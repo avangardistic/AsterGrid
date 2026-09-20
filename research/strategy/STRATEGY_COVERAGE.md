@@ -1,18 +1,20 @@
 # STRATEGY_COVERAGE.md
 
+> LINE NUMBERING: all `source_lines` in this repository use 1-based indexing against the authoritative 1368-line count (see STRATEGY_SOURCE_RECORD.md §7 revision log).
+
 - **Purpose:** Heading-by-heading coverage backbone for `Strategy.md` v2.3-final. Every heading maps to ≥1 `STR-*` requirement in `STRATEGY_CONTRACT.md`, or is explicitly marked NON_NORMATIVE. Guarantees no section is silently dropped during forensics.
 - **Version:** 1.1 (Phase 1 — STEP-4 reconciled to actual emitted IDs)
 - **Producer:** Claude Code (Opus 4.8), Phase 1 — Strategy Forensics.
-- **Inputs:** `Strategy.md` (SRC-001, SHA-256 `085044e7…a825e18`, 1369 lines).
-- **Status:** IN PROGRESS (mapping filled during STEP 4).
-- **Validation status:** Heading list extracted deterministically (`grep '^#{1,3} '`); line ranges computed to full 1369-line coverage.
+- **Inputs:** `Strategy.md` (SRC-001, SHA-256 `085044e7…a825e18`, 1368 lines, 1-based).
+- **Status:** COMPLETE (Phase 1) — mapping reconciled to actual IDs.
+- **Validation status:** Heading list extracted deterministically (`grep '^#{1,3} '`); line ranges computed to full 1368-line (1-based) coverage.
 
 ---
 
 ## Coverage arithmetic
 
 - Headings found: **52** (1 H1 title + 15 H2 numbered sections §1–§16 [note: no standalone "§6"→ all present] + 36 H3 subsections).
-- Line span: **L1–L1369** contiguous, no gaps (each heading's range = its line to the line before the next heading; last heading to EOF L1369).
+- Line span: **L1–L1368** contiguous, no gaps (1-based; each heading's range = its line to the line before the next heading; last heading to EOF L1368).
 
 ## Heading → line range → coverage
 
@@ -69,7 +71,7 @@
 | §13.4 Closure | L1011–L1084 | COVERED | STR-0243..STR-0256 |
 | §14 Parameter Reference | L1085–L1183 | COVERED | STR-0257 (global rule) + STR-0258..STR-0292 (all param rows + allowlist) |
 | §15 State Machine Invariants | L1184–L1214 | COVERED | STR-0293..STR-0315 (23 base invariants) + STR-0316..STR-0335 (amendment 1–20) |
-| §16 Dynamic Defaults Pending Calibration | L1215–L1369 | COVERED | STR-0336..STR-0343 |
+| §16 Dynamic Defaults Pending Calibration | L1215–L1368 | COVERED | STR-0336..STR-0343 |
 
 > The STR-* ID ranges are the authoritative binding in `STRATEGY_CONTRACT.md`.
 

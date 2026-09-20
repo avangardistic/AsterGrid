@@ -18,12 +18,27 @@
 | Path | `C:\Users\Avangard\Desktop\hypergrid\Strategy.md` (repo root) |
 | SHA-256 | `085044e72efa75e7dd7e812588d8247c8e60152eecb233bd6969f6545a825e18` |
 | Byte size | `92686` bytes |
-| Line count | 1369 |
+| Line count | **1368** — see dual record below |
 | Version string (verbatim) | `Version 2.3-final — Canonical Specification (base v2.2 + approved decisions D-07(F), D-09(CAL), D-12…D-15 + dynamic defaults D-16/D-17)` |
 | Status string (verbatim) | `FINAL — APPROVED WITH DYNAMIC DEFAULTS (D-16/D-17; owner-overridable, calibration pending).` |
 | Source class | STRATEGY_SOURCE (authoritative for strategy semantics) |
 | Mutability | **IMMUTABLE** — MUST NEVER be modified, rewritten, normalized, or reinterpreted. File is currently read-only (`r--r--r--`) on disk. |
 | Retrieval / verification date | 2026-09-20 |
+
+**Line-count dual record (authoritative; Phase 1.1, owner-verified):**
+
+```
+line_count_method: (Get-Content Strategy.md).Count   # 1-based, standard
+line_count: 1368
+line_count_notes: |
+  Phase 0 recorded 1369 via (Get-Content -Raw).Split("\n").Count, which
+  appends a trailing empty element for the file's final newline. The
+  standard 1-based count is 1368 (Phase 1.1, owner-verified). All
+  `source_lines` fields in STRATEGY_CONTRACT.md are interpreted against
+  1368 (1-based). SHA-256 unchanged; no content change.
+```
+
+Method cross-check (owner-run, 2026-09-20): (a) `(Get-Content).Count` = **1368** (authoritative, 1-based); (b) `(Get-Content -Raw).Split("`n").Count` = 1369 (adds 1 for trailing-newline empty element — source of the Phase 0 value); (c) `Measure-Object -Line` = 1090 (**DISCARD** — skips blank lines, false reading); (d) byte size = 92686 (matches Phase 0). SHA-256 unchanged → file is unmodified.
 
 ## 2. Provenance summary (as stated in the Strategy.md header, lines 3–6)
 
@@ -67,3 +82,8 @@ Additional rule-status tags used in the document (recorded for completeness): `[
 ## 6. Immutable-handling obligations (from `prompt.md`)
 
 Once canonical: read completely (done), hash (done), record version (done), **never modify**, never rewrite meaning, never silently normalize ambiguities, never let architecture convenience redefine it. This record is a *derived* artifact and is never itself the authority.
+
+## 7. Revision log (append-only)
+
+- **2026-09-20 — Phase 0:** initial record; line count 1369 (via `(Get-Content -Raw).Split("\n").Count`; +1 trailing-newline offset). Byte size 92686; SHA-256 `085044e7…a825e18`.
+- **2026-09-20 — Phase 1.1:** line count corrected to **1368** (standard 1-based method `(Get-Content).Count`; owner-verified). Byte size and SHA-256 **unchanged** across both phases (no content change). All `source_lines` in `STRATEGY_CONTRACT.md` interpreted as 1-based against 1368; Phase 1.1 sampled 6 requirements (first STR-* of §§3,4,5,9,13,15 = STR-0016/0025/0071/0182/0234/0293) — all PASS.
