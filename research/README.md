@@ -13,8 +13,8 @@
 
 | Phase | Name | State |
 |-------|------|-------|
-| 0 | Repository / Strategy Ingestion | **COMPLETE (this run)** |
-| 1 | Strategy Forensics | not started |
+| 0 | Repository / Strategy Ingestion | **COMPLETE** (commit 51df743) |
+| 1 | Strategy Forensics | **COMPLETE** — STRATEGY_CONTRACT.md (343 STR-* reqs) + STRATEGY_COVERAGE.md |
 | 2 | Source & Venue Research (Hyperliquid docs + SDK) | not started |
 | 3 | Capability Discovery | not started |
 | 4 | Architecture Research (≥3 materially different candidates) | not started |
@@ -29,11 +29,11 @@
 | 13 | Live Readiness | not started |
 | 14 | Live Activation | not started (separate Owner authority; NOT granted) |
 
-**Current phase:** Phase 0 just completed. **Next:** Phase 1 (Strategy Forensics) — awaiting a go-ahead per the first-run scope limit.
+**Current phase:** Phase 1 (Strategy Forensics) complete. **Next:** Phase 2 (Source & Venue Research — fetch/hash the six Hyperliquid sources, recover SDK version, verify every `[HC]` claim).
 
 ## Current blocker
 
-**None.** No unresolved semantic conflict, no missing required input for Phase 0.
+**None.** Phase 1 surfaced one non-blocking interpretation tension (OPEN-01: CycleReferenceDerivation default vs. "MUST be explicit"; see STRATEGY_CONTRACT.md) and 17 `[HC]` requirements awaiting Phase-2 venue verification. No blocking semantic ambiguity.
 
 ## Artifact layout (created only when a phase requires it)
 
@@ -45,8 +45,8 @@ research/
     hyperliquid/                    # (Phase 2) fetched venue evidence
   strategy/
     STRATEGY_SOURCE_RECORD.md       # canonical Strategy identity/hash/provenance
-    STRATEGY_CONTRACT.md            # (Phase 1) derived STR-* requirements — NOT YET CREATED
-    STRATEGY_COVERAGE.md            # (Phase 1+)
+    STRATEGY_CONTRACT.md            # (Phase 1) derived STR-* requirements — CREATED (343 reqs)
+    STRATEGY_COVERAGE.md            # (Phase 1) heading→STR-* coverage map — CREATED
   findings/                         # (as needed) CONFLICT-*.md, claims
   architecture/
     CAPABILITY_MAP.md               # (Phase 3) — NOT YET CREATED
