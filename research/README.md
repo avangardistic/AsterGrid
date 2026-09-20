@@ -15,7 +15,7 @@
 |-------|------|-------|
 | 0 | Repository / Strategy Ingestion | **COMPLETE** (commit 51df743) |
 | 1 | Strategy Forensics | **COMPLETE** — STRATEGY_CONTRACT.md (343 STR-* reqs) + STRATEGY_COVERAGE.md |
-| 2 | Source & Venue Research (Hyperliquid docs + SDK) | not started |
+| 2 | Source & Venue Research (Hyperliquid docs + SDK) | **COMPLETE** — 14 venue pages + SDK 0.24.0; 14/17 [HC] VERIFIED, 2 PARTIAL, 1 CONFLICTED |
 | 3 | Capability Discovery | not started |
 | 4 | Architecture Research (≥3 materially different candidates) | not started |
 | 5 | Architecture Decision | not started |
@@ -29,11 +29,11 @@
 | 13 | Live Readiness | not started |
 | 14 | Live Activation | not started (separate Owner authority; NOT granted) |
 
-**Current phase:** Phase 1 (Strategy Forensics) complete. **Next:** Phase 2 (Source & Venue Research — fetch/hash the six Hyperliquid sources, recover SDK version, verify every `[HC]` claim).
+**Current phase:** Phase 2 (Source & Venue Research) complete. **Next:** Phase 2b (fetch robust-price-indices/liquidations/signing to close STR-0134 & STR-0138 nuances) then Phase 3 (Capability Discovery). Owner review of CONFLICT-001/002/003 pending.
 
 ## Current blocker
 
-**None.** Phase 1 surfaced one non-blocking interpretation tension (OPEN-01: CycleReferenceDerivation default vs. "MUST be explicit"; see STRATEGY_CONTRACT.md) and 17 `[HC]` requirements awaiting Phase-2 venue verification. No blocking semantic ambiguity.
+**None blocking.** Open items: OPEN-01 (Phase 1: CycleReferenceDerivation default vs "MUST be explicit"); CONFLICT-001 (BTC/ETH max leverage 40x vs docs meta 50x — LOW impact, Leverage_effective=3 unaffected); CONFLICT-002 (webData2→webData3 naming — LOW); CONFLICT-003 (trigger→oracle-mark basis — PARTIALLY_VERIFIED). Evidence base: `research/sources/hyperliquid/` (14 pages + SDK_RECORD + TOPIC_EVIDENCE + _HC_TARGETS). Contract [HC] fields remain `venue_evidence_status: UNVERIFIED` (owner promotes to VERIFIED in a later review, per Phase-2 scope).
 
 ## Artifact layout (created only when a phase requires it)
 

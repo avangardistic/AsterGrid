@@ -3,7 +3,7 @@
 - **Purpose:** Derived, traceable contract of every normative requirement in `Strategy.md` v2.3-final, each with a stable `STR-*` ID. This is a DERIVED artifact — `Strategy.md` remains the sole authority. No requirement here invents semantics; ambiguities are surfaced in the OPEN section, never guessed.
 - **Version:** 1.0 (Phase 1)
 - **Producer:** Claude Code (Opus 4.8), Phase 1 — Strategy Forensics.
-- **Inputs:** `Strategy.md` (SRC-001, SHA-256 `085044e72efa75e7dd7e812588d8247c8e60152eecb233bd6969f6545a825e18`, 1369 lines); `prompt.md` (SRC-002) `<strategy_forensics>`, `<strategy_contract>`.
+- **Inputs:** `Strategy.md` (SRC-001, SHA-256 `085044e72efa75e7dd7e812588d8247c8e60152eecb233bd6969f6545a825e18`, 1368 lines (1-based; authoritative)); `prompt.md` (SRC-002) `<strategy_forensics>`, `<strategy_contract>`.
 - **Source references:** every entry cites `strategy_section` + `source_lines` + verbatim `wording`.
 - **Status:** COMPLETE for Phase 1 (335 requirements, STR-0001..STR-0335).
 - **Validation status:** self-consistency checks reported at end (STEP 5). All `implementation_status`/`verification_status` = NOT_STARTED in Phase 1.
