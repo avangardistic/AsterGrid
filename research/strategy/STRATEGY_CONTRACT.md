@@ -17,7 +17,7 @@
 
 Each requirement is one block. Fields per the Phase-1 spec (none omitted; `NONE`/`N/A` where empty):
 `section` · `lines` · `type` · `strength` (MUST/MUST_NOT/SHOULD/MAY) · `tag` (preserved verbatim) · `wording` (≤30-word verbatim quote) · `inputs` · `outputs` · `preconditions` · `postconditions` · `state_effects` · `formula` · `units` · `invariants` · `failure_behavior` · `safety_impact` (LOW/MEDIUM/HIGH/CRITICAL) · `dependencies` · `impl` (=NOT_STARTED) · `verif` (=NOT_STARTED).
-Extra fields where required: `[HC]` → `venue_evidence_status: UNVERIFIED`; `[DYN]`/`[TEMP]` → `dynamic_note: must remain dynamic — never freeze to a constant`.
+Extra fields where required: `[HC]` → `venue_evidence_status` (initial default `UNVERIFIED` at Phase 1; current value per requirement is VERIFIED / PARTIALLY_VERIFIED / RESOLVED_VIA_OWNER_DECISION after Phase 2/2.5+2b); `[DYN]`/`[TEMP]` → `dynamic_note: must remain dynamic — never freeze to a constant`.
 
 Tag semantics are exactly as recorded in `STRATEGY_SOURCE_RECORD.md` §4. Tags are NOT collapsed: `[DEFINED]` is a rule-status tag shown alongside content tags `[SD]/[UR]/[HC]/[DD]/[DYN]/[TEMP]/[OQ]`.
 
@@ -2700,7 +2700,7 @@ Tag semantics are exactly as recorded in `STRATEGY_SOURCE_RECORD.md` §4. Tags a
 - inputs: three dynamic defaults; input sets | outputs: ordering check | preconditions: any input set | postconditions: ordering holds or reported | state_effects: consistency
 - formula: ExposureTolerance < MaxExposureImbalance < NotionalPerLevel/MarkPrice | units: base-asset quantity
 - invariants: ordering must hold; failure reported, never silently patched | failure_behavior: report on failure | safety_impact: HIGH
-- dynamic_note: must remain dynamic — never freeze to a constant (verified in CALIBRATION-REPORT.md per spec)
+- dynamic_note: must remain dynamic — never freeze to a constant (mutual-ordering check to be verified in `research/validation/CALIBRATION-REPORT.md` — PENDING_ARTIFACT: NOT_YET_PRODUCED, will be produced in a later calibration phase)
 - dependencies: STR-0338, STR-0339, STR-0340, STR-0341 | impl: NOT_STARTED | verif: NOT_STARTED
 
 ### STR-0343 — Implementation MUST NOT invent a value for anything not in §14
@@ -2714,12 +2714,14 @@ Tag semantics are exactly as recorded in `STRATEGY_SOURCE_RECORD.md` §4. Tags a
 
 ## STEP 5 — Self-consistency checks (reported, not silently repaired)
 
+> **(historical — Phase 1 snapshot; superseded by Phase 2.5+2b resolution.)** The bullets below record the state AS OF Phase 1. The **current** `[HC]` status is authoritative in each requirement's `venue_evidence_status` field (updated Phase 2/2.5+2b) and summarized in the two notes at the very top of this file and in `research/sources/hyperliquid/TOPIC_EVIDENCE.md`. **Current [HC] roll-up:** 15 VERIFIED, 1 PARTIALLY_VERIFIED (STR-0228), 1 RESOLVED_VIA_OWNER_DECISION (STR-0337). This block is retained for traceability only.
+
 - **Total requirements:** 343 (STR-0001 … STR-0343), contiguous, no gaps.
 - **Duplicate requirement_id:** 0 (verified: 343 headers, 343 unique ids).
 - **Dangling dependency references:** 0 — every `STR-xxxx` cited in a `dependencies:` field resolves to an existing header (verified after the forward-reference repair pass; 20 forward-references were corrected to final IDs).
 - **Per-type counts (sum = 343):** GUARD 76 · INVARIANT 62 · PARAMETER 55 · FORMULA 33 · STATE_TRANSITION 28 · SCENARIO 21 · LIFECYCLE_STATE 17 · EVENT_SEMANTICS 11 · PRECEDENCE_RULE 10 · IDENTITY_RULE 10 · FAILURE_BEHAVIOR 10 · ECONOMIC_RULE 6 · PERSISTENCE_RULE 3 · RECOVERY_RULE 1.
 - **Normative strength counts:** MUST 302 · MUST_NOT 36 · SHOULD 4 · MAY 1.
-- **`[HC]` requirements:** 17 blocks, all carry `venue_evidence_status: UNVERIFIED` (Phase 2 will verify). List: STR-0132, STR-0133, STR-0134, STR-0135, STR-0136, STR-0137, STR-0138, STR-0175, STR-0176, STR-0177, STR-0194, STR-0200, STR-0224, STR-0228, STR-0254, STR-0337 — plus STR-0129 (`[SD][HC]`). (Count reflects blocks whose tag contains `[HC]`.)
+- **`[HC]` requirements (historical Phase-1 snapshot; NOW superseded — see current roll-up above):** 17 blocks, all carried `venue_evidence_status: UNVERIFIED` at Phase 1 (Phase 2 verified them). List: STR-0132, STR-0133, STR-0134, STR-0135, STR-0136, STR-0137, STR-0138, STR-0175, STR-0176, STR-0177, STR-0194, STR-0200, STR-0224, STR-0228, STR-0254, STR-0337 — plus STR-0129 (`[SD][HC]`). (Count reflects blocks whose tag contains `[HC]`.)
 - **`[DYN]` requirements retain their formula (never a constant):** the four canonical dynamic-default PARAMETERS keep their full formulas — STR-0338 (EmergencyTolerance), STR-0339 (ExposureTolerance), STR-0340 (MaxExposureImbalance), STR-0341 (ReferencePriceToleranceBps) — and their §14-register (STR-0264, STR-0276, STR-0278, STR-0279) and behavioral (STR-0083, STR-0096, STR-0100) mirrors. Every `[DYN]` block carries a `dynamic_note: must remain dynamic — never freeze to a constant`. No dynamic default was reduced to a constant.
 - **`fail-closed` coverage:** `Strategy.md` contains 12 occurrences of "fail-closed" (L16, 28, 31, 63, 368, 446, 506, 719, 734, 1339, 1361 — L1339/L1361/L28 are change-log/closed-ledger, L63 is the tag legend, all non-normative). Every **normative** fail-closed phrase maps to a requirement whose `failure_behavior` is fail-closed/BLOCKED: §4.1 D-04 → STR-0035; §5.2 step 4 (L368) → STR-0077; §5.4.1 (L446, L31) → STR-0098; §5.6 (L506) → STR-0108; §8 WEBHOOK (L719) → STR-0166; §8 arm-invariant 5 (L734) → STR-0172. Additionally, 52 requirement blocks carry a fail-closed/BLOCKED/RECONCILIATION_REQUIRED/LEVEL_SKIPPED/INELIGIBLE `failure_behavior` value, so fail-closed semantics are represented well beyond the 10 dedicated FAILURE_BEHAVIOR-typed entries.
 - **Ambiguous normative_strength:** none left implicit. See OPEN / interpretation notes below for every strength that was inferred from non-RFC-2119 wording ("prefer", "preferable", "may").

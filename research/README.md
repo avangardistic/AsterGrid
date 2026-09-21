@@ -1,11 +1,11 @@
 # research/ — Strategy-to-Runtime Research State
 
 - **Purpose:** Durable, context-survivable home for all research evidence, decisions, and traceability for transforming `Strategy.md` into a deterministic, auditable Hyperliquid trading runtime. This directory (not the chat context) is the source of truth for research state.
-- **Version:** 1.0 (Phase 0)
-- **Producer:** Claude Code (Opus 4.8), Phase 0.
+- **Version:** 1.5 (Phase 4.5)
+- **Producer:** Claude Code (Opus 4.8), Phases 0 → 4.5.
 - **Inputs:** `Strategy.md` (SRC-001), `prompt.md` (SRC-002, program protocol v3.0).
-- **Status:** Phase 0 COMPLETE. No blockers.
-- **Validation status:** Phase 0 artifacts created deterministically; hashes recorded in `sources/SOURCE_MANIFEST.md`.
+- **Status:** Phases 0–4 COMPLETE. Phase 4.5 (audit reconciliation): documentation cleanup done; **semantic classification BLOCKED** — the three audit documents are not present in the repository (see "Audit reconciliation (Phase 4.5)" below).
+- **Validation status:** Phase 0–4 artifacts created deterministically; hashes in `sources/SOURCE_MANIFEST.md`; `Strategy.md` SHA-256 unchanged across all phases.
 
 ---
 
@@ -15,7 +15,7 @@
 |-------|------|-------|
 | 0 | Repository / Strategy Ingestion | **COMPLETE** (commit 51df743) |
 | 1 | Strategy Forensics | **COMPLETE** — STRATEGY_CONTRACT.md (343 STR-* reqs) + STRATEGY_COVERAGE.md |
-| 2 | Source & Venue Research (Hyperliquid docs + SDK) | **COMPLETE** (+2.5/2b) — 17 venue pages + SDK 0.24.0; [HC]: 15 VERIFIED, 1 PARTIAL (STR-0228), 1 CONFLICTED (STR-0337→GATE-001). Owner gates 001/002 open |
+| 2 | Source & Venue Research (Hyperliquid docs + SDK) | **COMPLETE** (+2.5/2b) — 17 venue pages + SDK 0.24.0; [HC]: 15 VERIFIED, 1 PARTIAL (STR-0228), 1 RESOLVED_VIA_OWNER_DECISION (STR-0337). Owner gates 001/002 RESOLVED (Option A, 2026-09-21) |
 | 3 | Capability Discovery | **COMPLETE** — 24 capabilities (CAP-0001..0024); 343/343 STR-* mapped; DECISION-001/002 registered & applied |
 | 4 | Architecture Research (≥3 materially different candidates) | **COMPLETE** — state-ownership (23 states), boundaries, failure boundaries, 3 candidates (CAND-A/B/C) + 2 rejected |
 | 5 | Architecture Decision | not started |
@@ -29,7 +29,7 @@
 | 13 | Live Readiness | not started |
 | 14 | Live Activation | not started (separate Owner authority; NOT granted) |
 
-**Current phase:** Phase 4 (Architecture Research) complete. **Next:** Phase 5 (Architecture Decision — select among CAND-A/B/C and record `ARCHITECTURE_DECISION.md` + a DECISION_REGISTER entry). No winner selected yet.
+**Current phase:** Phase 4.5 (Audit reconciliation) — documentation cleanup DONE; semantic classification **BLOCKED** (audit docs absent). **Next:** deliver the three audit documents, then complete Phase 4.5 classification; then Phase 5 (Architecture Decision — owner has indicated CAND-B; to be recorded in `ARCHITECTURE_DECISION.md` + a DECISION_REGISTER entry).
 
 Phase-4 outputs: `research/architecture/STATE_OWNERSHIP.md` (23 single-owner states), `BOUNDARY_CANDIDATES.md` (smallest justified boundaries; no service/microservice justified), `FAILURE_BOUNDARIES.md` (11 failure modes; none require a service boundary), `ARCHITECTURE_CANDIDATES.md` (CAND-A modular monolith, CAND-B event-sourced, CAND-C layered ports/adapters; CAND-D workflow-engine & CAND-E actor-model rejected; microservices rejected a priori). No technology chosen.
 
@@ -37,33 +37,52 @@ Phase-4 outputs: `research/architecture/STATE_OWNERSHIP.md` (23 single-owner sta
 
 **None blocking.** Owner Gates 001 & 002 are **RESOLVED** (DECISION-001, DECISION-002 in `research/decisions/DECISION_REGISTER.md`). Contract [HC] fields: 15 VERIFIED, 1 PARTIALLY_VERIFIED (STR-0228, l2Book depth nuance — Phase-4 design), 1 RESOLVED_VIA_OWNER_DECISION (STR-0337). Open (non-blocking): OPEN-01 (CycleReferenceDerivation default vs "MUST be explicit"); STR-0228 depth-window design note. Phase-3 outputs: `research/architecture/CAPABILITY_MAP.md` (24 CAP-*) + `CAPABILITY_COVERAGE.md` (343/343 mapped). **No boundaries/topology/technology decided** (explicit non-decisions listed in CAPABILITY_MAP.md).
 
+## Audit reconciliation (Phase 4.5)
+
+Phase 4.5 is a bridge phase to classify the findings of three independent audit documents into `research/strategy/SEMANTIC_AMBIGUITIES.md` and to open Owner Gates for any `SEMANTIC_BLOCKING` finding.
+
+**BLOCKER (2026-09-21):** none of the three audit documents are present in the repository, so classification (Parts B/C) cannot proceed without inventing findings (prohibited). Only the documentation-cleanup part (Part A) was completed this run.
+
+| Audit document | Status | Classification output |
+|----------------|--------|-----------------------|
+| `philosophy.md` | **NOT FOUND in repo** | pending — `SEMANTIC_AMBIGUITIES.md` not yet produced |
+| `strategy_issues.md` | **NOT FOUND in repo** | pending |
+| `phases_0_4_technical_inspection.md` | **NOT FOUND in repo** | pending |
+
+Owner action required: add the three documents to the repository (e.g. under `research/audits/`) or paste their contents, then re-run Phase 4.5 classification. `SEMANTIC_AMBIGUITIES.md` and any `OWNER_GATE_003+` / `DECISION-003` will be produced then. Existing gates unaffected: **OWNER_GATE_001 & 002 remain RESOLVED**.
+
 ## Artifact layout (created only when a phase requires it)
 
 ```
 research/
   README.md                         # this file — research state overview
   sources/
-    SOURCE_MANIFEST.md              # source registry (SRC-*); venue rows PENDING
-    hyperliquid/                    # (Phase 2) fetched venue evidence
+    SOURCE_MANIFEST.md              # source registry (SRC-*); venue rows POPULATED (Phase 2/2b)
+    hyperliquid/                    # (Phase 2) fetched venue evidence — CREATED (17 pages + SDK + evidence)
   strategy/
     STRATEGY_SOURCE_RECORD.md       # canonical Strategy identity/hash/provenance
     STRATEGY_CONTRACT.md            # (Phase 1) derived STR-* requirements — CREATED (343 reqs)
     STRATEGY_COVERAGE.md            # (Phase 1) heading→STR-* coverage map — CREATED
-  findings/                         # (as needed) CONFLICT-*.md, claims
+    SEMANTIC_AMBIGUITIES.md         # (Phase 4.5) audit classification — PENDING audit docs
+  findings/                         # CONFLICT-001/002/003 — CREATED (all RESOLVED)
   architecture/
-    CAPABILITY_MAP.md               # (Phase 3) — NOT YET CREATED
-    ARCHITECTURE_CANDIDATES.md      # (Phase 4)
-    ARCHITECTURE_DECISION.md        # (Phase 5)
+    CAPABILITY_MAP.md               # (Phase 3) — CREATED (24 CAP-*)
+    CAPABILITY_COVERAGE.md          # (Phase 3) — CREATED (343/343 mapped)
+    STATE_OWNERSHIP.md              # (Phase 4) — CREATED (23 states)
+    BOUNDARY_CANDIDATES.md          # (Phase 4) — CREATED
+    FAILURE_BOUNDARIES.md           # (Phase 4) — CREATED (11 failure modes)
+    ARCHITECTURE_CANDIDATES.md      # (Phase 4) — CREATED (CAND-A/B/C)
+    ARCHITECTURE_DECISION.md        # (Phase 5) — NOT YET CREATED
   decisions/
-    DECISION_REGISTER.md            # (as needed)
-    OPEN_QUESTIONS.md               # (as needed)
-    REJECTED_ALTERNATIVES.md        # (as needed)
+    DECISION_REGISTER.md            # CREATED (DECISION-001, -002)
+    OWNER_GATE_001.md / OWNER_GATE_002.md  # CREATED (both RESOLVED)
   validation/
-    TRACEABILITY_MATRIX.md          # (Phase 9)
-    VALIDATION_PLAN.md
-    AUDIT_REPORT.md
+    CALIBRATION-REPORT.md           # (Phase 4.5) stub — NOT_YET_PRODUCED
+    TRACEABILITY_MATRIX.md          # (Phase 9) — NOT YET CREATED
+    VALIDATION_PLAN.md              # NOT YET CREATED
+    AUDIT_REPORT.md                 # NOT YET CREATED
   experiments/
-    runs/
+    runs/                           # NOT YET CREATED
 ```
 
 Per `prompt.md` `<artifact_first>` / `<artifact_structure>`: do NOT pre-create empty boilerplate. Files above without a "created" note do not yet exist.
