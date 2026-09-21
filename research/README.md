@@ -17,7 +17,7 @@
 | 1 | Strategy Forensics | **COMPLETE** — STRATEGY_CONTRACT.md (343 STR-* reqs) + STRATEGY_COVERAGE.md |
 | 2 | Source & Venue Research (Hyperliquid docs + SDK) | **COMPLETE** (+2.5/2b) — 17 venue pages + SDK 0.24.0; [HC]: 15 VERIFIED, 1 PARTIAL (STR-0228), 1 CONFLICTED (STR-0337→GATE-001). Owner gates 001/002 open |
 | 3 | Capability Discovery | **COMPLETE** — 24 capabilities (CAP-0001..0024); 343/343 STR-* mapped; DECISION-001/002 registered & applied |
-| 4 | Architecture Research (≥3 materially different candidates) | not started |
+| 4 | Architecture Research (≥3 materially different candidates) | **COMPLETE** — state-ownership (23 states), boundaries, failure boundaries, 3 candidates (CAND-A/B/C) + 2 rejected |
 | 5 | Architecture Decision | not started |
 | 6 | Implementation Plan | not started |
 | 7 | Deterministic Core Implementation | not started |
@@ -29,7 +29,9 @@
 | 13 | Live Readiness | not started |
 | 14 | Live Activation | not started (separate Owner authority; NOT granted) |
 
-**Current phase:** Phase 3 (Capability Discovery) complete. **Next:** Phase 4 (Architecture Research — ≥3 materially different candidates; boundary/topology decisions). Capability Map + coverage are the input.
+**Current phase:** Phase 4 (Architecture Research) complete. **Next:** Phase 5 (Architecture Decision — select among CAND-A/B/C and record `ARCHITECTURE_DECISION.md` + a DECISION_REGISTER entry). No winner selected yet.
+
+Phase-4 outputs: `research/architecture/STATE_OWNERSHIP.md` (23 single-owner states), `BOUNDARY_CANDIDATES.md` (smallest justified boundaries; no service/microservice justified), `FAILURE_BOUNDARIES.md` (11 failure modes; none require a service boundary), `ARCHITECTURE_CANDIDATES.md` (CAND-A modular monolith, CAND-B event-sourced, CAND-C layered ports/adapters; CAND-D workflow-engine & CAND-E actor-model rejected; microservices rejected a priori). No technology chosen.
 
 ## Current blocker
 
