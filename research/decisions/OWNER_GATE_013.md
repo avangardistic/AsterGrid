@@ -29,3 +29,5 @@
 
 ## ۷. توصیه (Recommendation)
 **گزینه A** به‌طور عینی پشتیبانی می‌شود: §13.3 صریحاً اجازهٔ EXPOSURE_CORRECTION حین FREEZE را می‌دهد (پس correction/hedge حتی در freeze زنده است)، و resume خودکارِ حالات گذرای reconcile با اصل fail-closed سازگار است، درحالی‌که freeze/recovery/kill-switch به‌دلیل شدت، owner clearance می‌خواهند. هر خروج باید با identity/timestamp/evidence ثبت شود (STR-0171/0315).
+
+**STATUS: RESOLVED — Option A (owner, 2026-09-21). See DECISION_REGISTER.md DECISION-014.**

@@ -29,3 +29,5 @@
 
 ## ۷. توصیه (Recommendation)
 **گزینه C** به‌طور عینی پشتیبانی می‌شود: `Strategy.md` صریحاً «یک Basket فعال per market» و «top-5 asset» را هدف می‌گیرد و AI-independent/fail-closed است؛ بنابراین فرض account اختصاصی با کلاس‌بندی صریح liquidation/funding/transfer کمترین ابهام و بیشترین انطباق با اصل «Actual Exposure فقط از وضعیت معتبر صرافی» را دارد. این تصمیم باید با GATE-010 هماهنگ ثبت شود.
+
+**STATUS: RESOLVED — Option C (owner, 2026-09-21). See DECISION_REGISTER.md DECISION-005.**

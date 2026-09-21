@@ -28,3 +28,5 @@ nominal expected reference price چگونه و از کدام رویداد/قیم
 
 ## ۷. توصیه (Recommendation)
 **گزینه B** (nominal = reference قبلی + فاصلهٔ اسمی سطح ترمینال طبق §7.1) به‌طور عینی پشتیبانی می‌شود: از پارامترهای موجود مشتق می‌شود، free parameter جدید نمی‌سازد، با ماهیت execution-grounded §5.4 و هدف ضدِ-drift §5.4.1 (ضریب 0.33 < 1) سازگار است، و رفتار partial/چند-fill را به همان «captured per §5.4» واگذار می‌کند. OPEN-01 (default vs explicit) باید هم‌زمان تعیین تکلیف شود.
+
+**STATUS: RESOLVED — Option B (owner, 2026-09-21). See DECISION_REGISTER.md DECISION-009.**

@@ -51,6 +51,10 @@ Phase 4.5 is a bridge phase to classify the findings of three independent audit 
 
 **11 new Owner Gates opened (GATE-003..GATE-013), all OPEN/pending owner decision;** OWNER_GATE_001 & 002 remain RESOLVED. Phase 5 must carry the NON_BLOCKING findings + OPEN-01 (AMB-0042) as explicit input constraints.
 
+## Owner decision round (Phase 4.6)
+
+On 2026-09-21 the Owner reviewed and decided all eleven blocking gates GATE-003..GATE-013; the decisions are recorded as **DECISION-004..DECISION-014** in `research/decisions/DECISION_REGISTER.md` (each gate file carries a RESOLVED status line). Mechanical consequences applied: a new invariant **STR-0344** ("at most one active order per Level at any time", from DECISION-004); **OPEN-01 CLOSED** by DECISION-009 (CycleReferenceDerivation must be set explicitly; runtime without it fails closed) and AMB-0042 marked RESOLVED; a **dedicated-account constraint** header note added to the contract (DECISION-005/011); and the **D-16 maintenance-margin model re-labelled HYPOTHESIS** (DECISION-006 — runtime reads venue liquidationPx/maintenance as primary; re-validation is a Live prerequisite). In `SEMANTIC_AMBIGUITIES.md`, all 11 SEMANTIC_BLOCKING rows (+AMB-0042) now read `RESOLVED_BY_DECISION_0NN`. See `DECISION_REGISTER.md`.
+
 ## Artifact layout (created only when a phase requires it)
 
 ```

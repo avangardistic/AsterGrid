@@ -29,3 +29,5 @@
 
 ## ۷. توصیه (Recommendation)
 **گزینه C** به‌طور عینی پشتیبانی می‌شود: با «یک Basket per market» در `Strategy.md`، DECISION-002 (clearinghouseState authority)، و در دسترس بودن `userFunding`/fill fee در venue (SRC-105/107)، فرض account اختصاصی + تخصیص صریح funding/fee کمترین ابهام و بیشترین انطباق با NET-PnL accounting (STR-0234/0235) را دارد. باید هم‌راستا با GATE-004 ثبت شود.
+
+**STATUS: RESOLVED — Option C (owner, 2026-09-21). See DECISION_REGISTER.md DECISION-011.**

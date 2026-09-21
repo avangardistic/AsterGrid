@@ -30,3 +30,5 @@
 
 ## ۷. توصیه (Recommendation)
 **گزینه C** (A + یک order فعال per Level) به‌طور عینی از شواهد پشتیبانی می‌شود: cloid یک هویت مشتری‌محورِ ۱۲۸بیتی است (venue-verified، STR-0133) که با orderStatus و delta قابل راستی‌آزمایی است؛ محدودیت «یک order فعال per Level» ابهام انتساب را ساختاری حذف می‌کند و با اصل «slower verified over fast unverified» (STR-0312) سازگار است. در هر حال، رفتار ابهام باید fail-closed بماند.
+
+**STATUS: RESOLVED — Option C (owner, 2026-09-21). See DECISION_REGISTER.md DECISION-004.**

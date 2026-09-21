@@ -1,6 +1,7 @@
 # STRATEGY_CONTRACT.md
 
 > **Authoritative source note (DECISION-002, 2026-09-21):** ActualExposure and CapitalBase MUST be read ONLY from clearinghouseState. webData2/webData3 MUST NOT be used as state authority anywhere in this program.
+> **Dedicated-account constraint (DECISION-005 / DECISION-011, 2026-09-21):** The trading account is dedicated exclusively to this system. No other bot, manual trading, or third-party activity is assumed to share the account. Any position change not attributable to a strategy intent is classified as contamination and triggers RECONCILIATION_REQUIRED / FREEZE per DECISION-005.
 > **Historical UNVERIFIED notes:** two non-field `UNVERIFIED` strings remain in this file at the field-legend and the Phase-1 STEP-5 report. Both are historical prose, not live requirement statuses. All 17 [HC] requirement fields were resolved in Phase 2/2.5+2b.
 > **Audit findings (Phase 4.5):** open semantic ambiguities and Owner Gates affecting these requirements are classified in `research/strategy/SEMANTIC_AMBIGUITIES.md` (AMB-0001..0046; GATE-003..GATE-013 OPEN).
 
@@ -1741,6 +1742,7 @@ Tag semantics are exactly as recorded in `STRATEGY_SOURCE_RECORD.md` §4. Tags a
 - inputs: risk state; MaxExposureImbalance | outputs: immediate Ioc hedge | preconditions: acute risk | postconditions: unconditional hedge | state_effects: hedge recovery
 - formula: NONE | units: base-asset quantity | invariants: acute branch unconditional | failure_behavior: immediate Ioc | safety_impact: CRITICAL
 - dependencies: STR-0223 | impl: NOT_STARTED | verif: NOT_STARTED
+- status_note (DECISION-006, 2026-09-21): HYPOTHESIS — pending controlled observation in Phase 8/12. Runtime MUST read venue-reported liquidationPx / maintenance margin as the primary model. Re-validation is a Live prerequisite.
 
 ### STR-0207 — ELSE (non-acute) → evaluate via §10 NetExpectedEdge; prefer maker-side correction
 - section: §11.2 Hedge cost-awareness | lines: L873–L875 | type: ECONOMIC_RULE | strength: SHOULD | tag: [UR][DEFINED]
@@ -1882,6 +1884,7 @@ Tag semantics are exactly as recorded in `STRATEGY_SOURCE_RECORD.md` §4. Tags a
 - invariants: auto-tightens at higher leverage; drives §11.2 acute branch | failure_behavior: breach → unconditional Hedge Recovery | safety_impact: CRITICAL
 - dynamic_note: must remain dynamic — never freeze to a constant (D-16; canonical PARAMETER: STR-0340)
 - dependencies: STR-0219, STR-0227, STR-0141, STR-0340, STR-0206 | impl: NOT_STARTED | verif: NOT_STARTED
+- status_note (DECISION-006, 2026-09-21): HYPOTHESIS — pending controlled observation in Phase 8/12. Runtime MUST read venue-reported liquidationPx / maintenance margin as the primary model. Re-validation is a Live prerequisite.
 
 ### STR-0224 — CapitalBase = account equity incl. unrealized PnL (clearinghouseState accountValue) (D-13)
 - section: §12.1 Range Survivability | lines: L949–L950 | type: FORMULA | strength: MUST | tag: [UR][HC][DEFINED]
@@ -2646,6 +2649,7 @@ Tag semantics are exactly as recorded in `STRATEGY_SOURCE_RECORD.md` §4. Tags a
 - inputs: dynamic default reads | outputs: tagged/logged usage | preconditions: default used | postconditions: logged + distinguishable | state_effects: audit
 - formula: NONE | units: NONE | invariants: never frozen; owner override needs no recalibration; supersede prior [TEMP] | failure_behavior: NONE | safety_impact: HIGH
 - dynamic_note: must remain dynamic — never freeze to a constant (D-16/D-17)
+- status_note (DECISION-006, 2026-09-21): the D-16 dynamic defaults whose derivation depends on the maintenance/liquidation model (STR-0223, STR-0340; and the leverage/margin-distance basis of STR-0338) are HYPOTHESIS pending controlled observation in Phase 8/12; runtime reads venue-reported margin/liquidation as the primary model. STR-0339 (ExposureTolerance) and STR-0341 (ReferencePriceToleranceBps) do not depend on the maintenance model and are unaffected by DECISION-006 (they remain [DYN] calibration-pending).
 - dependencies: STR-0257 | impl: NOT_STARTED | verif: NOT_STARTED
 
 ### STR-0337 — [HC] Hyperliquid contract mechanics used by the derivations (maintenance=½ initial at max lev; hourly funding 1/8; BTC/ETH max lev 40×; mark price for margin/liquidation)
@@ -2657,6 +2661,7 @@ Tag semantics are exactly as recorded in `STRATEGY_SOURCE_RECORD.md` §4. Tags a
 - venue_evidence_status: RESOLVED_VIA_OWNER_DECISION (Phase 3; was CONFLICTED Phase 2/2b. VERIFIED mechanics: maintenance=½ initial at max leverage, funding hourly at 1/8 of 8h rate, mark price for margin/liquidation. The "BTC/ETH max leverage = 40x" figure is ILLUSTRATIVE per DECISION-001; runtime reads meta.maxLeverage live and Leverage_effective=min(3, meta.maxLeverage)=3, so formulas unaffected)
 - owner_decision: DECISION-001
 - venue_evidence_refs: [SRC-113, SRC-115, SRC-116, SRC-117, SRC-118]
+- status_note (DECISION-006, 2026-09-21): the maintenance/liquidation model here is HYPOTHESIS — pending controlled observation in Phase 8/12. Runtime MUST read venue-reported liquidationPx / maintenance margin as the primary model; the §16 `0.5/Leverage_effective` form is an illustrative conservative floor only. Re-validation is a Live prerequisite.
 - dependencies: NONE | impl: NOT_STARTED | verif: NOT_STARTED
 
 ### STR-0338 — [DYN] CANONICAL EmergencyTolerance := 0.005 × (10000 / Leverage_effective) bps (D-16) — must remain dynamic
@@ -2667,6 +2672,7 @@ Tag semantics are exactly as recorded in `STRATEGY_SOURCE_RECORD.md` §4. Tags a
 - invariants: auto-tightens at higher leverage; supersedes 50 bps [TEMP] | failure_behavior: NONE | safety_impact: HIGH
 - dynamic_note: must remain dynamic — never freeze to a constant (D-16); must be calibrated
 - dependencies: STR-0219, STR-0276, STR-0183, STR-0337 | impl: NOT_STARTED | verif: NOT_STARTED
+- status_note (DECISION-006, 2026-09-21): remains [DYN] calibration-pending; the leverage/margin-distance basis it relies on is HYPOTHESIS — runtime MUST read venue-reported margin/liquidation as the primary model; re-validation is a Live prerequisite.
 
 ### STR-0339 — [DYN] CANONICAL ExposureTolerance := (0.001 × StepBps/10) × NotionalPerLevel/MarkPrice (D-16) — must remain dynamic
 - section: §16 Dynamic Defaults | lines: L1266–L1294 | type: PARAMETER | strength: MUST | tag: [DYN][DEFINED]
@@ -2685,6 +2691,7 @@ Tag semantics are exactly as recorded in `STRATEGY_SOURCE_RECORD.md` §4. Tags a
 - invariants: auto-tightens at higher leverage; drives §11.2 acute branch; supersedes (1.0×level) [TEMP] | failure_behavior: breach → unconditional Hedge Recovery | safety_impact: CRITICAL
 - dynamic_note: must remain dynamic — never freeze to a constant (D-16); must be calibrated
 - dependencies: STR-0219, STR-0227, STR-0141, STR-0279, STR-0223, STR-0337, STR-0342 | impl: NOT_STARTED | verif: NOT_STARTED
+- status_note (DECISION-006, 2026-09-21): HYPOTHESIS — pending controlled observation in Phase 8/12. Runtime MUST read venue-reported liquidationPx / maintenance margin as the primary model; the `0.5/Leverage_effective` form is an illustrative conservative floor only. Re-validation is a Live prerequisite.
 
 ### STR-0341 — [DYN] CANONICAL ReferencePriceToleranceBps := 0.33 × StepBps (D-17, DYNAMIC-CALIBRATABLE) — must remain dynamic
 - section: §16 Dynamic Defaults | lines: L1327 | type: PARAMETER | strength: MUST | tag: [DYN][DEFINED]
@@ -2729,7 +2736,7 @@ Tag semantics are exactly as recorded in `STRATEGY_SOURCE_RECORD.md` §4. Tags a
 
 ### OPEN items and interpretation notes (surfaced, NOT silently resolved)
 
-- **OPEN-01 (non-blocking interpretation tension) — CycleReferenceDerivation default vs. "MUST be explicit":** §5.4 gives `TERMINAL_EXECUTION` as the default of four options (STR-0091, STR-0268) yet also states "The selected policy is configuration and MUST be explicit" (STR-0094). Both are captured verbatim; the tension (is a default permitted, or must the operator set it explicitly?) is **not resolved here**. It aligns with §16/STR-0343 ("must not invent a value"); a later phase/Owner should decide whether the default is usable or explicit config is mandatory (fail-closed). No guess made.
+- **OPEN-01 (non-blocking interpretation tension) — CycleReferenceDerivation default vs. "MUST be explicit":** §5.4 gives `TERMINAL_EXECUTION` as the default of four options (STR-0091, STR-0268) yet also states "The selected policy is configuration and MUST be explicit" (STR-0094). Both are captured verbatim; the tension (is a default permitted, or must the operator set it explicitly?) is **not resolved here**. It aligns with §16/STR-0343 ("must not invent a value"); a later phase/Owner should decide whether the default is usable or explicit config is mandatory (fail-closed). No guess made. **CLOSED by DECISION-009 (2026-09-21): CycleReferenceDerivation MUST be set explicitly in runtime config; the Strategy.md default is a template only; runtime without an explicit setting fails closed. See DECISION_REGISTER.md DECISION-009.**
 - **Strength inferred from wording (not a semantic guess):** SHOULD assigned where `Strategy.md` says "prefer"/"preferable" — STR-0195 ("prefer MAKER"), STR-0207 ("prefer a maker-side correction"), STR-0311 ("preferable"), STR-0312 ("preferable"). MAY assigned to STR-0164 (AUTO "arms automatically" — permissive mode). All other rules are MUST/MUST_NOT. These are the only 5 non-MUST strengths; each is a direct reading of the source verb, recorded here for transparency.
 - **Taxonomy note (not a semantic issue):** STR-0093 (§5.4 tick-rounding at conversion, full-precision reference) is a precision rule; since `PRECISION_RULE` is not in the allowed `requirement_type` set, it is typed `GUARD` with the precision nature noted in its `invariants` field. Same family as §6.3 (STR-0135–STR-0138).
 - **Blocking semantic ambiguities:** **none.** Per `Strategy.md` §16 closed ledger, all owner decisions D-01…D-17 are resolved and no `[OQ]` remains open; the four calibration-pending values are specified dynamic mechanisms (not open questions) and are preserved as such.
@@ -2742,3 +2749,18 @@ Tag semantics are exactly as recorded in `STRATEGY_SOURCE_RECORD.md` §4. Tags a
 These are the only intra-section gate consolidations; every other §8 gate and rule has its own ID. Dynamic-default parameters intentionally appear in both their behavioral section, their §14 register row, and their §16 canonical entry (per Phase-1 special extraction duties c & d), cross-linked via `dependencies`/`dynamic_note`.
 
 *End of STRATEGY_CONTRACT.md (Phase 1). Authority remains `Strategy.md`; this contract is derived and non-authoritative.*
+
+---
+
+## §17 — Phase 4.6 owner-decision additions
+
+> New requirements added by Owner decisions (Phase 4.6). No existing STR-* was renumbered or altered. IDs continue after STR-0343.
+
+### STR-0344 — At most one active order per Level at any time
+- section: §17 (Phase 4.6; from GATE-003 / DECISION-004) | lines: N/A (owner-decision-derived) | type: INVARIANT | strength: MUST_NOT | tag: [UR][DEFINED]
+- wording: "At most one active order per Level at any time. A Level with an unresolved (submitted but not yet POSITION_VERIFIED or explicitly CANCELLED) order MUST NOT create a second order on the same Level."
+- inputs: per-Level order state | outputs: single-active-order enforcement | preconditions: a Level has an unresolved order | postconditions: no second order created on that Level | state_effects: per-Level active-order lock
+- formula: NONE | units: NONE
+- invariants: guarantees unique fill/delta→Level attribution (basis of DECISION-004); complements STR-0131 (LEVEL FILLED ⇔ order fill ∧ delta) and STR-0298 (cloid persisted before submit) | failure_behavior: reject second order (fail-closed); on attribution ambiguity → RECONCILIATION_REQUIRED, Level not verified | safety_impact: CRITICAL
+- dependencies: STR-0071, STR-0072, STR-0129, STR-0131, STR-0199, STR-0293 | impl: NOT_STARTED | verif: NOT_STARTED
+- origin: DECISION-004 (from GATE-003), 2026-09-21.

@@ -29,3 +29,5 @@ runtime باید deterministic و قابل replay باشد (STR-0315, STR-0334) 
 
 ## ۷. توصیه (Recommendation)
 **گزینه C**: چون معماری منتخب event-sourced (CAND-B) است، «log محلی به‌عنوان مرجع ترتیب» (A) با «gap-detection/snapshot reconciliation» (B) ترکیب می‌شود تا هم replay قطعی و هم سازگاری با حقیقت venue حاصل شود. این با STR-0315/0334 و اصل fail-closed سازگار است. (توصیه از نظر روش پشتیبانی می‌شود؛ جزئیات tie-break باید در Phase 6 ثبت و در CALIBRATION/verification آزموده شوند.)
+
+**STATUS: RESOLVED — Option C (owner, 2026-09-21). See DECISION_REGISTER.md DECISION-007.**

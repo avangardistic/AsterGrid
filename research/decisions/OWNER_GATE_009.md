@@ -28,3 +28,5 @@
 
 ## ۷. توصیه (Recommendation)
 **گزینه C** به‌طور عینی از متن پشتیبانی می‌شود: STR-0199/0212 صریحاً exposure را از «verified filled quantity» می‌سازند (پس partial باید شمرده شود)، اما §5.1 «reach» سطح ترمینال را برای پیشروی می‌خواهد؛ لذا شمردن exposure از partial + الزام full-fill برای terminal reach، سازگارترین و fail-safe است. سیاست باقیمانده به §9.1/§9.3 (Emergency/Skip) واگذار می‌شود.
+
+**STATUS: RESOLVED — Option C (owner, 2026-09-21). See DECISION_REGISTER.md DECISION-010.**

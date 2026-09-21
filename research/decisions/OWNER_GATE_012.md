@@ -27,3 +27,5 @@
 
 ## ۷. توصیه (Recommendation)
 **گزینه A** به‌طور عینی پشتیبانی می‌شود: کاملاً از اصول موجود §4.1/§4.4/§4.5/§4.7 مشتق می‌شود (verified-only، single-successor، origin=traversed، disable مقدم)، با fail-closed و «deferred-not-cancelled» سازگار است و double-evolution/starvation را کمینه می‌کند. هر حالت باید reason code یکتا (مثلاً `RETURN_LEVEL_UNVERIFIED`, `SUCCESSOR_LOCK_ACTIVE`, `CYCLE_LIMIT_REACHED`, `GENERATION_ID_LIMIT`) بگیرد.
+
+**STATUS: RESOLVED — Option A (owner, 2026-09-21). See DECISION_REGISTER.md DECISION-013.**

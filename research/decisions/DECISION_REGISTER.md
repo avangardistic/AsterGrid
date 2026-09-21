@@ -62,3 +62,165 @@
 - **supersedes:** NONE.
 
 > Note: GATE-001 and GATE-002 remain RESOLVED (Option A) and were not reopened. Audit findings that touched them were recorded as new adjacent findings where distinct (e.g., AMB-0003 maintenance-margin model is distinct from GATE-001's max-leverage number). OPEN-01 (CycleReferenceDerivation) is carried as AMB-0042 (SEMANTIC_NON_BLOCKING) and was NOT turned into a new gate, per the Phase-4.5 B3 rule.
+
+---
+
+## DECISION-004 — Unique-attribution rule for POSITION_VERIFIED (from GATE-003 / AMB-0001)
+
+- **decision_id:** DECISION-004
+- **question:** How is a fill/delta uniquely attributed to one intent/Level for POSITION_VERIFIED?
+- **context:** GATE-003 / AMB-0001; `research/strategy/SEMANTIC_AMBIGUITIES.md`.
+- **evidence:** SRC-201 §4.1, SRC-202 A-003/B-001/D-001/D-010/K-003, SRC-203 §3.5/NC-04; venue cloid/orderStatus/clearinghouseState (SRC-104/105/107).
+- **decision:** **Option C** — attribution uses `cloid` + `oid` (mapped via `orderStatus`) + authoritative delta from `clearinghouseState`, AND a new strategy-level invariant: "At most one active order per Level at any time." On ambiguity: fail-closed (`RECONCILIATION_REQUIRED`; Level not verified).
+- **alternatives:** A (cloid-only), B (reconciliation-window matching without cloid), D (other).
+- **rejected_alternatives:** A, B, D.
+- **affected_strategy_requirements:** STR-0071, STR-0072, STR-0129, STR-0131, STR-0199, STR-0293; new invariant STR-0344 (Part B1).
+- **risk:** LOW-MEDIUM (design constraint; aligned with fail-closed).
+- **reversibility:** MEDIUM (grid design constraint).
+- **owner_required:** YES. **owner_decision:** Option C (2026-09-21).
+- **date:** 2026-09-21. **supersedes:** NONE.
+
+## DECISION-005 — External position-change handling (from GATE-004 / AMB-0002)
+
+- **decision_id:** DECISION-005
+- **question:** How are external position changes classified/handled, and is the account dedicated?
+- **context:** GATE-004 / AMB-0002.
+- **evidence:** SRC-202 B-002/D-011/D-012/D-013/G-010/H-008/J-004, SRC-201 §4.10, N#11.
+- **decision:** **Option C** — dedicated-account domain constraint + explicit event class for external position changes (liquidation / funding / transfer). Any exposure not attributable to a strategy intent → contamination → `RECONCILIATION_REQUIRED` / `FREEZE`.
+- **alternatives:** A (freeze-on-any-external-activity), B (shared-account allocation), D.
+- **rejected_alternatives:** A, B.
+- **affected_strategy_requirements:** STR-0200, STR-0201, STR-0294, STR-0239.
+- **risk:** MEDIUM (operational; depends on account discipline).
+- **reversibility:** MEDIUM.
+- **owner_required:** YES. **owner_decision:** Option C (2026-09-21).
+- **date:** 2026-09-21. **supersedes:** NONE.
+
+## DECISION-006 — Maintenance/liquidation model (from GATE-005 / AMB-0003)
+
+- **decision_id:** DECISION-006
+- **question:** What is the valid maintenance-margin/liquidation model for risk thresholds; is `0.5/Leverage_effective` authoritative?
+- **context:** GATE-005 / AMB-0003 (distinct from GATE-001).
+- **evidence:** SRC-115 margining, SRC-116 contract-specs, SRC-118 liquidations; SRC-202 C-001/C-002/H-001/K-007, SRC-201 §4.2, N#2.
+- **decision:** **Option C** — runtime reads venue-reported `liquidationPx` and per-asset maintenance margin from `meta`/margin-tiers (`clearinghouseState`) as the primary maintenance/liquidation model. The §16 D-16 formula `0.5 / Leverage_effective` is retained ONLY as an illustrative, conservative floor for initial sizing. D-16 formulas are explicitly re-labelled HYPOTHESIS pending controlled observation in Phase 8/12; re-validation is a Live prerequisite.
+- **alternatives:** A (schedule-only, no §16 floor), B (hypothesis-only without venue ground truth), D.
+- **rejected_alternatives:** A, B.
+- **affected_strategy_requirements:** STR-0223, STR-0337, STR-0340, STR-0206.
+- **risk:** HIGH until controlled observation; LOW after (D-16 no longer authority).
+- **reversibility:** HIGH.
+- **owner_required:** YES. **owner_decision:** Option C (2026-09-21).
+- **date:** 2026-09-21. **supersedes:** NONE.
+
+## DECISION-007 — Event ordering & clock model (from GATE-006 / AMB-0004)
+
+- **decision_id:** DECISION-007
+- **question:** What is the canonical event-ordering/clock model for deterministic replay?
+- **context:** GATE-006 / AMB-0004.
+- **evidence:** SRC-202 B-004/E-001/D-009/L-009, SRC-201 §4.7, SRC-203 NC-03; SRC-110 nonces.
+- **decision:** **Option C** — canonical event order = (venue sequence when present) → (server timestamp) → (local receive timestamp) → (monotonic local counter as tie-break). All observation/timer events that affect a decision are recorded in the event log. WS gap → `RECONCILIATION_REQUIRED` until snapshot reconciliation.
+- **alternatives:** A (local ingestion order only), B (venue-seq only; no logical-clock fallback), D.
+- **rejected_alternatives:** A, B.
+- **affected_strategy_requirements:** STR-0063, STR-0315, STR-0334.
+- **risk:** LOW (deterministic foundation for CAND-B).
+- **reversibility:** MEDIUM (tie-break details in Phase 6).
+- **owner_required:** YES. **owner_decision:** Option C (2026-09-21).
+- **date:** 2026-09-21. **supersedes:** NONE.
+
+## DECISION-008 — UNKNOWN_SUBMISSION recovery (from GATE-007 / AMB-0005)
+
+- **decision_id:** DECISION-008
+- **question:** What is the recovery model for ambiguous submission / atomicity / idempotency?
+- **context:** GATE-007 / AMB-0005; FM-08/09/10.
+- **evidence:** SRC-202 B-013/B-014/E-002/E-003/G-002/G-003/G-005, SRC-201 §4.11, SRC-203 §3.5, N#6; SRC-104 exchange-endpoint (`expiresAfter`), SRC-110 nonces.
+- **decision:** **Option B** — on ambiguous submission (timeout, crash mid-send), enter explicit state `UNKNOWN_SUBMISSION`; persist `intent+cloid` BEFORE any side effect; use `expiresAfter` on actions; reconcile with `orderStatus` (by cloid) + `openOrders` + `userFills` + `clearinghouseState` BEFORE any new side effect. Never assume cloid-based dedup in venue.
+- **alternatives:** A (without `expiresAfter`), C (other).
+- **rejected_alternatives:** A, C.
+- **affected_strategy_requirements:** STR-0004, STR-0132, STR-0298, STR-0314, STR-0133, STR-0138.
+- **risk:** MEDIUM (rate-limit cost of `expiresAfter`; mitigated by disciplined reconciliation).
+- **reversibility:** HIGH.
+- **owner_required:** YES. **owner_decision:** Option B (2026-09-21).
+- **date:** 2026-09-21. **supersedes:** NONE.
+
+## DECISION-009 — Nominal reference price + CycleReferenceDerivation explicitness (from GATE-008 / AMB-0006; CLOSES OPEN-01 / AMB-0042)
+
+- **decision_id:** DECISION-009
+- **question:** How is `nominal expected reference price` (§5.4.1) defined; and is CycleReferenceDerivation defaulted or explicit?
+- **context:** GATE-008 / AMB-0006; OPEN-01 / AMB-0042.
+- **evidence:** SRC-201 §4.4, N#4; Strategy §5.4/§5.4.1/§7.1.
+- **decision:** **Option B** — `nominal expected reference price` = (previous Cycle's reference price) + (nominal distance to the terminal level, per §7.1 geometry for the same Generation). Captured reference remains per §5.4; §5.4.1 compares captured vs nominal. Additionally: `CycleReferenceDerivation` MUST be set explicitly in runtime config; the Strategy.md default is only a template — runtime without an explicit setting fails closed (BLOCKED). **This CLOSES OPEN-01 and resolves AMB-0042.**
+- **alternatives:** A (equivalent phrasing), C (mid/mark at POSITION_VERIFIED), D.
+- **rejected_alternatives:** A, C.
+- **affected_strategy_requirements:** STR-0091, STR-0096, STR-0097, STR-0098.
+- **risk:** LOW. **reversibility:** HIGH.
+- **owner_required:** YES. **owner_decision:** Option B (2026-09-21).
+- **date:** 2026-09-21. **supersedes:** closes OPEN-01.
+
+## DECISION-010 — Partial-fill transition semantics (from GATE-009 / AMB-0007)
+
+- **decision_id:** DECISION-010
+- **question:** When does a Level advance under partial fill?
+- **context:** GATE-009 / AMB-0007.
+- **evidence:** SRC-202 B-003/B-008/F-009; Strategy §5.1/§11.4.
+- **decision:** **Option C** — exposure accounting uses verified cumulative filled quantity (partial fills count immediately, per STR-0199/0212), BUT terminal reach / Cycle progression requires full-fill of the terminal level (per §5.1). Remaining unfilled quantity is managed per §9.1/§9.3 (Emergency / Skip).
+- **alternatives:** A (full-fill for exposure too), B (cumulative threshold = full), D.
+- **rejected_alternatives:** A, B.
+- **affected_strategy_requirements:** STR-0071, STR-0074, STR-0199, STR-0212.
+- **risk:** LOW. **reversibility:** HIGH.
+- **owner_required:** YES. **owner_decision:** Option C (2026-09-21).
+- **date:** 2026-09-21. **supersedes:** NONE.
+
+## DECISION-011 — Basket-vs-account accounting scope (from GATE-010 / AMB-0008)
+
+- **decision_id:** DECISION-011
+- **question:** How are PnL/funding/fees/residual attributed from account to Basket?
+- **context:** GATE-010 / AMB-0008; depends on DECISION-005.
+- **evidence:** SRC-202 A-002/A-004/D-013/F-005/H-009/I-002/I-003/I-006/I-007, SRC-201 §4.10, N#7; venue `userFunding`/fill fee (SRC-105/107).
+- **decision:** **Option C** — dedicated account (per DECISION-005), with explicit per-position accounting of funding and fee sourced from `userFunding` and fill-level fee fields, so `BasketNetPnL`, `MaxBasketNotional`, closure target, and residual exposure are attributable to the Basket. accountValue ≈ Basket capital; any deviation is contamination per DECISION-005.
+- **alternatives:** A (accountValue = Basket capital w/o explicit allocation), B (shared-account allocation), D.
+- **rejected_alternatives:** A, B.
+- **affected_strategy_requirements:** STR-0224, STR-0234, STR-0248, STR-0159.
+- **risk:** LOW-MEDIUM. **reversibility:** MEDIUM.
+- **owner_required:** YES. **owner_decision:** Option C (2026-09-21).
+- **date:** 2026-09-21. **supersedes:** NONE.
+
+## DECISION-012 — Closure target cost-timing (from GATE-011 / AMB-0009)
+
+- **decision_id:** DECISION-012
+- **question:** When is `TotalSystemCosts` snapshot/locked; effect of late costs & corrections?
+- **context:** GATE-011 / AMB-0009.
+- **evidence:** SRC-202 A-006/E-009/G-014/I-004/I-005/I-008, SRC-201 §4.9, N#10; §14 global rule.
+- **decision:** **Option A** — `BasketNetProfitClosureTarget` is locked at first eligibility using TotalSystemCosts accumulated to that instant. Costs incurred after locking do NOT change the target, but DO enter `BasketNetPnL`; closure condition remains "NET ≥ target". Corrections arriving after verified closure are recorded historically only; closure is not reopened.
+- **alternatives:** B (recompute-until-close; violates §14 global rule), C (safety buffer), D.
+- **rejected_alternatives:** B, C.
+- **affected_strategy_requirements:** STR-0243, STR-0245, STR-0246, STR-0256.
+- **risk:** LOW. **reversibility:** HIGH.
+- **owner_required:** YES. **owner_decision:** Option A (2026-09-21).
+- **date:** 2026-09-21. **supersedes:** NONE.
+
+## DECISION-013 — Evolution complex-path semantics (from GATE-012 / AMB-0010)
+
+- **decision_id:** DECISION-013
+- **question:** How do the five Evolution border cases resolve?
+- **context:** GATE-012 / AMB-0010.
+- **evidence:** SRC-202 B-007/B-009/B-010/E-008/E-011, SRC-201 §4.8; Strategy §4.1/§4.4/§4.5/§4.7.
+- **decision:** **Option A** — strict/verified-only Evolution semantics for all five border cases: origin = first verified group in the current Cycle; return requires return to the established return level (STR-0034); no candidate after `INELIGIBLE_EVOLUTION_CANDIDATE` within the same Cycle; only a full re-formation in a later Cycle re-candidates; disable precedes Evolution (§4.7 P3). Every border case gets a unique reason code (`RETURN_LEVEL_UNVERIFIED`, `SUCCESSOR_LOCK_ACTIVE`, `CYCLE_LIMIT_REACHED`, `GENERATION_ID_LIMIT`, …); reason-code enumeration formalized in Phase 6.
+- **alternatives:** B (permissive; double-evolution/starvation risk), D.
+- **rejected_alternatives:** B.
+- **affected_strategy_requirements:** STR-0025, STR-0029, STR-0034, STR-0035, STR-0055.
+- **risk:** LOW (aligns with single-in-flight / single-successor).
+- **reversibility:** HIGH.
+- **owner_required:** YES. **owner_decision:** Option A (2026-09-21).
+- **date:** 2026-09-21. **supersedes:** NONE.
+
+## DECISION-014 — Liveness / exit conditions (from GATE-013 / AMB-0011)
+
+- **decision_id:** DECISION-014
+- **question:** What are the exit conditions from fail-closed states?
+- **context:** GATE-013 / AMB-0011.
+- **evidence:** SRC-202 B-015/K-012/J-005, N#13; Strategy §13.3.
+- **decision:** **Option A** — auto-resume on successful reconciliation for transient states (`RECONCILIATION_REQUIRED`, `BLOCKED`); explicit Owner clearance required to exit `FREEZE`, `RECOVERY`, and any kill-switch state. Every resume is recorded with identity/timestamp/evidence. §13.3 already permits EXPOSURE_CORRECTION under FREEZE, so hedge/correction remains live while ENTRY_INTENT is blocked.
+- **alternatives:** B (Owner clearance for all), C (auto-resume for all), D.
+- **rejected_alternatives:** B, C.
+- **affected_strategy_requirements:** STR-0077, STR-0098, STR-0239, STR-0242.
+- **risk:** LOW. **reversibility:** HIGH.
+- **owner_required:** YES. **owner_decision:** Option A (2026-09-21).
+- **date:** 2026-09-21. **supersedes:** NONE.

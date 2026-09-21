@@ -29,3 +29,5 @@
 
 ## ۷. توصیه (Recommendation)
 **گزینه A** به‌طور عینی پشتیبانی می‌شود: با قاعدهٔ سراسری §14 (formula computed once → binding) سازگار است، از look-ahead accounting جلوگیری می‌کند، و چون هزینه‌های بعدی در `BasketNetPnL` (STR-0234, NET) لحاظ می‌شوند، شرط «net ≥ target» همچنان مانع بستنِ زیان‌ده می‌شود. سیاست «correction پس از closure فقط ثبت تاریخی است» با immutability (STR-0332) سازگار است.
+
+**STATUS: RESOLVED — Option A (owner, 2026-09-21). See DECISION_REGISTER.md DECISION-012.**

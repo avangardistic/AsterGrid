@@ -28,3 +28,5 @@
 
 ## ۷. توصیه (Recommendation)
 **گزینه C** به‌طور عینی پشتیبانی می‌شود: venue مقدار `liquidationPx` و maintenance را بر پایهٔ max leverage و tier تعریف می‌کند (SRC-115/116/118)، پس استفادهٔ مستقیم از این مقادیر در runtime دقیق‌تر از فرض `0.5/user_leverage` است؛ نگه‌داشتن فرمول §16 به‌عنوان کف محافظه‌کارانهٔ اولیه با اصل fail-safe سازگار است. تا مشاهدهٔ کنترل‌شده، D-16 باید صریحاً hypothesis علامت بخورد.
+
+**STATUS: RESOLVED — Option C (owner, 2026-09-21). See DECISION_REGISTER.md DECISION-006.**

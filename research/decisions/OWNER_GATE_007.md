@@ -27,3 +27,5 @@ recovery ایمن پس از crash/timeout و idempotency side-effectها (FM-08/
 
 ## ۷. توصیه (Recommendation)
 **گزینه B** (A + `expiresAfter`) به‌طور عینی پشتیبانی می‌شود: venue صریحاً `expiresAfter` و nonce-based replay control را فراهم می‌کند (SRC-104/110)، و ترکیب persist-before-send + reconcile-before-act با اصل «establish whether it already happened before retry» و fail-closed منطبق است. dedup بر cloid نباید فرض شود؛ راستی‌آزمایی همیشه از venue.
+
+**STATUS: RESOLVED — Option B (owner, 2026-09-21). See DECISION_REGISTER.md DECISION-008.**
