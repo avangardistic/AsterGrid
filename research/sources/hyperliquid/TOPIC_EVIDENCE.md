@@ -70,3 +70,27 @@
 - **CONFLICTED (1):** STR-0337 (funding + maintenance-margin parts VERIFIED; the "BTC/ETH max leverage = 40x" sub-claim conflicts with docs meta example of 50 → CONFLICT-001).
 - **SOURCE_UNAVAILABLE (0).**
 - Sub-note: STR-0133's "cloid idempotent" and STR-0138's duplicate-submission behavior are PARTIALLY covered (identity yes; dedup-on-duplicate not documented).
+
+---
+
+## Phase 2b addendum (2026-09-20) — append-only, revises statuses below
+
+**New sources:** page-robust-price-indices.md, page-liquidations.md, page-signing.md.
+
+### T6 — Order types / TIF — STR-0134 now VERIFIED (was PARTIALLY_VERIFIED)
+- New evidence (robust-price-indices.md): "Mark price … is used for margining, liquidations, **triggering TP/SL**, and computing unrealized pnl." Mark price = median incorporating an oracle-EMA component + book + CEX mids; "last trade" is only 1 of 3 medianed inputs. (liquidations.md: "Liquidations use the mark price".)
+- **Revised status: STR-0134 = VERIFIED.** Trigger orders are evaluated on **mark price, not last trade**. Strategy's "oracle mark price" maps to venue **mark price** (oracle-derived + book/CEX); operative claim unambiguously confirmed. → CONFLICT-003 RESOLVED; GATE-003 NOT opened.
+
+### T5 — cloid / idempotency / nonces — STR-0138 firmed VERIFIED; cloid-dedup still undocumented
+- New evidence (signing.md): correct signing requires handling **trailing zeroes on numbers** and lowercased addresses; two signing schemes; msgpack field order. Confirms client-side pre-sign normalization (STR-0138).
+- cloid duplicate-submission de-dup: **still not documented** anywhere fetched; replay control is the per-address nonce set. Deferred observation item (non-blocking); does not affect STR-0133's enumerated mechanisms.
+
+### T10 — Margin mechanics — STR-0337 max-leverage number now CORROBORATED at 40x (but docs internally inconsistent)
+- New evidence (liquidations.md): "The maintenance margin is half of the initial margin at max leverage, **which varies from 3-40x** … between **1.25% (for 40x max leverage assets)** and 16.7% (for 3x …)." This authoritative prose CORROBORATES Strategy's "BTC/ETH max leverage = 40x → maintenance 1.25%", and contradicts the info-endpoint `meta` *example* of 50. Docs are internally inconsistent (prose 40x vs meta example 50x).
+- **Revised status: STR-0337 = CONFLICTED** (mechanics VERIFIED — maintenance=½ initial, funding hourly 1/8, mark for margin/liquidation; the max-leverage numeric is escalated) → CONFLICT-001 PARTIALLY_RESOLVED + ESCALATED_TO_OWNER (GATE-001).
+
+### Revised roll-up (Phase 2 + 2b)
+- **VERIFIED (15):** STR-0129, 0132, 0133, 0134, 0135, 0136, 0137, 0138, 0175, 0176, 0177, 0194, 0200, 0224, 0254.
+- **PARTIALLY_VERIFIED (1):** STR-0228 (l2Book depth bounded ≤20 levels/side vs ±10×StepBps window — design nuance for Phase 3).
+- **CONFLICTED (1):** STR-0337 (mechanics verified; BTC/ETH max-leverage numeric → CONFLICT-001 / GATE-001).
+- **SOURCE_UNAVAILABLE (0).**

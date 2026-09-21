@@ -15,7 +15,7 @@
 |-------|------|-------|
 | 0 | Repository / Strategy Ingestion | **COMPLETE** (commit 51df743) |
 | 1 | Strategy Forensics | **COMPLETE** — STRATEGY_CONTRACT.md (343 STR-* reqs) + STRATEGY_COVERAGE.md |
-| 2 | Source & Venue Research (Hyperliquid docs + SDK) | **COMPLETE** — 14 venue pages + SDK 0.24.0; 14/17 [HC] VERIFIED, 2 PARTIAL, 1 CONFLICTED |
+| 2 | Source & Venue Research (Hyperliquid docs + SDK) | **COMPLETE** (+2.5/2b) — 17 venue pages + SDK 0.24.0; [HC]: 15 VERIFIED, 1 PARTIAL (STR-0228), 1 CONFLICTED (STR-0337→GATE-001). Owner gates 001/002 open |
 | 3 | Capability Discovery | not started |
 | 4 | Architecture Research (≥3 materially different candidates) | not started |
 | 5 | Architecture Decision | not started |
@@ -29,11 +29,15 @@
 | 13 | Live Readiness | not started |
 | 14 | Live Activation | not started (separate Owner authority; NOT granted) |
 
-**Current phase:** Phase 2 (Source & Venue Research) complete. **Next:** Phase 2b (fetch robust-price-indices/liquidations/signing to close STR-0134 & STR-0138 nuances) then Phase 3 (Capability Discovery). Owner review of CONFLICT-001/002/003 pending.
+**Current phase:** Phase 2 + 2.5 + 2b complete. **Next:** Phase 3 (Capability Discovery) — pending owner responses to OWNER_GATE_001 (max leverage / §16 calibration preamble) and OWNER_GATE_002 (clearinghouseState vs webData2/3 authority).
 
 ## Current blocker
 
-**None blocking.** Open items: OPEN-01 (Phase 1: CycleReferenceDerivation default vs "MUST be explicit"); CONFLICT-001 (BTC/ETH max leverage 40x vs docs meta 50x — LOW impact, Leverage_effective=3 unaffected); CONFLICT-002 (webData2→webData3 naming — LOW); CONFLICT-003 (trigger→oracle-mark basis — PARTIALLY_VERIFIED). Evidence base: `research/sources/hyperliquid/` (14 pages + SDK_RECORD + TOPIC_EVIDENCE + _HC_TARGETS). Contract [HC] fields remain `venue_evidence_status: UNVERIFIED` (owner promotes to VERIFIED in a later review, per Phase-2 scope).
+**Two OPEN Owner Gates (non-blocking for evidence, gating for Phase-3 capability decisions):**
+- **OWNER_GATE_001** — CONFLICT-001 (BTC/ETH max leverage 40x vs meta example 50x). Runtime impact LOW (Leverage_effective=3), escalated for §16 calibration-preamble integrity; STR-0337 = CONFLICTED.
+- **OWNER_GATE_002** — CONFLICT-002 (webData2→webData3; authoritative source for ActualExposure). Recommend clearinghouseState as sole authority.
+
+Other open items: OPEN-01 (Phase 1: CycleReferenceDerivation default vs "MUST be explicit"). CONFLICT-003 (trigger basis) **RESOLVED** — mark price triggers TP/SL, not last trade; STR-0134 VERIFIED. Contract [HC] fields now: 15 VERIFIED, 1 PARTIALLY_VERIFIED (STR-0228), 1 CONFLICTED (STR-0337). Evidence base: `research/sources/hyperliquid/` (17 pages + SDK_RECORD + TOPIC_EVIDENCE + _HC_TARGETS); gates in `research/decisions/`.
 
 ## Artifact layout (created only when a phase requires it)
 

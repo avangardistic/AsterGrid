@@ -12,3 +12,10 @@
 - **impact:** **LOW–MEDIUM.** Trigger basis matters for Emergency Execution (§9.1) and stop behavior. Strategy's core intent (never trigger on raw last trade) is consistent with the venue using mark/oracle, but the precise basis for stop/take needs one more primary source.
 - **resolution_method:** Phase 2b/3: fetch trading/robust-price-indices.md and trading/liquidations.md; if still unresolved, confirm by controlled observation. Do not assume "oracle mark for all trigger types" until corroborated.
 - **current_status:** OPEN — surfaced to owner; STR-0134 marked PARTIALLY_VERIFIED.
+
+## Update 2026-09-20 (Phase 2.5+2b)
+
+- **New evidence (SRC-117, robust-price-indices.md, verbatim):** "Mark price is an unbiased and robust estimate of the fair perp price, and is used for margining, liquidations, **triggering TP/SL**, and computing unrealized pnl." Mark price is a **median** of (1) oracle price + 150s EMA of (HL mid − oracle), (2) median of best bid/ask/last-trade on HL, (3) weighted median of Binance/OKX/Bybit/Gate/MEXC perp mids. (SRC-118, liquidations.md: "Liquidations use the mark price".)
+- **analysis:** The venue distinguishes **oracle price** (funding only) from **mark price** (margining, liquidations, TP/SL triggering, uPnL). Trigger orders fire on **mark price**, and "last trade" is only 1 of 3 medianed inputs — never the sole basis. Strategy's phrase "oracle mark price, not last trade" maps to the venue's **mark price** (which includes an oracle-derived component); the operative claim (triggers on mark, not raw last trade) is now **unambiguously confirmed**. The only imprecision is terminology ("oracle mark" vs "mark"), which is subsumed since mark incorporates the oracle.
+- **revised impact:** **LOW** (terminology only; operative semantics confirmed).
+- **updated status:** **RESOLVED.** STR-0134 promoted to VERIFIED (refs SRC-112, SRC-117, SRC-118). GATE-003 is therefore **NOT** opened (per the Part D condition).

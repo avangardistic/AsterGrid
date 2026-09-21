@@ -50,15 +50,15 @@ All fetched via the built-in browser using each page's `.md` raw variant. SHA-25
 |----|-----|-------|-------------|------------------|------------------|-----------|
 | SRC-106 | https://github.com/hyperliquid-dex/hyperliquid-python-sdk | TOOL_SOURCE / IMPLEMENTATION_REFERENCE (NOT venue authority) | SDK_RECORD.md | `5072f79424ef713a3b2a6868e9357755d6a106b89d5a2b7c82cde71155f34a76` | tag **0.24.0**, commit `2fdb18f9517675ea03695a0962bd19eece9c83f0`, published 2026-06-04 | 2026-09-20 |
 
-## 2b. PENDING — secondary pages for Phase 2b (not yet fetched)
+## 2b. Secondary pages — FETCHED (Phase 2b, 2026-09-20)
 
-> Needed to fully resolve the two PARTIALLY_VERIFIED items; no evidentiary weight until fetched.
+| ID | URL | Class | Saved file | SHA-256 (extract) | Bytes | [HC] targets addressed |
+|----|-----|-------|-----------|-------------------|-------|------------------------|
+| SRC-117 | .../trading/robust-price-indices.md | VENUE_PRIMARY_SOURCE | page-robust-price-indices.md | `43cb94be9c0cc7bea138059c17a5e6ed3d81bd8c8572e4bbc90c36eca3fa2e7b` | 2309 | STR-0134 (trigger basis = mark), STR-0337 (mark) |
+| SRC-118 | .../trading/liquidations.md | VENUE_PRIMARY_SOURCE | page-liquidations.md | `469e6c9e89c5bb195e450190db0f063c15ec84012f71f95257cb7834819d80b8` | 2298 | STR-0337 (maintenance, max-lev 3–40x, mark), STR-0134 (support) |
+| SRC-119 | .../for-developers/api/signing.md | VENUE_PRIMARY_SOURCE | page-signing.md | `4256ef4b26e8e034c530e62084111b1bd1b5f34924a29253107b03699faf2a41` | 2068 | STR-0138 (pre-sign normalization); STR-0133 (cloid dedup NOT documented) |
 
-| URL | Purpose |
-|-----|---------|
-| .../trading/robust-price-indices.md | Mark/oracle price basis for trigger orders (CONFLICT-003 / STR-0134). |
-| .../trading/liquidations.md | Trigger/liquidation price basis (STR-0134 corroboration). |
-| .../for-developers/api/signing.md | Signing details (supports STR-0138 normalization). |
+All three fetched via built-in browser `.md` raw variant; hash = saved extract (see §hash-scope). Retrieval 2026-09-20.
 
 ## 3. Retrieval discipline (binding, from `prompt.md`)
 

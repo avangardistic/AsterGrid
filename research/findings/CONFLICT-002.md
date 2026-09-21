@@ -12,3 +12,9 @@
 - **impact:** **LOW.** The authoritative source Strategy names FIRST — `clearinghouseState` — is fully verified and is the correct authority for `ActualExposure` (STR-0200) and account equity (STR-0224). The webData2 dependency is redundant/frontend and should not be treated as the authoritative delta source.
 - **resolution_method:** Phase 3 should specify `clearinghouseState` (REST + WS) as THE authoritative position/margin source; treat `webData2`/`webData3` as non-authoritative UI aggregate (use only for convenience, never for POSITION_VERIFIED). Update capability/architecture docs accordingly (not Strategy.md).
 - **current_status:** OPEN — surfaced to owner; no silent edit.
+
+## Update 2026-09-20 (Phase 2.5+2b)
+
+- **New evidence:** none specific to webData2/3 fetched in 2b (websocket/subscriptions.md from Phase 2 remains the source: `webData3` is the current subscription; `WebData2` documented as "used primarily for the frontend"). Corroborated indirectly: `clearinghouseState` is repeatedly used across margining/liquidations/perpetuals pages as the authoritative position/margin source.
+- **revised impact:** **LOW** (unchanged). The authoritative source Strategy names first — `clearinghouseState` — is verified as the correct authority for `ActualExposure` (STR-0200) and equity (STR-0224); webData2/3 is a redundant frontend aggregate.
+- **updated status:** **ESCALATED_TO_OWNER** — the semantic question ("which endpoint is authoritative for ActualExposure per §11.1, given webData2 is frontend-aggregate and renamed webData3") is put to the owner in `research/decisions/OWNER_GATE_002.md` so the authority pairing "clearinghouseState/webData2" is confirmed/updated at the capability layer (Phase 3), without editing Strategy.md.

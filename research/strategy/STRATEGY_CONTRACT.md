@@ -5,7 +5,7 @@
 - **Producer:** Claude Code (Opus 4.8), Phase 1 — Strategy Forensics.
 - **Inputs:** `Strategy.md` (SRC-001, SHA-256 `085044e72efa75e7dd7e812588d8247c8e60152eecb233bd6969f6545a825e18`, 1368 lines (1-based; authoritative)); `prompt.md` (SRC-002) `<strategy_forensics>`, `<strategy_contract>`.
 - **Source references:** every entry cites `strategy_section` + `source_lines` + verbatim `wording`.
-- **Status:** COMPLETE for Phase 1 (335 requirements, STR-0001..STR-0335).
+- **Status:** COMPLETE for Phase 1 (343 requirements, STR-0001..STR-0343).
 - **Validation status:** self-consistency checks reported at end (STEP 5). All `implementation_status`/`verification_status` = NOT_STARTED in Phase 1.
 
 ---
@@ -1075,7 +1075,8 @@ Tag semantics are exactly as recorded in `STRATEGY_SOURCE_RECORD.md` §4. Tags a
 - inputs: order events; authoritative reads | outputs: level/order state | preconditions: intent created | postconditions: state ∈ pipeline | state_effects: order/level state machine
 - formula: NONE | units: NONE | invariants: POSITION_VERIFIED is terminal verified state
 - failure_behavior: EMERGENCY / SKIPPED / ERROR / CANCELLED per branch | safety_impact: HIGH
-- venue_evidence_status: UNVERIFIED (Phase 2 will verify venue order-lifecycle mechanism)
+- venue_evidence_status: VERIFIED (Phase 2/2b — orderUpdates + orderStatus + REST ack)
+- venue_evidence_refs: [SRC-104, SRC-105, SRC-109]
 - dependencies: STR-0131 | impl: NOT_STARTED | verif: NOT_STARTED
 
 ### STR-0130 — EMERGENCY (trigger-without-fill) and SKIPPED (tolerance/economics fail) are first-class states
@@ -1098,7 +1099,8 @@ Tag semantics are exactly as recorded in `STRATEGY_SOURCE_RECORD.md` §4. Tags a
 - wording: "No state reaches FILLED … from a bare userFills message or REST ack alone — a subsequent authoritative position-state read (clearinghouseState/webData2) must confirm the delta."
 - inputs: userFills; REST ack; authoritative read | outputs: confirmed/unconfirmed | preconditions: fill signal | postconditions: FILLED only after authoritative confirm | state_effects: verification gate
 - formula: NONE | units: NONE | invariants: authoritative read required | failure_behavior: not FILLED without authoritative confirm | safety_impact: CRITICAL
-- venue_evidence_status: UNVERIFIED (Phase 2 will verify clearinghouseState/webData2 semantics)
+- venue_evidence_status: VERIFIED (Phase 2/2b — orderStatus + clearinghouseState authoritative; userFills alone insufficient. Authority source = clearinghouseState; webData2/3 nuance in CONFLICT-002/GATE-002, non-blocking)
+- venue_evidence_refs: [SRC-105, SRC-107, SRC-109]
 - dependencies: STR-0131, STR-0133 | impl: NOT_STARTED | verif: NOT_STARTED
 
 ---
@@ -1111,7 +1113,8 @@ Tag semantics are exactly as recorded in `STRATEGY_SOURCE_RECORD.md` §4. Tags a
 - inputs: venue APIs | outputs: relied-on mechanisms | preconditions: venue integration | postconditions: mechanisms available | state_effects: adapter dependencies
 - formula: NONE | units: NONE (history retained ≤10,000) | invariants: cloid idempotent identity
 - failure_behavior: NONE | safety_impact: HIGH
-- venue_evidence_status: UNVERIFIED (Phase 2 will verify each mechanism against primary docs/SDK)
+- venue_evidence_status: VERIFIED (Phase 2/2b — cloid 128-bit, ack resting/filled/error, orderStatus, WS orderUpdates, WS userFills snapshot-tagged, userFillsByTime ≤10000, TIF Alo/Gtc/Ioc all confirmed. Note: cloid duplicate-submission de-dup is NOT documented — deferred observation item; does not affect the enumerated mechanisms)
+- venue_evidence_refs: [SRC-104, SRC-105, SRC-107, SRC-109, SRC-110]
 - dependencies: NONE | impl: NOT_STARTED | verif: NOT_STARTED
 
 ### STR-0134 — Trigger orders evaluated against oracle mark price, not last trade
@@ -1120,7 +1123,8 @@ Tag semantics are exactly as recorded in `STRATEGY_SOURCE_RECORD.md` §4. Tags a
 - inputs: trigger orders; oracle mark price | outputs: trigger evaluation | preconditions: trigger order active | postconditions: evaluated vs oracle mark | state_effects: trigger semantics
 - formula: NONE | units: price | invariants: oracle mark (not last trade) governs triggers
 - failure_behavior: NONE | safety_impact: HIGH
-- venue_evidence_status: UNVERIFIED (Phase 2 will verify trigger/mark semantics)
+- venue_evidence_status: VERIFIED (Phase 2b — robust-price-indices: mark price triggers TP/SL, not last trade; "oracle mark" maps to venue mark price which incorporates oracle+book+CEX. CONFLICT-003 RESOLVED)
+- venue_evidence_refs: [SRC-112, SRC-117, SRC-118]
 - dependencies: STR-0133 | impl: NOT_STARTED | verif: NOT_STARTED
 
 ---
@@ -1133,7 +1137,8 @@ Tag semantics are exactly as recorded in `STRATEGY_SOURCE_RECORD.md` §4. Tags a
 - inputs: price; szDecimals; MAX_DECIMALS=6 | outputs: normalized price | preconditions: order build | postconditions: price within precision | state_effects: price normalization
 - formula: decimals ≤ (6 − szDecimals); sig figs ≤ 5 | units: sig figs / decimal places | invariants: precision compliance
 - failure_behavior: fail-closed (normalize before signing; else exchange reject) | safety_impact: HIGH
-- venue_evidence_status: UNVERIFIED (Phase 2 will verify precision rules & MAX_DECIMALS)
+- venue_evidence_status: VERIFIED (Phase 2 — tick-and-lot-size confirms ≤5 sig figs, ≤(6−szDecimals) decimals, MAX_DECIMALS=6 perps)
+- venue_evidence_refs: [SRC-108]
 - dependencies: STR-0138 | impl: NOT_STARTED | verif: NOT_STARTED
 
 ### STR-0136 — Integer prices always valid
@@ -1142,7 +1147,8 @@ Tag semantics are exactly as recorded in `STRATEGY_SOURCE_RECORD.md` §4. Tags a
 - inputs: integer price | outputs: valid price | preconditions: order build | postconditions: integer accepted | state_effects: NONE
 - formula: NONE | units: price | invariants: integer prices exempt from decimal rule
 - failure_behavior: NONE | safety_impact: MEDIUM
-- venue_evidence_status: UNVERIFIED (Phase 2 will verify)
+- venue_evidence_status: VERIFIED (Phase 2 — tick-and-lot-size: "Integer prices are always allowed")
+- venue_evidence_refs: [SRC-108]
 - dependencies: STR-0135 | impl: NOT_STARTED | verif: NOT_STARTED
 
 ### STR-0137 — Size precision: sizes rounded to the asset's szDecimals (from meta)
@@ -1151,7 +1157,8 @@ Tag semantics are exactly as recorded in `STRATEGY_SOURCE_RECORD.md` §4. Tags a
 - inputs: size; szDecimals (from meta) | outputs: normalized size | preconditions: order build | postconditions: size at szDecimals | state_effects: size normalization
 - formula: size rounded to szDecimals | units: base-asset size | invariants: precision compliance
 - failure_behavior: fail-closed | safety_impact: HIGH
-- venue_evidence_status: UNVERIFIED (Phase 2 will verify szDecimals source/meta)
+- venue_evidence_status: VERIFIED (Phase 2 — sizes rounded to szDecimals from meta.universe; BTC 5, ETH 4)
+- venue_evidence_refs: [SRC-108, SRC-107]
 - dependencies: STR-0138 | impl: NOT_STARTED | verif: NOT_STARTED
 
 ### STR-0138 — Normalization happens in the Execution Engine before every signed order (never exchange reject-and-retry)
@@ -1160,7 +1167,8 @@ Tag semantics are exactly as recorded in `STRATEGY_SOURCE_RECORD.md` §4. Tags a
 - inputs: raw price/size | outputs: normalized order | preconditions: before signing | postconditions: normalized before submission | state_effects: pre-sign normalization
 - formula: NONE | units: NONE | invariants: normalize before signing; price/size normalized before signing (§15)
 - failure_behavior: fail-closed (do not rely on exchange rejection) | safety_impact: HIGH
-- venue_evidence_status: UNVERIFIED (Phase 2 will verify venue rejection behavior for un-normalized orders)
+- venue_evidence_status: VERIFIED (Phase 2/2b — tick-and-lot-size precision + signing: trailing zeros/precision must be handled client-side before signing; tickRejected exists)
+- venue_evidence_refs: [SRC-108, SRC-119]
 - dependencies: STR-0135, STR-0137 | impl: NOT_STARTED | verif: NOT_STARTED
 
 ---
@@ -1462,7 +1470,8 @@ Tag semantics are exactly as recorded in `STRATEGY_SOURCE_RECORD.md` §4. Tags a
 - inputs: order size; asset min; margin; MarginSafetyBuffer | outputs: pass/fail | preconditions: arming | postconditions: size/margin ok | state_effects: gate
 - formula: margin_avail ≥ required_initial_margin × (1 + 0.20) | units: base-asset size; USD margin
 - invariants: NONE | failure_behavior: IDLE/PRECHECK | safety_impact: HIGH
-- venue_evidence_status: UNVERIFIED (Phase 2 will verify asset minimum size [HC])
+- venue_evidence_status: VERIFIED (Phase 2 — $10 minimum order value (minTradeNtlRejected); margin = size×mark/leverage; max order-value tiers)
+- venue_evidence_refs: [SRC-104, SRC-105, SRC-115, SRC-116]
 - dependencies: STR-0272 | impl: NOT_STARTED | verif: NOT_STARTED
 
 ### STR-0176 — Gates 5 & 6: exposure caps (§7.3) not exceeded; open-order count has headroom below per-account cap (~1000 [HC]), preserving hedge headroom
@@ -1471,7 +1480,8 @@ Tag semantics are exactly as recorded in `STRATEGY_SOURCE_RECORD.md` §4. Tags a
 - inputs: exposure caps; open-order count; per-account cap | outputs: pass/fail | preconditions: arming | postconditions: caps + headroom ok | state_effects: gate
 - formula: NONE | units: USD notional; order count (~1000) | invariants: preserve headroom for hedge orders
 - failure_behavior: IDLE/PRECHECK | safety_impact: HIGH
-- venue_evidence_status: UNVERIFIED (Phase 2 will verify per-account open-order cap)
+- venue_evidence_status: VERIFIED (Phase 2 — rate-limits: default 1000 open orders/user (up to 5000 by volume); reduce-only/trigger rejected at ≥1000)
+- venue_evidence_refs: [SRC-111]
 - dependencies: STR-0154 | impl: NOT_STARTED | verif: NOT_STARTED
 
 ### STR-0177 — Gates 7 & 8: price/size normalized (§6.3)
@@ -1479,7 +1489,8 @@ Tag semantics are exactly as recorded in `STRATEGY_SOURCE_RECORD.md` §4. Tags a
 - wording: "7–8. Price/size normalized (§6.3)"
 - inputs: price; size | outputs: normalized order | preconditions: arming | postconditions: normalized before signing | state_effects: gate
 - formula: NONE | units: NONE | invariants: normalize before signing | failure_behavior: IDLE/PRECHECK | safety_impact: HIGH
-- venue_evidence_status: UNVERIFIED (Phase 2 will verify §6.3 precision/normalization semantics)
+- venue_evidence_status: VERIFIED (Phase 2 — price/size normalization per tick-and-lot-size; cf. STR-0135/0137/0138)
+- venue_evidence_refs: [SRC-108]
 - dependencies: STR-0138 | impl: NOT_STARTED | verif: NOT_STARTED
 
 ### STR-0178 — Gate 9: Market/Basket not in FREEZE/ERROR/RECOVERY
@@ -1623,7 +1634,8 @@ Tag semantics are exactly as recorded in `STRATEGY_SOURCE_RECORD.md` §4. Tags a
 - inputs: userFees (live) | outputs: fee | preconditions: economics eval | postconditions: live fee used | state_effects: fee input
 - formula: NONE | units: % (taker ≈0.045%, maker ≈0.015% base) | invariants: never hardcoded; live per tier
 - failure_behavior: NONE | safety_impact: HIGH
-- venue_evidence_status: UNVERIFIED (Phase 2 will verify userFees endpoint & fee tiers)
+- venue_evidence_status: VERIFIED (Phase 2 — fees: perps Tier-0 base taker 0.045% / maker 0.015%; tiered by 14d volume + staking; pull live, never hardcode)
+- venue_evidence_refs: [SRC-114]
 - dependencies: STR-0193 | impl: NOT_STARTED | verif: NOT_STARTED
 
 ### STR-0195 — Normal Level arming prefers MAKER (Alo) — lower fee; Alo reject-instead-of-cross can never accidentally take
@@ -1673,7 +1685,8 @@ Tag semantics are exactly as recorded in `STRATEGY_SOURCE_RECORD.md` §4. Tags a
 - inputs: clearinghouseState/webData2 | outputs: ActualExposure | preconditions: authoritative read | postconditions: actual exposure from venue only | state_effects: exposure model
 - formula: ActualExposure = net position from clearinghouseState/webData2 | units: base-asset quantity
 - invariants: Actual Exposure only from authoritative exchange state | failure_behavior: NONE | safety_impact: CRITICAL
-- venue_evidence_status: UNVERIFIED (Phase 2 will verify clearinghouseState/webData2 position semantics)
+- venue_evidence_status: VERIFIED (Phase 2 — clearinghouseState.assetPositions[].position.szi = signed net position; authoritative. webData2/3 nuance → CONFLICT-002/GATE-002, non-blocking)
+- venue_evidence_refs: [SRC-107, SRC-109]
 - dependencies: STR-0133 | impl: NOT_STARTED | verif: NOT_STARTED
 
 ### STR-0201 — ExposureDelta := ExpectedExposure − ActualExposure
@@ -1870,7 +1883,8 @@ Tag semantics are exactly as recorded in `STRATEGY_SOURCE_RECORD.md` §4. Tags a
 - inputs: clearinghouseState accountValue | outputs: CapitalBase | preconditions: computation time | postconditions: CapitalBase read | state_effects: capital input
 - formula: CapitalBase = accountValue (incl unrealized PnL) | units: USD
 - invariants: read from authoritative venue state | failure_behavior: NONE | safety_impact: HIGH
-- venue_evidence_status: UNVERIFIED (Phase 2 will verify clearinghouseState accountValue semantics)
+- venue_evidence_status: VERIFIED (Phase 2 — marginSummary.accountValue = equity incl. unrealized PnL; unrealized pnl counts toward cross account value/margin)
+- venue_evidence_refs: [SRC-107, SRC-115]
 - dependencies: STR-0200 | impl: NOT_STARTED | verif: NOT_STARTED
 
 ### STR-0225 — MaxSafeNotional_margin = CapitalBase × Leverage_effective / 2 (D-13)
@@ -1902,7 +1916,8 @@ Tag semantics are exactly as recorded in `STRATEGY_SOURCE_RECORD.md` §4. Tags a
 - inputs: L2 book; StepBps; mid | outputs: MarketDepth | preconditions: computation | postconditions: depth measured | state_effects: formula input
 - formula: MarketDepth = Σ(bid+ask depth) within ±(10×StepBps) of mid | units: USD
 - invariants: matches DistanceBand upper bound | failure_behavior: NONE | safety_impact: MEDIUM
-- venue_evidence_status: UNVERIFIED (Phase 2 will verify L2 book depth availability)
+- venue_evidence_status: PARTIALLY_VERIFIED (Phase 2 — l2Book provides per-level px/sz but is bounded to ≤20 levels/side (5 fast/20 slow on WS); the ±10×StepBps window may exceed 20 levels for tight grids. Design nuance for Phase 3; no conflict record)
+- venue_evidence_refs: [SRC-105, SRC-109]
 - dependencies: STR-0140 | impl: NOT_STARTED | verif: NOT_STARTED
 
 ### STR-0229 — MaxBasketNotional computed ONCE (proposed → owner-confirmed → binding); formula NOT re-executed while running (§14 global rule)
@@ -2112,7 +2127,8 @@ Tag semantics are exactly as recorded in `STRATEGY_SOURCE_RECORD.md` §4. Tags a
 - inputs: TWAP parent; child fills; actual position | outputs: tracked remaining qty | preconditions: TWAP close | postconditions: remaining tracked | state_effects: closure tracking
 - formula: NONE | units: seconds (≥30); % (≤3%) | invariants: never assumed closed on submission
 - failure_behavior: NONE | safety_impact: HIGH
-- venue_evidence_status: UNVERIFIED (Phase 2 will verify native TWAP slicing/slippage semantics)
+- venue_evidence_status: VERIFIED (Phase 2 — order-types: native TWAP, suborders ≥30s, ≤3% per-suborder slippage, catch-up ≤3× normal suborder)
+- venue_evidence_refs: [SRC-112, SRC-104]
 - dependencies: STR-0253 | impl: NOT_STARTED | verif: NOT_STARTED
 
 ### STR-0255 — Every closing leg passes Fillability Analyzer gating AND POSITION_VERIFIED before being counted closed
@@ -2630,7 +2646,8 @@ Tag semantics are exactly as recorded in `STRATEGY_SOURCE_RECORD.md` §4. Tags a
 - inputs: venue margin/funding mechanics | outputs: derivation inputs | preconditions: derivations | postconditions: mechanics relied on | state_effects: derivation basis
 - formula: maintenance = ½ × initial (at max lev); funding hourly = (1/8) × 8h rate | units: % / ratio
 - invariants: derivations grounded in venue mechanics | failure_behavior: NONE | safety_impact: HIGH
-- venue_evidence_status: UNVERIFIED (Phase 2 will verify margin/funding/max-leverage/mark-price mechanics)
+- venue_evidence_status: CONFLICTED (Phase 2/2b — VERIFIED: maintenance=½ initial at max leverage, funding hourly at 1/8 of 8h rate, mark price for margin/liquidation. CONFLICTED: "BTC/ETH max leverage = 40x" — liquidations.md prose corroborates 40x, but info meta example shows 50x. Escalated → CONFLICT-001 / OWNER_GATE_001. Runtime uses Leverage_effective=min(3, meta.maxLeverage)=3, so formulas unaffected)
+- venue_evidence_refs: [SRC-113, SRC-115, SRC-116, SRC-117, SRC-118]
 - dependencies: NONE | impl: NOT_STARTED | verif: NOT_STARTED
 
 ### STR-0338 — [DYN] CANONICAL EmergencyTolerance := 0.005 × (10000 / Leverage_effective) bps (D-16) — must remain dynamic
