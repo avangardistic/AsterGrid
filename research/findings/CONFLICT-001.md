@@ -21,3 +21,9 @@
   - (ii) Does the runtime read `maxLeverage` from `meta` or hardcode 40x? **Reads live** — D-13 defines `Leverage_effective = min(Leverage_user, MaxLeverage_asset)`, and `MaxLeverage_asset` is per-asset from `meta.maxLeverage` (SRC-107). "40x" is preamble illustration only; nothing in the executed formulas hardcodes it.
 - **revised impact:** **MEDIUM** (escalated). Runtime-formula impact is **LOW** (Leverage_effective clamps to 3; formulas unaffected), but the discrepancy alters the **illustrative calibration constants** described in §16 and reflects a docs-internal inconsistency, so it is raised to MEDIUM and escalated for owner awareness of the calibration preamble.
 - **updated status:** **ESCALATED_TO_OWNER** (PARTIALLY_RESOLVED: Strategy's 40x is corroborated by authoritative prose; the meta-example 50 is illustrative; runtime must read live `meta.maxLeverage`). See `research/decisions/OWNER_GATE_001.md`.
+
+## Update 2026-09-21 (Phase 3 — Owner decision)
+
+- **owner decision:** DECISION-001 = **Option A** (recorded 2026-09-21). The "40x" figure in §16 is ILLUSTRATIVE / NON-BINDING; runtime MUST read `meta.maxLeverage` live and MUST NEVER hardcode 40 or 50; live verification of the current value is OPTIONAL/non-blocking.
+- **contract effect:** STR-0337 `venue_evidence_status` → `RESOLVED_VIA_OWNER_DECISION` with `owner_decision: DECISION-001`.
+- **status:** **RESOLVED** (owner decision Option A). See DECISION_REGISTER.md DECISION-001.

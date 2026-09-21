@@ -16,7 +16,7 @@
 | 0 | Repository / Strategy Ingestion | **COMPLETE** (commit 51df743) |
 | 1 | Strategy Forensics | **COMPLETE** — STRATEGY_CONTRACT.md (343 STR-* reqs) + STRATEGY_COVERAGE.md |
 | 2 | Source & Venue Research (Hyperliquid docs + SDK) | **COMPLETE** (+2.5/2b) — 17 venue pages + SDK 0.24.0; [HC]: 15 VERIFIED, 1 PARTIAL (STR-0228), 1 CONFLICTED (STR-0337→GATE-001). Owner gates 001/002 open |
-| 3 | Capability Discovery | not started |
+| 3 | Capability Discovery | **COMPLETE** — 24 capabilities (CAP-0001..0024); 343/343 STR-* mapped; DECISION-001/002 registered & applied |
 | 4 | Architecture Research (≥3 materially different candidates) | not started |
 | 5 | Architecture Decision | not started |
 | 6 | Implementation Plan | not started |
@@ -29,15 +29,11 @@
 | 13 | Live Readiness | not started |
 | 14 | Live Activation | not started (separate Owner authority; NOT granted) |
 
-**Current phase:** Phase 2 + 2.5 + 2b complete. **Next:** Phase 3 (Capability Discovery) — pending owner responses to OWNER_GATE_001 (max leverage / §16 calibration preamble) and OWNER_GATE_002 (clearinghouseState vs webData2/3 authority).
+**Current phase:** Phase 3 (Capability Discovery) complete. **Next:** Phase 4 (Architecture Research — ≥3 materially different candidates; boundary/topology decisions). Capability Map + coverage are the input.
 
 ## Current blocker
 
-**Two OPEN Owner Gates (non-blocking for evidence, gating for Phase-3 capability decisions):**
-- **OWNER_GATE_001** — CONFLICT-001 (BTC/ETH max leverage 40x vs meta example 50x). Runtime impact LOW (Leverage_effective=3), escalated for §16 calibration-preamble integrity; STR-0337 = CONFLICTED.
-- **OWNER_GATE_002** — CONFLICT-002 (webData2→webData3; authoritative source for ActualExposure). Recommend clearinghouseState as sole authority.
-
-Other open items: OPEN-01 (Phase 1: CycleReferenceDerivation default vs "MUST be explicit"). CONFLICT-003 (trigger basis) **RESOLVED** — mark price triggers TP/SL, not last trade; STR-0134 VERIFIED. Contract [HC] fields now: 15 VERIFIED, 1 PARTIALLY_VERIFIED (STR-0228), 1 CONFLICTED (STR-0337). Evidence base: `research/sources/hyperliquid/` (17 pages + SDK_RECORD + TOPIC_EVIDENCE + _HC_TARGETS); gates in `research/decisions/`.
+**None blocking.** Owner Gates 001 & 002 are **RESOLVED** (DECISION-001, DECISION-002 in `research/decisions/DECISION_REGISTER.md`). Contract [HC] fields: 15 VERIFIED, 1 PARTIALLY_VERIFIED (STR-0228, l2Book depth nuance — Phase-4 design), 1 RESOLVED_VIA_OWNER_DECISION (STR-0337). Open (non-blocking): OPEN-01 (CycleReferenceDerivation default vs "MUST be explicit"); STR-0228 depth-window design note. Phase-3 outputs: `research/architecture/CAPABILITY_MAP.md` (24 CAP-*) + `CAPABILITY_COVERAGE.md` (343/343 mapped). **No boundaries/topology/technology decided** (explicit non-decisions listed in CAPABILITY_MAP.md).
 
 ## Artifact layout (created only when a phase requires it)
 

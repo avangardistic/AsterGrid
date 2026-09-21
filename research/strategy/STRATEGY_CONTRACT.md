@@ -1,5 +1,8 @@
 # STRATEGY_CONTRACT.md
 
+> **Authoritative source note (DECISION-002, 2026-09-21):** ActualExposure and CapitalBase MUST be read ONLY from clearinghouseState. webData2/webData3 MUST NOT be used as state authority anywhere in this program.
+> **Historical UNVERIFIED notes:** two non-field `UNVERIFIED` strings remain in this file at the field-legend and the Phase-1 STEP-5 report. Both are historical prose, not live requirement statuses. All 17 [HC] requirement fields were resolved in Phase 2/2.5+2b.
+
 - **Purpose:** Derived, traceable contract of every normative requirement in `Strategy.md` v2.3-final, each with a stable `STR-*` ID. This is a DERIVED artifact — `Strategy.md` remains the sole authority. No requirement here invents semantics; ambiguities are surfaced in the OPEN section, never guessed.
 - **Version:** 1.0 (Phase 1)
 - **Producer:** Claude Code (Opus 4.8), Phase 1 — Strategy Forensics.
@@ -1687,6 +1690,8 @@ Tag semantics are exactly as recorded in `STRATEGY_SOURCE_RECORD.md` §4. Tags a
 - invariants: Actual Exposure only from authoritative exchange state | failure_behavior: NONE | safety_impact: CRITICAL
 - venue_evidence_status: VERIFIED (Phase 2 — clearinghouseState.assetPositions[].position.szi = signed net position; authoritative. webData2/3 nuance → CONFLICT-002/GATE-002, non-blocking)
 - venue_evidence_refs: [SRC-107, SRC-109]
+- authoritative_source: clearinghouseState only
+- owner_decision: DECISION-002
 - dependencies: STR-0133 | impl: NOT_STARTED | verif: NOT_STARTED
 
 ### STR-0201 — ExposureDelta := ExpectedExposure − ActualExposure
@@ -1885,6 +1890,8 @@ Tag semantics are exactly as recorded in `STRATEGY_SOURCE_RECORD.md` §4. Tags a
 - invariants: read from authoritative venue state | failure_behavior: NONE | safety_impact: HIGH
 - venue_evidence_status: VERIFIED (Phase 2 — marginSummary.accountValue = equity incl. unrealized PnL; unrealized pnl counts toward cross account value/margin)
 - venue_evidence_refs: [SRC-107, SRC-115]
+- authoritative_source: clearinghouseState only
+- owner_decision: DECISION-002
 - dependencies: STR-0200 | impl: NOT_STARTED | verif: NOT_STARTED
 
 ### STR-0225 — MaxSafeNotional_margin = CapitalBase × Leverage_effective / 2 (D-13)
@@ -2646,7 +2653,8 @@ Tag semantics are exactly as recorded in `STRATEGY_SOURCE_RECORD.md` §4. Tags a
 - inputs: venue margin/funding mechanics | outputs: derivation inputs | preconditions: derivations | postconditions: mechanics relied on | state_effects: derivation basis
 - formula: maintenance = ½ × initial (at max lev); funding hourly = (1/8) × 8h rate | units: % / ratio
 - invariants: derivations grounded in venue mechanics | failure_behavior: NONE | safety_impact: HIGH
-- venue_evidence_status: CONFLICTED (Phase 2/2b — VERIFIED: maintenance=½ initial at max leverage, funding hourly at 1/8 of 8h rate, mark price for margin/liquidation. CONFLICTED: "BTC/ETH max leverage = 40x" — liquidations.md prose corroborates 40x, but info meta example shows 50x. Escalated → CONFLICT-001 / OWNER_GATE_001. Runtime uses Leverage_effective=min(3, meta.maxLeverage)=3, so formulas unaffected)
+- venue_evidence_status: RESOLVED_VIA_OWNER_DECISION (Phase 3; was CONFLICTED Phase 2/2b. VERIFIED mechanics: maintenance=½ initial at max leverage, funding hourly at 1/8 of 8h rate, mark price for margin/liquidation. The "BTC/ETH max leverage = 40x" figure is ILLUSTRATIVE per DECISION-001; runtime reads meta.maxLeverage live and Leverage_effective=min(3, meta.maxLeverage)=3, so formulas unaffected)
+- owner_decision: DECISION-001
 - venue_evidence_refs: [SRC-113, SRC-115, SRC-116, SRC-117, SRC-118]
 - dependencies: NONE | impl: NOT_STARTED | verif: NOT_STARTED
 
