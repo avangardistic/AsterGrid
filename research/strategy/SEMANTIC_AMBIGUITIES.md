@@ -1,0 +1,104 @@
+# SEMANTIC_AMBIGUITIES.md — Phase 4.5 audit classification
+
+- **Purpose:** Classify every finding from the three independent audit documents (SRC-201/202/203) into one of six categories, mapping each to what resolves or constrains it. Audits are **advisory findings to be classified, not authority**; where an audit conflicts with `Strategy.md`, `Strategy.md` wins and the conflict is recorded.
+- **Producer:** Claude Code (Opus 4.8), Phase 4.5 (resume).
+- **Inputs:** SRC-201 `philosophy.md`, SRC-202 `strategy_issues.md`, SRC-203 `phases_0_4_technical_inspection.md`; existing artifacts (contract, gates 001/002 RESOLVED, CONFLICT-001/002/003 RESOLVED, OPEN-01, CALIBRATION-REPORT stub).
+- **Method:** Cross-document duplicates merged into ONE `AMB-*` row (all source refs listed). A finding is **SEMANTIC_BLOCKING** only if two compliant implementations could differ observably AND it matters AND resolution needs an Owner strategy-semantic decision. Where an obviously-correct fail-closed/deterministic rule exists (recordable in Phase 6/7 without owner authority) → **SEMANTIC_NON_BLOCKING**.
+
+## Summary
+
+- **Total consolidated findings:** 46 (`AMB-0001..AMB-0046`), covering ~143 issues in `strategy_issues.md` (A–N) + 15 in `philosophy.md` (§4.1–4.15) + NC-01..06/§3.5 in the technical inspection.
+- **Counts per category:** SEMANTIC_BLOCKING **11** · SEMANTIC_NON_BLOCKING **25** · IMPLEMENTATION_DETAIL **3** · DOMAIN_CONSTRAINT **2** · ALREADY_RESOLVED **5** · OUT_OF_SCOPE **0**.
+- **Counts per severity (max across merged sources):** CRITICAL **8** · HIGH **28** · MEDIUM **10** · LOW **0**.
+- **SEMANTIC_BLOCKING finding_ids → gates:**
+  - AMB-0001 attribution uniqueness → GATE-003
+  - AMB-0002 external position-change classification → GATE-004
+  - AMB-0003 maintenance-margin/liquidation model vs user leverage (D-16 validity) → GATE-005
+  - AMB-0004 event ordering & clock model (deterministic replay) → GATE-006
+  - AMB-0005 UNKNOWN_SUBMISSION / atomicity / ambiguous-send recovery → GATE-007
+  - AMB-0006 nominal reference price definition (§5.4.1) → GATE-008
+  - AMB-0007 partial-fill transition semantics → GATE-009
+  - AMB-0008 Basket-vs-account accounting scope & allocation → GATE-010
+  - AMB-0009 closure target cost-timing / late-cost / reopen-after-close → GATE-011
+  - AMB-0010 Evolution complex-path transition completeness → GATE-012
+  - AMB-0011 liveness / exit from BLOCKED/FREEZE/RECONCILIATION/RECOVERY → GATE-013
+- **ALREADY_RESOLVED finding_ids + resolving artifact:**
+  - AMB-0041 fee-tier variability → STR-0194 (fees pulled live, never hardcoded)
+  - AMB-0043 mixed historical/current status docs → Phase 4.5 Part A (README + contract historical labels)
+  - AMB-0044 missing CALIBRATION-REPORT.md → Phase 4.5 Part A stub (`research/validation/CALIBRATION-REPORT.md`, PENDING_ARTIFACT)
+  - AMB-0045 conflict-resolution completeness → CONFLICT-001/002/003 (RESOLVED) + DECISION-001/002 (residual margin-model → GATE-005)
+  - AMB-0046 trigger price basis consistency (mark/oracle/mid/execution) → CONFLICT-003 / STR-0134 (RESOLVED)
+- **Top-10 by impact** (ranking criterion: severity CRITICAL first, then cross-cutting breadth = number of merged source findings × number of affected CAPs; ties broken by whether it gates POSITION_VERIFIED/risk):
+  1. AMB-0001 attribution — CRITICAL; underpins POSITION_VERIFIED, exposure, evolution, closure (CAP-0002/0003/0007/0016).
+  2. AMB-0005 UNKNOWN_SUBMISSION/atomicity/recovery — CRITICAL; safety of every side effect + recovery (CAP-0014/0015/0021/0002).
+  3. AMB-0003 maintenance-margin/liquidation model — CRITICAL; every risk/hedge threshold (CAP-0016/0017).
+  4. AMB-0002 external position classification — CRITICAL; correctness of ActualExposure & accounting (CAP-0002/0016/0018).
+  5. AMB-0004 event ordering/clock — CRITICAL; deterministic replay of the whole core (CAP-0005/0021).
+  6. AMB-0008 Basket-vs-account accounting scope — CRITICAL; PnL/closure/sizing correctness (CAP-0002/0010/0018).
+  7. AMB-0009 closure cost-timing — CRITICAL/HIGH; when a Basket may close (CAP-0018/0020).
+  8. AMB-0006 nominal reference price — HIGH; §5.4.1 fire gate on every Cycle/Generation (CAP-0008/0020).
+  9. AMB-0007 partial-fill transition — HIGH; lifecycle progression correctness (CAP-0003/0008/0016).
+  10. AMB-0010 Evolution complex paths — HIGH; whether/when a Generation is created (CAP-0006/0007).
+
+## Classification table
+
+| id | sources | sev | category | summary (≤25w) | mapped_to | rationale | affects_str | affects_cap | status |
+|----|---------|-----|----------|----------------|-----------|-----------|-------------|-------------|--------|
+| AMB-0001 | 202:A-003,B-001,D-001,D-010,K-003; 201:§4.1; 203:§3.5/NC-04 | CRITICAL | SEMANTIC_BLOCKING | Fill+delta do not uniquely attribute to one intent/Level; POSITION_VERIFIED needs a matching rule. | GATE-003 | Two impls can verify different Levels from the same delta; owner-semantic. | STR-0071,0072,0129,0131,0199,0293 | CAP-0002,0003,0007,0016 | OPEN |
+| AMB-0002 | 202:B-002,D-011,D-012,D-013,G-010,H-008,J-004; 201:§4.10; N#11 | CRITICAL | SEMANTIC_BLOCKING | External position changes (manual/liquidation/transfer/funding) not classified vs strategy intent. | GATE-004 | Owner must define detection/handling/scope; affects ActualExposure truth. | STR-0200,0201,0294; STR-0239 | CAP-0002,0016,0018,0023 | OPEN |
+| AMB-0003 | 202:C-001,C-002,H-001,K-007; 201:§4.2; N#2 | CRITICAL | SEMANTIC_BLOCKING | `0.5/Leverage_effective` maintenance-margin assumption at user leverage is unproven; risk thresholds may be wrong. | GATE-005 | Distinct from GATE-001 (max-lev number); risk-model validity; owner confirms/model or measures. | STR-0223,0337,0340; STR-0206 | CAP-0016,0017 | OPEN |
+| AMB-0004 | 202:B-004,E-001,D-009,L-009; 201:§4.7; 203:NC-03 | CRITICAL | SEMANTIC_BLOCKING | No canonical event-ordering/clock model → replay non-deterministic; out-of-order/equal timestamps undefined. | GATE-006 | Prompt B4 blocking example; two impls replay differently. | STR-0063,0315,0334 | CAP-0005,0021,0001 | OPEN |
+| AMB-0005 | 202:B-013,B-014,E-002,E-003,G-002,G-003,G-005; 201:§4.11; 203:§3.5; N#6 | CRITICAL | SEMANTIC_BLOCKING | Timeout-after-send / UNKNOWN_SUBMISSION recovery + atomicity boundaries undefined; cloid≠dedup. | GATE-007 | Prompt B4 blocking example; unsafe recovery / blind retry risk. | STR-0004,0132,0298,0314; STR-0133,0138 | CAP-0014,0015,0021,0002 | OPEN |
+| AMB-0006 | 201:§4.4; N#4 | HIGH | SEMANTIC_BLOCKING | "nominal expected reference price" (§5.4.1 tolerance) is not algorithmically defined. | GATE-008 | Without a defined nominal, the fire-gate differs across impls; owner-semantic. | STR-0096,0097,0098,0091 | CAP-0008,0020 | OPEN |
+| AMB-0007 | 202:B-003,B-008,F-009 | HIGH | SEMANTIC_BLOCKING | When does a Level advance — first fill / cumulative / full fill? Terminal eligibility under partial fill undefined. | GATE-009 | Two impls progress lifecycle differently; owner-semantic. | STR-0071,0074,0199,0212 | CAP-0003,0008,0016 | OPEN |
+| AMB-0008 | 202:A-002,A-004,D-013,F-005,H-009,I-002,I-003,I-006,I-007; 201:§4.10; N#7 | CRITICAL | SEMANTIC_BLOCKING | accountValue is account-level; attributing PnL/funding/fees/residual to a Basket needs a scope/allocation policy. | GATE-010 | Owner must declare account scope/allocation (or dedicated-account domain constraint). | STR-0224,0234,0248; STR-0159 | CAP-0002,0010,0018 | OPEN |
+| AMB-0009 | 202:A-006,E-009,G-014,I-004,I-005,I-008; 201:§4.9; N#10 | CRITICAL | SEMANTIC_BLOCKING | `TotalSystemCosts` lifetime-to-date vs `BasketNetProfitClosureTarget` computed-once; late costs & reopen-after-close undefined. | GATE-011 | Observable difference in when a Basket closes; owner-semantic accounting/sequence. | STR-0245,0246,0243,0256 | CAP-0018,0020 | OPEN |
+| AMB-0010 | 202:B-007,B-009,B-010,E-008,E-011 | HIGH | SEMANTIC_BLOCKING | Evolution transition relation incomplete for complex paths (multi-traversal, skip, lower-level return, re-candidate, simultaneity). | GATE-012 | Owner must define edge-case evolution behavior + unique reason codes. | STR-0025,0029,0034,0035,0055 | CAP-0006,0007 | OPEN |
+| AMB-0011 | 202:B-015,K-012,J-005; N#13 | HIGH | SEMANTIC_BLOCKING | No defined exit conditions from BLOCKED/FREEZE/RECONCILIATION/RECOVERY → possible permanent halt (liveness). | GATE-013 | Owner must define resume conditions (auto vs owner-cleared); safety without liveness. | STR-0077,0098,0239,0242; STR-0022(§13.3) | CAP-0018,0023 | OPEN |
+| AMB-0012 | 202:C-007,L-003,K-005; 201:§4.5 | HIGH | SEMANTIC_NON_BLOCKING | Non-overlap (N1–N3) must be tested on tick/lot-normalized submittable prices, not real-valued. | Phase-6 decision | Deterministic fail-closed rule; no owner choice. | STR-0104,0105,0106,0107,0108,0093 | CAP-0008,0009 | OPEN |
+| AMB-0013 | 202:D-002,H-004,K-006; 201:§4.6; N#8 | HIGH | SEMANTIC_NON_BLOCKING | Define MarketDepth coverage-completeness vs l2Book ≤20 levels/±10×StepBps window; fail-closed if uncovered. | STR-0228 (tracked) | Deterministic rule; already PARTIALLY_VERIFIED design note. | STR-0228,0227 | CAP-0001,0010 | OPEN |
+| AMB-0014 | 202:C-004,L-002,L-004; 201:§4.3 | HIGH | SEMANTIC_NON_BLOCKING | ExposureTolerance may be below min-tradable size; quantization/compare policy + round-to-zero undefined. | Phase-6 decision | Precision/quantization policy for a calibration-pending value; deterministic. | STR-0083,0339; STR-0137 | CAP-0010,0016,0020 | OPEN |
+| AMB-0015 | 202:C-005,C-006,L-010 | HIGH | SEMANTIC_NON_BLOCKING | Rounding direction, float representation, boundary equality (<= vs <) not fixed across formulas. | Phase-6 decision | Deterministic conservative-rounding + explicit boundary policy. | STR-0083,0153,0248 | CAP-0010,0013,0020 | OPEN |
+| AMB-0016 | 202:C-008,E-005,E-012,E-013,F-007,F-008 | HIGH | SEMANTIC_NON_BLOCKING | Dynamic-default inputs & calibration version/effective-time must be recorded for deterministic replay. | Phase-6/7 (CAP-0021) | Deterministic design (record decision-affecting inputs). | STR-0336,0338,0339,0340,0341 | CAP-0020,0021,0022 | OPEN |
+| AMB-0017 | 202:A-004,B-006,B-012,B-016,E-006,E-007,E-010 | HIGH | SEMANTIC_NON_BLOCKING | Side-effect ordering / atomic decision boundary beyond §4.7 precedence (Hedge↔Profit, closure↔entry, iteration order). | Phase-6/7 (CAP-0005) | Single-pass deterministic engine + §4.7 largely resolve; residual is deterministic design. | STR-0063,0203,0335 | CAP-0005,0015,0016 | OPEN |
+| AMB-0018 | 202:E-004,D-004; 201:§4.14 | MEDIUM | SEMANTIC_NON_BLOCKING | Evidence gap during continuous-confirmation window must not be read as continuity. | Phase-6 decision | Fail-closed default (gap pauses/resets) is deterministic. | STR-0036,0037,0038,0039 | CAP-0007,0001 | OPEN |
+| AMB-0019 | 202:D-003,F-004 | HIGH | SEMANTIC_NON_BLOCKING | Max allowable age (freshness) per data type (mark/book/meta/fees/leverage/account/fills) undefined. | Phase-6 decision | Deterministic freshness policy; fail-closed on stale. | STR-0163,0200,0228 | CAP-0001,0002 | OPEN |
+| AMB-0020 | 202:D-005 | HIGH | SEMANTIC_NON_BLOCKING | REST vs WS disagreement precedence/reconciliation undefined. | Phase-6 (DECISION-002 partial) | clearinghouseState is authority (DECISION-002); precedence rule recordable. | STR-0200 | CAP-0001,0002 | OPEN |
+| AMB-0021 | 202:G-004; 201:§4.12 | HIGH | SEMANTIC_NON_BLOCKING | TWAP parent/child mapping, remaining-qty, cancel/expire, crash-mid-TWAP not fully modeled. | Phase-6/7 | STR-0254 already: track remaining, never assume closed; formalize design. | STR-0254 | CAP-0015,0018 | OPEN |
+| AMB-0022 | 202:G-005 | HIGH | SEMANTIC_NON_BLOCKING | Cancellation-in-flight state (send-cancel → authoritative confirm) not modeled. | Phase-6/7 | Deterministic order-lifecycle design. | STR-0075,0085,0129 | CAP-0015 | OPEN |
+| AMB-0023 | 202:G-006,E-014,D-014 | HIGH | SEMANTIC_NON_BLOCKING | Rejection taxonomy (precision/margin/rate-limit/price/risk) → skip vs retry vs recalc vs freeze not fully mapped. | Phase-6/7 | Deterministic mapping using orderStatus reject reasons. | STR-0163,0182,0190 | CAP-0011,0015,0023 | OPEN |
+| AMB-0024 | 202:G-007 | HIGH | SEMANTIC_NON_BLOCKING | Market-order/IOC slippage effect on reference/cost/non-overlap not fully propagated. | Phase-6/7 | Deterministic: use execution-grounded reference (§5.4); model slippage in economics. | STR-0091,0185,0193 | CAP-0008,0013,0015 | OPEN |
+| AMB-0025 | 202:G-009 | HIGH | SEMANTIC_NON_BLOCKING | Account/margin/position-mode (cross/isolated, one-way/hedge) must be pinned; affects liquidation semantics. | Phase-6 (feeds GATE-005) | Config/domain pin; deterministic once declared. | STR-0337 | CAP-0002,0017 | OPEN |
+| AMB-0026 | 202:A-008,D-006,D-007,G-013,J-007,M-003 | HIGH | SEMANTIC_NON_BLOCKING | Venue change (schema/metadata/tick/lot/leverage/fee/API drift) handling + Strategy/venue version binding. | Phase-6/8 (DECISION-001 partial) | Read live meta (DECISION-001) + fail-closed on drift; deterministic operational rule. | STR-0135,0137,0337,0257 | CAP-0001,0020,0023 | OPEN |
+| AMB-0027 | 202:F-001,F-002,F-003,F-004,F-005,F-006,F-007,F-009,F-010,E-011 | HIGH | SEMANTIC_NON_BLOCKING | Output/reporting contract: reason codes, freshness, provenance, desired-vs-observed, partial-success residuals; no success-before-settlement. | Phase-6 | Reporting-contract design; success-before-settlement already barred by STR-0131. | STR-0131,0293; STR-0035 | CAP-0022,0018 | OPEN |
+| AMB-0028 | 202:D-015,G-011 | MEDIUM | SEMANTIC_NON_BLOCKING | Rate-limit/backoff/open-order-cap operational model & effect on timers/risk windows. | Phase-6/8 | Deterministic operational policy; STR-0176 cap known. | STR-0176 | CAP-0001,0015 | OPEN |
+| AMB-0029 | 202:J-001,J-002 | HIGH | SEMANTIC_NON_BLOCKING | Signer must verify correct, non-stale intent; forensic-trail detail (request/signature metadata) undefined. | Phase-6/7 (security) | Security-design; signing is a security boundary (BOUNDARY_CANDIDATES). | STR-0298; STR-0171 | CAP-0014,0021,0022 | OPEN |
+| AMB-0030 | 202:J-003 | HIGH | SEMANTIC_NON_BLOCKING | API-key rotation / revoke / expiry / signer recovery lifecycle undefined. | Phase-6/8 (security/ops) | Operational security design; no strategy-semantic choice. | STR-0298 | CAP-0014,0019 | OPEN |
+| AMB-0031 | 202:J-004,J-005 | HIGH | SEMANTIC_NON_BLOCKING | Manual intervention + kill-switch (FREEZE/cancel-all/flatten-all) effect on state/accounting/recovery. | Phase-6/7 (J-004 also GATE-004) | Operational semantics; overlaps external-change (GATE-004) for manual orders. | STR-0239,0240 | CAP-0018,0019,0023 | OPEN |
+| AMB-0032 | 202:J-006,E-013 | MEDIUM | SEMANTIC_NON_BLOCKING | Owner-gate/policy/calibration versioning during an active Basket (effect on prior state). | Phase-6/7 | Config-versioning design; §14 computed-once already constrains. | STR-0257 | CAP-0020 | OPEN |
+| AMB-0033 | 202:L-001,L-005,L-006,L-007,L-008,C-005 | HIGH | SEMANTIC_NON_BLOCKING | Numeric domain/type system & boundary cases (zero/near-zero price, StepBps domain, spread, leverage/tier bounds, overflow). | Phase-6 (type system) | Deterministic type/domain guards; fail-closed out of domain. | STR-0135,0153,0140 | CAP-0010,0020,0023 | OPEN |
+| AMB-0034 | 202:K-001..K-012; 203:NC-03,NC-05,NC-06; 201:§6; 202:H-010 | CRITICAL | SEMANTIC_NON_BLOCKING | Verification obligations: reference model, invariant/property, exhaustive, failure-injection, differential replay, precision, depth, survivability, liveness, mutation. | Phase-7/9/10-12 (CAP-0024) | Coverage≠correctness; behavioral proof is later-phase obligation, not a decision now. | (all) | CAP-0024 (+all) | DEFERRED |
+| AMB-0035 | 202:H-002,H-003,H-004,H-005,H-006 | HIGH | SEMANTIC_NON_BLOCKING | Economic/risk realism (gap risk, exec latency, liquidity collapse, adverse selection, funding shock) needs validation. | Phase-10 (economic validation) | Risk-realism validated by backtest/shadow; not a decision now. | STR-0215,0216,0223 | CAP-0017,0016 | DEFERRED |
+| AMB-0036 | 202:C-003,C-010 | HIGH | IMPLEMENTATION_DETAIL | Apply defined `StepBps_as_USD` formula with consistent units; cost additivity/timing. | Phase-6/7 | Formula defined in §13.4; unit discipline is implementation. | STR-0245,0246 | CAP-0018,0020 | OPEN |
+| AMB-0037 | 202:C-009,L-008; 201:§4.15 | MEDIUM | IMPLEMENTATION_DETAIL | State-size/storage/index/retention for up to 240,000 Level instances (design/perf). | Phase-6/7 | Not correctness; storage/perf engineering. | STR-0016..0024 | CAP-0021 | OPEN |
+| AMB-0038 | 202:M-004 | MEDIUM | IMPLEMENTATION_DETAIL | Source version-pin granularity (commit/date) for venue claims. | Phase-6 | Provenance hygiene; manifest already records date+hash. | (none) | CAP-0022 | OPEN |
+| AMB-0039 | 202:A-007,J-010 | MEDIUM | DOMAIN_CONSTRAINT | Runtime is AI-independent; calibration/metadata refresh are OFFLINE; runtime uses owner-confirmed static params. | Documented (CAP-0020/0024) | Established program constraint; documented, not a defect. | STR-0257,0343 | CAP-0020,0024 | RESOLVED |
+| AMB-0040 | 202:L-001 (partial) | MEDIUM | DOMAIN_CONSTRAINT | Prices strictly positive; scope limited to top-5 liquid assets (Strategy §Target). | Documented (Strategy scope) | Domain assumption to document explicitly; still needs guards (AMB-0033). | STR (scope) | CAP-0001,0010 | RESOLVED |
+| AMB-0041 | 202:H-007 | MEDIUM | ALREADY_RESOLVED | Fee-tier variability handled by live `userFees` fetch, never hardcoded. | STR-0194 | Already an invariant/venue-verified. | STR-0194 | CAP-0001,0013 | RESOLVED |
+| AMB-0042 | 202:A-001; 201:§4.4; N#3 | HIGH | SEMANTIC_NON_BLOCKING | CycleReferenceDerivation default vs "MUST be explicit" tension. | OPEN-01 (tracked) | Already tracked as OPEN-01; resolvable by requiring explicit config; NO new gate (per B3). | STR-0091,0094,0268 | CAP-0008,0020 | OPEN |
+| AMB-0043 | 202:J-009,M-002; 201:§3; 203:NC-01 | MEDIUM | ALREADY_RESOLVED | Mixed historical/current status in README & contract footer. | Phase 4.5 Part A | README + contract historical labels added (commit e0097a6). | (docs) | — | RESOLVED |
+| AMB-0044 | 202:J-008,M-001; 201:§3; 203:NC-02 | MEDIUM | ALREADY_RESOLVED | `CALIBRATION-REPORT.md` referenced but absent. | Phase 4.5 Part A stub | Stub created (PENDING_ARTIFACT); STR-0342 repointed. | STR-0342 | CAP-0020 | RESOLVED |
+| AMB-0045 | 202:M-006 | HIGH | ALREADY_RESOLVED | Conflict resolution may make a source authoritative without rewriting formula implications. | CONFLICT-001/002/003 + DECISION-001/002 | Resolved with impact analysis; residual margin-model → GATE-005 (AMB-0003). | STR-0337,0200,0224,0134 | CAP-0002,0016 | RESOLVED |
+| AMB-0046 | 202:G-008,D-008 | HIGH | ALREADY_RESOLVED | Trigger price basis (mark/oracle/mid/execution) consistency. | CONFLICT-003 / STR-0134 | Mark price triggers TP/SL, not last trade (RESOLVED). | STR-0134 | CAP-0001 | RESOLVED |
+
+## Classification-uncertainty notes (fail-closed: surfaced, not hidden)
+
+- **AMB-0004 (event ordering) & AMB-0007 (partial-fill):** borderline between SEMANTIC_BLOCKING and SEMANTIC_NON_BLOCKING. Chosen BLOCKING because the prompt's B4 explicitly lists event ordering as blocking, and partial-fill advancement changes lifecycle progression observably; both plausibly have "obviously-correct" deterministic answers, but each still admits ≥2 legitimate behaviors, so an Owner Gate (with a recommended answer) is the conservative choice.
+- **AMB-0011 (liveness):** BLOCKING because "which freeze/recovery states auto-resume vs require owner clearance" is an owner-authority question, even though the mechanical resume-when-reconciled part is deterministic.
+- **AMB-0008 vs AMB-0002:** both touch account-vs-Basket separation. Split because AMB-0002 is *detection/handling of external position changes* (exposure truth) while AMB-0008 is *accounting/allocation scope* (PnL/closure). They may be answered together by an owner "dedicated-account" declaration; cross-referenced.
+- **AMB-0017 (race/side-effect ordering):** classified NON_BLOCKING because the Phase-4 deterministic single-pass engine + §4.7 precedence already serialize decisions; only side-effect emission ordering remains, which is deterministic design. Flagged in case Phase 5 disagrees.
+- **AMB-0034 & AMB-0035:** CRITICAL severity but NON_BLOCKING category — they are verification/validation OBLIGATIONS for later phases, not decisions to make now; status DEFERRED.
+- **AMB-0042 (OPEN-01):** not turned into a new gate (per the B3 instruction to note, not reclassify OPEN-01); carried as a Phase-5 constraint.
+
+## Note on audit-vs-Strategy conflicts
+No audit finding was accepted as overriding `Strategy.md`. Where an audit implies a change to strategy meaning (e.g., AMB-0003 margin model, AMB-0009 closure timing), it is routed to an Owner Gate; `Strategy.md` remains unmodified and authoritative until an Owner decision says otherwise.

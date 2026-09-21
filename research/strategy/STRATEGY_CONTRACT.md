@@ -2,6 +2,7 @@
 
 > **Authoritative source note (DECISION-002, 2026-09-21):** ActualExposure and CapitalBase MUST be read ONLY from clearinghouseState. webData2/webData3 MUST NOT be used as state authority anywhere in this program.
 > **Historical UNVERIFIED notes:** two non-field `UNVERIFIED` strings remain in this file at the field-legend and the Phase-1 STEP-5 report. Both are historical prose, not live requirement statuses. All 17 [HC] requirement fields were resolved in Phase 2/2.5+2b.
+> **Audit findings (Phase 4.5):** open semantic ambiguities and Owner Gates affecting these requirements are classified in `research/strategy/SEMANTIC_AMBIGUITIES.md` (AMB-0001..0046; GATE-003..GATE-013 OPEN).
 
 - **Purpose:** Derived, traceable contract of every normative requirement in `Strategy.md` v2.3-final, each with a stable `STR-*` ID. This is a DERIVED artifact — `Strategy.md` remains the sole authority. No requirement here invents semantics; ambiguities are surfaced in the OPEN section, never guessed.
 - **Version:** 1.0 (Phase 1)

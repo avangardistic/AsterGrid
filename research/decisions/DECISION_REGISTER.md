@@ -41,3 +41,24 @@
 - **owner_decision:** **Option A** (recorded 2026-09-21).
 - **date:** 2026-09-21.
 - **supersedes:** none (first resolution of CONFLICT-002 / GATE-002).
+
+---
+
+## DECISION-003 — Phase 4.5 semantic classification
+
+- **decision_id:** DECISION-003
+- **question:** How are the audit findings classified, and which require Owner Gates?
+- **context:** pointer to `research/strategy/SEMANTIC_AMBIGUITIES.md` (46 consolidated findings `AMB-0001..AMB-0046`).
+- **evidence:** SRC-201 (`philosophy.md`), SRC-202 (`strategy_issues.md`), SRC-203 (`phases_0_4_technical_inspection.md`).
+- **decision:** "Classified per SEMANTIC_AMBIGUITIES.md; **11** findings are SEMANTIC_BLOCKING and produce Owner Gates **GATE-003..GATE-013**; **25** findings are SEMANTIC_NON_BLOCKING and will be listed as Phase-5 constraints (2 of them DEFERRED as later-phase verification/validation obligations); 3 IMPLEMENTATION_DETAIL, 2 DOMAIN_CONSTRAINT, 5 ALREADY_RESOLVED."
+- **alternatives:** N/A (classification, not a design decision).
+- **rejected_alternatives:** N/A.
+- **affected_strategy_requirements:** union of STR-* referenced by any AMB-* row — incl. STR-0004, 0025, 0029, 0034, 0035, 0055, 0063, 0071, 0072, 0074, 0077, 0091, 0094, 0096–0098, 0129, 0131–0138, 0159, 0176, 0199, 0200, 0201, 0206, 0212, 0223, 0224, 0227, 0228, 0234, 0239, 0240, 0242, 0245, 0246, 0248, 0254, 0256, 0257, 0268, 0293, 0294, 0298, 0314, 0315, 0334, 0336–0343 (full per-row lists in SEMANTIC_AMBIGUITIES.md).
+- **risk:** LOW (this phase only classifies; it does not decide semantics).
+- **reversibility:** HIGH (reclassifiable).
+- **owner_required:** PARTIALLY (only for the blocking gates GATE-003..GATE-013).
+- **owner_decision:** pending for the blocking gates.
+- **date:** 2026-09-21.
+- **supersedes:** NONE.
+
+> Note: GATE-001 and GATE-002 remain RESOLVED (Option A) and were not reopened. Audit findings that touched them were recorded as new adjacent findings where distinct (e.g., AMB-0003 maintenance-margin model is distinct from GATE-001's max-leverage number). OPEN-01 (CycleReferenceDerivation) is carried as AMB-0042 (SEMANTIC_NON_BLOCKING) and was NOT turned into a new gate, per the Phase-4.5 B3 rule.

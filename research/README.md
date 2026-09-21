@@ -4,7 +4,7 @@
 - **Version:** 1.5 (Phase 4.5)
 - **Producer:** Claude Code (Opus 4.8), Phases 0 → 4.5.
 - **Inputs:** `Strategy.md` (SRC-001), `prompt.md` (SRC-002, program protocol v3.0).
-- **Status:** Phases 0–4 COMPLETE. Phase 4.5 (audit reconciliation): documentation cleanup done; **semantic classification BLOCKED** — the three audit documents are not present in the repository (see "Audit reconciliation (Phase 4.5)" below).
+- **Status:** Phases 0–4 COMPLETE. Phase 4.5 (audit reconciliation) COMPLETE — documentation cleanup + semantic classification (46 AMB-*, 11 new Owner Gates GATE-003..013, DECISION-003). Next: Phase 5.
 - **Validation status:** Phase 0–4 artifacts created deterministically; hashes in `sources/SOURCE_MANIFEST.md`; `Strategy.md` SHA-256 unchanged across all phases.
 
 ---
@@ -29,7 +29,7 @@
 | 13 | Live Readiness | not started |
 | 14 | Live Activation | not started (separate Owner authority; NOT granted) |
 
-**Current phase:** Phase 4.5 (Audit reconciliation) — documentation cleanup DONE; semantic classification **BLOCKED** (audit docs absent). **Next:** deliver the three audit documents, then complete Phase 4.5 classification; then Phase 5 (Architecture Decision — owner has indicated CAND-B; to be recorded in `ARCHITECTURE_DECISION.md` + a DECISION_REGISTER entry).
+**Current phase:** Phase 4.5 (Audit reconciliation) COMPLETE. **Next:** Phase 5 (Architecture Decision — owner has indicated CAND-B; to be recorded in `ARCHITECTURE_DECISION.md` + a DECISION_REGISTER entry). Phase 5 MUST carry the 25 SEMANTIC_NON_BLOCKING findings + OPEN-01 as explicit input constraints, and the 11 OPEN Owner Gates (GATE-003..013) gate Phase-6/7 implementation of the affected areas.
 
 Phase-4 outputs: `research/architecture/STATE_OWNERSHIP.md` (23 single-owner states), `BOUNDARY_CANDIDATES.md` (smallest justified boundaries; no service/microservice justified), `FAILURE_BOUNDARIES.md` (11 failure modes; none require a service boundary), `ARCHITECTURE_CANDIDATES.md` (CAND-A modular monolith, CAND-B event-sourced, CAND-C layered ports/adapters; CAND-D workflow-engine & CAND-E actor-model rejected; microservices rejected a priori). No technology chosen.
 
@@ -41,15 +41,15 @@ Phase-4 outputs: `research/architecture/STATE_OWNERSHIP.md` (23 single-owner sta
 
 Phase 4.5 is a bridge phase to classify the findings of three independent audit documents into `research/strategy/SEMANTIC_AMBIGUITIES.md` and to open Owner Gates for any `SEMANTIC_BLOCKING` finding.
 
-**BLOCKER (2026-09-21):** none of the three audit documents are present in the repository, so classification (Parts B/C) cannot proceed without inventing findings (prohibited). Only the documentation-cleanup part (Part A) was completed this run.
+**RESOLVED (2026-09-21):** the three audit documents were supplied under `research/audits/` (SRC-201/202/203) and classification is complete. See **`research/strategy/SEMANTIC_AMBIGUITIES.md`** (46 findings AMB-0001..0046: 11 SEMANTIC_BLOCKING → **OWNER_GATE_003..OWNER_GATE_013**, 25 NON_BLOCKING, 3 IMPLEMENTATION_DETAIL, 2 DOMAIN_CONSTRAINT, 5 ALREADY_RESOLVED) and **DECISION-003**.
 
 | Audit document | Status | Classification output |
 |----------------|--------|-----------------------|
-| `philosophy.md` | **NOT FOUND in repo** | pending — `SEMANTIC_AMBIGUITIES.md` not yet produced |
-| `strategy_issues.md` | **NOT FOUND in repo** | pending |
-| `phases_0_4_technical_inspection.md` | **NOT FOUND in repo** | pending |
+| `philosophy.md` (SRC-201) | classified | folded into SEMANTIC_AMBIGUITIES.md (AMB-*) |
+| `strategy_issues.md` (SRC-202) | classified | folded into SEMANTIC_AMBIGUITIES.md (AMB-*) |
+| `phases_0_4_technical_inspection.md` (SRC-203) | classified | folded into SEMANTIC_AMBIGUITIES.md (AMB-*) |
 
-Owner action required: add the three documents to the repository (e.g. under `research/audits/`) or paste their contents, then re-run Phase 4.5 classification. `SEMANTIC_AMBIGUITIES.md` and any `OWNER_GATE_003+` / `DECISION-003` will be produced then. Existing gates unaffected: **OWNER_GATE_001 & 002 remain RESOLVED**.
+**11 new Owner Gates opened (GATE-003..GATE-013), all OPEN/pending owner decision;** OWNER_GATE_001 & 002 remain RESOLVED. Phase 5 must carry the NON_BLOCKING findings + OPEN-01 (AMB-0042) as explicit input constraints.
 
 ## Artifact layout (created only when a phase requires it)
 
@@ -63,7 +63,7 @@ research/
     STRATEGY_SOURCE_RECORD.md       # canonical Strategy identity/hash/provenance
     STRATEGY_CONTRACT.md            # (Phase 1) derived STR-* requirements — CREATED (343 reqs)
     STRATEGY_COVERAGE.md            # (Phase 1) heading→STR-* coverage map — CREATED
-    SEMANTIC_AMBIGUITIES.md         # (Phase 4.5) audit classification — PENDING audit docs
+    SEMANTIC_AMBIGUITIES.md         # (Phase 4.5) audit classification — CREATED (46 AMB-*)
   findings/                         # CONFLICT-001/002/003 — CREATED (all RESOLVED)
   architecture/
     CAPABILITY_MAP.md               # (Phase 3) — CREATED (24 CAP-*)

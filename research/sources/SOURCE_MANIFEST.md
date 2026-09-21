@@ -60,7 +60,17 @@ All fetched via the built-in browser using each page's `.md` raw variant. SHA-25
 
 All three fetched via built-in browser `.md` raw variant; hash = saved extract (see §hash-scope). Retrieval 2026-09-20.
 
-## 3. Retrieval discipline (binding, from `prompt.md`)
+## 3. Independent audit documents (Phase 4.5)
+
+AUDIT_SOURCE: independent audits. Treated as findings to be classified, not as authority. Where an audit finding conflicts with `Strategy.md`, `Strategy.md` wins, and the conflict is recorded (see `research/strategy/SEMANTIC_AMBIGUITIES.md`).
+
+| ID | Path | Class | SHA-256 | Bytes | Date | Role |
+|----|------|-------|---------|-------|------|------|
+| SRC-201 | research/audits/philosophy.md | AUDIT_SOURCE | `3385a7fb0f1180e42f06a5f76f28225cd52151a97aba8978f30381466898e2c8` | 24134 | 2026-09-21 | Independent pre-Phase-5 logical audit of the strategy. |
+| SRC-202 | research/audits/strategy_issues.md | AUDIT_SOURCE | `542e70a759c3f15431cdfc3016a6f0d39c7e4b0b0ef1b85a169191422769dd30` | 49895 | 2026-09-21 | Comprehensive issue inventory (A–N). |
+| SRC-203 | research/audits/phases_0_4_technical_inspection.md | AUDIT_SOURCE | `0885204e6893ba21d3495bb0c4066bfeb28350f34be6bbd809e73f4acb1b91e0` | 29354 | 2026-09-21 | Technical inspection of Phases 0–4. |
+
+## 4. Retrieval discipline (binding, from `prompt.md`)
 
 - Prefer primary/first-party sources; never cite a secondary article when a first-party source supports the claim.
 - Record retrieval time, URL, and version/commit where available.
