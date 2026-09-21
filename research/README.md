@@ -1,10 +1,10 @@
 # research/ — Strategy-to-Runtime Research State
 
 - **Purpose:** Durable, context-survivable home for all research evidence, decisions, and traceability for transforming `Strategy.md` into a deterministic, auditable Hyperliquid trading runtime. This directory (not the chat context) is the source of truth for research state.
-- **Version:** 1.5 (Phase 4.5)
-- **Producer:** Claude Code (Opus 4.8), Phases 0 → 4.5.
+- **Version:** 1.6 (Phase 5)
+- **Producer:** Claude Code (Opus 4.8), Phases 0 → 5.
 - **Inputs:** `Strategy.md` (SRC-001), `prompt.md` (SRC-002, program protocol v3.0).
-- **Status:** Phases 0–4 COMPLETE. Phase 4.5 (audit reconciliation) COMPLETE — documentation cleanup + semantic classification (46 AMB-*, 11 new Owner Gates GATE-003..013, DECISION-003). Next: Phase 5.
+- **Status:** Phases 0–4.6 COMPLETE. Phase 5 (Architecture Decision) COMPLETE — CAND-B (event-sourced single process) recorded in `architecture/ARCHITECTURE_DECISION.md` + DECISION-015. Next: Phase 6 (Implementation Plan).
 - **Validation status:** Phase 0–4 artifacts created deterministically; hashes in `sources/SOURCE_MANIFEST.md`; `Strategy.md` SHA-256 unchanged across all phases.
 
 ---
@@ -18,7 +18,7 @@
 | 2 | Source & Venue Research (Hyperliquid docs + SDK) | **COMPLETE** (+2.5/2b) — 17 venue pages + SDK 0.24.0; [HC]: 15 VERIFIED, 1 PARTIAL (STR-0228), 1 RESOLVED_VIA_OWNER_DECISION (STR-0337). Owner gates 001/002 RESOLVED (Option A, 2026-09-21) |
 | 3 | Capability Discovery | **COMPLETE** — 24 capabilities (CAP-0001..0024); 343/343 STR-* mapped; DECISION-001/002 registered & applied |
 | 4 | Architecture Research (≥3 materially different candidates) | **COMPLETE** — state-ownership (23 states), boundaries, failure boundaries, 3 candidates (CAND-A/B/C) + 2 rejected |
-| 5 | Architecture Decision | not started |
+| 5 | Architecture Decision | **COMPLETE** — CAND-B event-sourced single process (DECISION-015); 14 interpretation constraints + Phase-4.5/4.6 carried constraints binding for Phase 6+ |
 | 6 | Implementation Plan | not started |
 | 7 | Deterministic Core Implementation | not started |
 | 8 | Venue Integration | not started |
@@ -29,7 +29,7 @@
 | 13 | Live Readiness | not started |
 | 14 | Live Activation | not started (separate Owner authority; NOT granted) |
 
-**Current phase:** Phase 4.5 (Audit reconciliation) COMPLETE. **Next:** Phase 5 (Architecture Decision — owner has indicated CAND-B; to be recorded in `ARCHITECTURE_DECISION.md` + a DECISION_REGISTER entry). Phase 5 MUST carry the 25 SEMANTIC_NON_BLOCKING findings + OPEN-01 as explicit input constraints, and the 11 OPEN Owner Gates (GATE-003..013) gate Phase-6/7 implementation of the affected areas.
+**Current phase:** Phase 5 (Architecture Decision) COMPLETE — CAND-B (event-driven single process / event-sourced) recorded in `architecture/ARCHITECTURE_DECISION.md` and DECISION-015; the 14 interpretation constraints (§3) and the Phase-4.5/4.6 carried constraints (§11: 25 SEMANTIC_NON_BLOCKING incl. 2 DEFERRED, D-16 hypothesis, dedicated-account, STR-0344, CycleReferenceDerivation-explicit) are BINDING inputs to Phase 6/7. **Next:** Phase 6 (Implementation Plan). All 13 Owner Gates RESOLVED (DECISION-001..014).
 
 Phase-4 outputs: `research/architecture/STATE_OWNERSHIP.md` (23 single-owner states), `BOUNDARY_CANDIDATES.md` (smallest justified boundaries; no service/microservice justified), `FAILURE_BOUNDARIES.md` (11 failure modes; none require a service boundary), `ARCHITECTURE_CANDIDATES.md` (CAND-A modular monolith, CAND-B event-sourced, CAND-C layered ports/adapters; CAND-D workflow-engine & CAND-E actor-model rejected; microservices rejected a priori). No technology chosen.
 
@@ -76,9 +76,9 @@ research/
     BOUNDARY_CANDIDATES.md          # (Phase 4) — CREATED
     FAILURE_BOUNDARIES.md           # (Phase 4) — CREATED (11 failure modes)
     ARCHITECTURE_CANDIDATES.md      # (Phase 4) — CREATED (CAND-A/B/C)
-    ARCHITECTURE_DECISION.md        # (Phase 5) — NOT YET CREATED
+    ARCHITECTURE_DECISION.md        # (Phase 5) — CREATED (CAND-B; DECISION-015)
   decisions/
-    DECISION_REGISTER.md            # CREATED (DECISION-001, -002)
+    DECISION_REGISTER.md            # CREATED (DECISION-001..015)
     OWNER_GATE_001.md / OWNER_GATE_002.md  # CREATED (both RESOLVED)
   validation/
     CALIBRATION-REPORT.md           # (Phase 4.5) stub — NOT_YET_PRODUCED

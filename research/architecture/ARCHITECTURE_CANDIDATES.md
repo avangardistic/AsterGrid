@@ -115,3 +115,11 @@
 
 ## Explicit non-decisions (reaffirmed)
 No winner selected; no language/framework/database/protocol/deployment target chosen; no `ARCHITECTURE_DECISION.md` created; no `DECISION_REGISTER` architecture entry. Those are Phase 5 (decision) and Phase 6/7 (technology).
+
+---
+
+## Decision (Phase 5, 2026-09-21)
+Selected: CAND-B.
+Rejected at this phase: CAND-A, CAND-C (reasons: see ARCHITECTURE_DECISION.md §2).
+Rejected at Phase 4: CAND-D, CAND-E, microservices.
+Owner-selected; see DECISION_REGISTER.md DECISION-015.

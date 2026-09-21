@@ -224,3 +224,18 @@
 - **risk:** LOW. **reversibility:** HIGH.
 - **owner_required:** YES. **owner_decision:** Option A (2026-09-21).
 - **date:** 2026-09-21. **supersedes:** NONE.
+
+## DECISION-015 — Runtime architecture family selection (Phase 5)
+
+- **decision_id:** DECISION-015
+- **question:** "Which architecture family is selected for the runtime?"
+- **context:** Phase-4 candidate set (`research/architecture/ARCHITECTURE_CANDIDATES.md`: CAND-A/B/C viable + CAND-D/E + microservices rejected) and the full rationale in `research/architecture/ARCHITECTURE_DECISION.md`.
+- **evidence:** Phase-4 comparison matrix (CAND-B rated HIGH on Recovery/Persistence/Observability; A/C only MEDIUM and needing an added audit log) plus the mandatory requirements that made the difference: STR-0315 / STR-0334 (§15 inv.19 reconstructability), STR-0298 (persist-before-side-effect), STR-0325 / STR-0326 (fail-closed; no transition solely on intended orders), §4.7 P0–P6 total-order determinism (STR-0047..STR-0053), STR-0344 (one active order per Level), DECISION-002 (clearinghouseState authority), DECISION-007 (canonical event order / tie-break).
+- **decision:** "**CAND-B — Event-Driven Single Process / Event-Sourced**, with the 14 interpretation constraints from ARCHITECTURE_DECISION.md §3 and the Phase-4.5/4.6 carried constraints from §11."
+- **alternatives:** CAND-A (modular monolith), CAND-C (layered ports/adapters), CAND-D (durable workflow engine), CAND-E (actor model), microservices / multi-process distribution.
+- **rejected_alternatives:** CAND-A (reconstructability rests on checkpoint discipline — weaker than log-as-truth; retained as migration target); CAND-C (needs an added disciplined audit log to meet STR-0315/0334 — reintroduces CAND-B's log); CAND-D (heavy external runtime dependency vs AI-independent mandate; nothing requires it); CAND-E (nondeterministic interleaving fights §4.7 total order); microservices (no failure mode requires a service boundary; fragments single-owner state; no scaling driver — one Basket per market, STR-0005).
+- **affected_strategy_requirements:** STR-0315, STR-0334 (reconstructability); STR-0047..STR-0053 (§4.7 total-order determinism); STR-0298 (persist-before-side-effect); STR-0325, STR-0326 (fail-closed); STR-0344 (one active order per Level).
+- **risk:** **LOW for correctness** (the append-only event log preserves full history, so every transition is reconstructable per STR-0315/0334 by construction); **MEDIUM for Phase-6 cost** (event-schema discipline + versioning, and a snapshotting strategy for replay performance, are required — both acknowledged as Phase-6 work, neither a blocker).
+- **reversibility:** MEDIUM (the pure Core carries over unchanged to CAND-A or CAND-C; the commitment is the event schema / log-as-truth, so migrating away means a log/schema migration — see ARCHITECTURE_DECISION.md §9).
+- **owner_required:** YES. **owner_decision:** CAND-B (2026-09-21).
+- **date:** 2026-09-21. **supersedes:** NONE.
