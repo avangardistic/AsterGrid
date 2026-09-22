@@ -59,6 +59,10 @@ On 2026-09-21 the Owner reviewed and decided all eleven blocking gates GATE-003.
 
 On 2026-09-22 four secondary audit documents were registered as **non-authoritative** sources (SRC-204 `strategy_audit.md`, SRC-205 `strategy_fixes.md`, SRC-206 `genetic_calibration_report.md`, SRC-207 `ga_arena.py`+`ga_results.json`; see `sources/SOURCE_MANIFEST.md` §5). The GA study is classified exploratory-only in **`research/findings/GA_CLASSIFICATION.md`** (Golden Genome = calibration PROPOSAL, remains `[DYNAMIC — CALIBRATION PENDING]`; not a runtime dependency; CAP-0024 is the reference model). The audit's **F-1\*** livelock claim was **independently re-derived from `Strategy.md` + venue evidence** in **`research/findings/F1_VERIFICATION.md`** — verdict **F1_CONDITIONAL** (confirmed at the D-16 default scenario: τ_E=$5 < venue q_min=$10, reachable dead-band $6–$9, no escape rule; absent when `StepBps·MaxBasketNotional ≥ 600,000`); recorded as AMB-0047 in **`research/findings/F1_SEMANTIC_RECORD.md`**. **No fix applied, no DECISION-016+ created, no Owner Gate opened** — the Owner decides next steps.
 
+## Independent verification of audit findings U-1..U-8 (Phase 4.9)
+
+On 2026-09-22 the eight `U` findings of `strategy_audit.md` (SRC-204) were independently re-derived against `Strategy.md` + venue evidence — see **`research/findings/U_VERIFICATION_SUMMARY.md`** and per-finding **`research/findings/U1..U8_VERIFICATION.md`**; AMB-0048..0055 recorded in **`research/findings/U_AMB_RECORD.md`**. Verdicts: U-1/U-3/U-4/U-5/U-7/U-8 **U_VERIFIED**, U-2/U-6 **U_CONDITIONAL**; none rejected. Blocking-pending (need an Owner Gate before Phase 7): **U-1, U-2, U-4, U-7**. Non-blocking (Phase-6 resolution): **U-3, U-5, U-6, U-8**. Key discrepancies with the audit's framing: U-2 (conditional on hedge-halt, not always-live), U-3 (opposite-group already handled by §5.6 L503), U-5 (already mitigated by DECISION-008), U-6 (moot at the default). **No fix applied, no gate opened, no DECISION created.**
+
 ## Artifact layout (created only when a phase requires it)
 
 ```
