@@ -49,7 +49,7 @@ Phase 4.5 is a bridge phase to classify the findings of three independent audit 
 | `strategy_issues.md` (SRC-202) | classified | folded into SEMANTIC_AMBIGUITIES.md (AMB-*) |
 | `phases_0_4_technical_inspection.md` (SRC-203) | classified | folded into SEMANTIC_AMBIGUITIES.md (AMB-*) |
 
-**11 new Owner Gates opened (GATE-003..GATE-013), all OPEN/pending owner decision;** OWNER_GATE_001 & 002 remain RESOLVED. Phase 5 must carry the NON_BLOCKING findings + OPEN-01 (AMB-0042) as explicit input constraints.
+**11 new Owner Gates opened (GATE-003..GATE-013), all OPEN/pending owner decision;** OWNER_GATE_001 & 002 remain RESOLVED. Phase 5 must carry the NON_BLOCKING findings + OPEN-01 (AMB-0042) as explicit input constraints. *(historical — Phase-4.5 status; superseded. All 18 gates GATE-001..GATE-018 are now RESOLVED as of Phase 4.10 — see the Phase-4.6 and Phase-4.10 sections above and DECISION_REGISTER.md DECISION-001..020.)*
 
 ## Owner decision round (Phase 4.6)
 
@@ -66,6 +66,10 @@ On 2026-09-22 the eight `U` findings of `strategy_audit.md` (SRC-204) were indep
 ## Phase 4.10 — Owner Gate resolutions (U-1, U-2, U-4, U-7)
 
 On 2026-09-22 the Owner resolved all four U-blocking gates (Options A) and F-1\*'s GATE-014 (Q-1=A, Q-2=B, Q-3=A). New gates **GATE-015..GATE-018** created and RESOLVED; **DECISION-016..020** recorded in `decisions/DECISION_REGISTER.md`. Mechanical consequences: new requirements **STR-0345..STR-0362** added in `strategy/STRATEGY_CONTRACT.md` §18 (no `Strategy.md` change, no existing STR renumbered); `architecture/CAPABILITY_COVERAGE.md` updated to **362/362** mapped (incl. the previously-unmapped STR-0344). Fix-1 (STR-0345..0348) and the U-1/U-2/U-4/U-7 mitigations are contract-level specifications for Phase 6/7 implementation — no code written. **U-3/U-5/U-6/U-8 remain SEMANTIC_NON_BLOCKING**, scheduled for Phase 6 (recorded as STR-0361/0362 + `findings/U_AMB_RECORD.md`); no gate opened for them.
+
+## Phase 6a — Implementation-plan input preparation
+
+On 2026-09-22: created **`validation/VALIDATION_PLAN.md`** (the verification strategy required before Phase 7 — 17 mechanisms, 6 prioritized oracles, coverage matrix with 0 unmapped STR-*, Phase-7 entry criteria, Live-readiness dependencies, and the AMB-0034/0035 deferred obligations). Refreshed the venue evidence base (live re-fetch 2026-09-22): the two materially-drifted pages (perpetuals, websocket subscriptions) snapshotted as `sources/hyperliquid/page-*.live-2026-09-22.md` and logged in `SOURCE_MANIFEST.md` §6 — `marginTables`/`marginTiers` **support DECISION-006**; the `meta.marginMode` field-semantics nuance (isolation qualifiers, not a literal `cross`) recorded in `findings/VENUE_DRIFT_2026-09-22.md` with **DECISION-020 unchanged**; new WS/HIP-3 capabilities logged, not adopted. Scheduled the four non-blocking items (U-3/U-5/U-6/U-8) in `decisions/PHASE6_SCHEDULE.md`. Stale Phase-4.5 gate-status prose annotated as historical (all 18 gates RESOLVED). Note: **6a/6b/6c are working subdivisions of Phase 6** (6a input prep; 6b event model + interfaces + CAP-0024 design; 6c non-blocking resolution). No event schema/interface/plan, no technology, no code, no Testnet/Live.
 
 ## Artifact layout (created only when a phase requires it)
 
@@ -95,7 +99,7 @@ research/
   validation/
     CALIBRATION-REPORT.md           # (Phase 4.5) stub — NOT_YET_PRODUCED
     TRACEABILITY_MATRIX.md          # (Phase 9) — NOT YET CREATED
-    VALIDATION_PLAN.md              # NOT YET CREATED
+    VALIDATION_PLAN.md              # (Phase 6a) — CREATED (verification strategy; Phase-7 entry artifact)
     AUDIT_REPORT.md                 # NOT YET CREATED
   experiments/
     runs/                           # NOT YET CREATED

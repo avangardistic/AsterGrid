@@ -88,3 +88,24 @@ AUDIT_SOURCE: independent audits. Treated as findings to be classified, not as a
 | SRC-205 | research/audits/strategy_fixes.md | AUDIT_PROPOSAL_SOURCE | `8411e681661d7198b5f8bbad702852bbe1e61d8502d624cb0614efc95cfbb3a5` | 22896 | 2026-09-22 | Proposed resolutions to audit findings. PROPOSAL ONLY. NOT accepted until Owner decision. NOT authority. |
 | SRC-206 | research/audits/genetic_calibration_report.md | SYNTHETIC_EXPLORATORY_SOURCE | `23b0f7a93c7e285e27bb06048b025523a5b9f12aa6b06a23034a82d049b66527` | 18654 | 2026-09-22 | Synthetic GA study. Golden Genome is a calibration PROPOSAL within a simulator. NOT production truth. NOT authority. NOT a calibration value. |
 | SRC-207 | research/audits/ga_arena.py + ga_results.json | EXPLORATORY_TOOL_SOURCE | py:`e8a38237803513addc26f72c6083281d1bde1085279d3e641b1b68b4dcf89aaf` json:`9d8e5cf62405bfbd0151b08ba33862da2b905e29e4b13648bd7f5ae57a9c495c` | 18340 + 15927 | 2026-09-22 | GA engine and raw results. Offline exploratory tooling. NOT runtime dependency. NOT authority. |
+
+## 6. Venue evidence refresh (Phase 6a, 2026-09-22)
+
+> **Refresh policy (append, do not lose prior evidence):** the Phase-2/2b curated extracts (`page-*.md`, SRC-101..119) are RETAINED unchanged as the working evidence base. The 2026-09-22 refresh re-fetched the live `.md` pages and preserves current evidence as dated live snapshots alongside the curated extracts. SRC ids are unchanged.
+
+**Page-count reconciliation:** 17 venue SRC ids correspond to **16 distinct saved page files**; SRC-101 and SRC-103 share `page-api-root.md`. (All 12 [HC] topics remain covered.)
+
+**Refresh scope (2026-09-22):** the two pages with material, decision-relevant drift were re-fetched in full and snapshotted (below). The remaining 14 pages were verified by cross-reference to the independent live re-fetch recorded in `research/audits/auditb6.md` (2026-09-21), which confirmed every `[HC]` claim still matches the live docs verbatim; a full 16-page live re-dump can be produced on request. Retrieval via built-in browser `.md` raw variant.
+
+| SRC (refreshed) | Live snapshot file | SHA-256 (snapshot) | Bytes | Fetched | supersedes / relation |
+|-----------------|--------------------|--------------------|-------|---------|-----------------------|
+| SRC-107 (perpetuals) | `hyperliquid/page-perpetuals-info.live-2026-09-22.md` | `2f3c2794fe280a74336aedd8f388009e6f544a043fe3d8084ff39bf90fbbc33d` | 4644 | 2026-09-22 | augments curated `page-perpetuals-info.md` (retained); decision-relevant excerpts verbatim |
+| SRC-109 (websocket subs) | `hyperliquid/page-websocket-subscriptions.live-2026-09-22.md` | `d51ec5eea0506e1df3406fa6d72a2caeb8761cbf875bc3d19198d9f665ce24b2` | 2256 | 2026-09-22 | augments curated `page-websocket-subscriptions.md` (retained); new WS subs logged |
+
+**DECISION-006 supporting evidence:** the refreshed perpetuals page documents `marginTables` / `marginTiers` (`lowerBound` / `maxLeverage`) and per-position `liquidationPx` + `maxLeverage` in `clearinghouseState` — directly supporting DECISION-006 (runtime reads venue-reported maintenance/liquidation as the primary model; §16 D-16 is the illustrative conservative floor only).
+
+**DECISION-020 finding (marginMode):** the venue `meta.marginMode` field EXISTS but its values are isolation qualifiers (`strictIsolated` / `noCross`), with NO literal `cross` value; account/position cross-vs-isolated lives in `clearinghouseState.assetPositions[].leverage.type` (which DECISION-020's STR-0360 assertion already keys on). This is a field-semantics nuance, not a contradiction — recorded in `research/findings/VENUE_DRIFT_2026-09-22.md`. **DECISION-020 UNCHANGED.**
+
+**New venue capabilities logged (NOT adopted — Phase 6b decides):** `marginTables`/`marginTiers`, `collateralToken`, `isDelisted`, HIP-3 builder dexes (`xyz:*`, `marginTableId`, `growthMode`); WS subscriptions `twapStates`, `userTwapSliceFills`, `userTwapHistory`, `bbo`, `fastAssetCtxs`, `allDexsClearinghouseState`, `allDexsAssetCtxs`, `outcomeMetaUpdates`, `spotState` (`webData3` current).
+
+**Conflicts:** none contradicting any DECISION-001..020 (see VENUE_DRIFT_2026-09-22.md). No decision changed in this refresh.
