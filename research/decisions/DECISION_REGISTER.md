@@ -240,19 +240,79 @@
 - **owner_required:** YES. **owner_decision:** CAND-B (2026-09-21).
 - **date:** 2026-09-21. **supersedes:** NONE.
 
-## DECISION-016 — F-1* livelock cell resolution (from OWNER_GATE_014 / AMB-0047) — PENDING
+## DECISION-016 — F-1* livelock cell resolution (from OWNER_GATE_014 / AMB-0047) — RESOLVED
 
 - **decision_id:** DECISION-016
 - **question:** "Should the F-1* livelock cell be resolved by adopting Fix-1 (tradability-quantized exposure gate), by a calibration constraint (StepBps × MaxBasketNotional ≥ 600,000), or both?"
 - **context:** `research/findings/F1_VERIFICATION.md` (independent verification, verdict F1_CONDITIONAL); `research/decisions/OWNER_GATE_014.md` (Q-1 Fix-1 adoption; Q-2 calibration constraint; Q-3 contract annotation).
 - **evidence:** SRC-204 (`strategy_audit.md` §1 F-1*/§3), SRC-202 (`strategy_issues.md` category C), SRC-104 (`page-exchange-endpoint.md` — venue $10 minimum order value, hard reject), `Strategy.md` §5.2 / §11.1 (gate predicate `|ExposureDelta| ≤ ExposureTolerance`) / §16 D-16 (τ_E formula).
-- **decision:** "**PENDING** — awaiting Owner resolution of OWNER_GATE_014 Q-1, Q-2, Q-3."
+- **decision:** "Option A (Q-1) + B (Q-2) + A (Q-3): **Q-1=A** — Adopt Fix-1: tradability-quantized exposure gate `T_enter(M) = (1+ε_H) · max(τ_acc(M), q_min(M))` with `ε_H = 1`, plus round-to-zero for `0 < |Δ| < T_exit`. **Q-2=B** — Calibration constraint `StepBps × MaxBasketNotional ≥ 600,000` enforced ONLY as a logged warning (not init-time abort), with τ_E/q_min margin reported in CALIBRATION-REPORT.md. Rationale: a hard constraint would reject current defaults (10 × 30,000 = 300,000 < 600,000) at init. **Q-3=A** — Annotation only on STR-0339; D-16 formula unchanged."
 - **alternatives:** the option sets in OWNER_GATE_014 — Q-1 {A adopt Fix-1 / B keep τ_E, rely on calibration / C other}; Q-2 {A hard config invariant / B warn-only / C other}; Q-3 {A annotation only, D-16 unchanged / B leave contract as-is / C other}.
-- **rejected_alternatives:** not yet decided (PENDING).
-- **affected_strategy_requirements:** STR-0339, STR-0298, STR-0315, STR-0074, STR-0077.
-- **risk:** HIGH while unresolved (livelock reachable at defaults, StepBps × MaxBasketNotional < 600,000); LOW after resolution if Fix-1 adopted; MEDIUM if only the calibration constraint is adopted (a future config change could re-open the dead-band unless enforced fail-closed).
-- **reversibility:** HIGH (Fix-1 is additive; a calibration constraint is a config value).
+- **rejected_alternatives:** Q-1=B/C, Q-2=A (init-abort would reject current defaults), Q-3=B/C.
+- **affected_strategy_requirements:** STR-0339, STR-0298, STR-0315, STR-0074, STR-0077 (+ new STR-0345..STR-0348 — see §18 of STRATEGY_CONTRACT.md).
+- **risk:** LOW after resolution: Fix-1 removes the dead-band structurally; the calibration constraint remains as a warning + tracked metric.
+- **reversibility:** HIGH.
 - **owner_required:** YES.
-- **owner_decision:** **PENDING**.
+- **owner_decision:** Q-1=A, Q-2=B, Q-3=A (2026-09-22).
 - **date:** 2026-09-22.
 - **supersedes:** NONE.
+
+## DECISION-017 — GrossGridEdge closed form (from OWNER_GATE_015 / AMB-0048 / U-1)
+
+- **decision_id:** DECISION-017
+- **question:** "How is `GrossGridEdge` defined as a closed form so the §8 gate-10 arming decision is computable and replay-deterministic?"
+- **context:** `research/findings/U1_VERIFICATION.md`; `research/decisions/OWNER_GATE_015.md`.
+- **evidence:** SRC-204 (§1 U-1 / S-10.1), `Strategy.md` §10 (L810–819, single symbolic `GrossGridEdge` use) / §8 gate 10 (L752–754) / §10 floor (L827–830).
+- **decision:** "Option A — `GrossGridEdge := StepBps` (constant, deterministic). Validity condition `GGE − 2·fee_maker − funding_est > NetExpectedEdgeFloor` at Tier-0 fees. The `α·S/2` (adverse-selection) form is recorded as a future calibration proposal only, not adopted."
+- **alternatives:** A (`GGE := StepBps`); B (per-level distance-to-terminal `(P_terminal − P_k)/P_terminal × 10⁴`); C (owner alternative).
+- **rejected_alternatives:** B (introduces a level-dependent variable absent from the current gate design), C.
+- **affected_strategy_requirements:** STR-0193, STR-0179, STR-0197, STR-0273 (+ new STR-0349..STR-0351 — see §18).
+- **risk:** LOW (deterministic; matches the StepBps-denominated floor and D-06's StepBps_as_USD).
+- **reversibility:** HIGH.
+- **owner_required:** YES. **owner_decision:** Option A (2026-09-22).
+- **date:** 2026-09-22. **supersedes:** NONE.
+
+## DECISION-018 — Funding circuit-breaker (from OWNER_GATE_016 / AMB-0049 / U-2)
+
+- **decision_id:** DECISION-018
+- **question:** "What funding-bleed protective bound (threshold + response) should be added, given no §12.1 bound rate-limits funding and the sole NET-DD bound is vacuous?"
+- **context:** `research/findings/U2_VERIFICATION.md`; `research/decisions/OWNER_GATE_016.md`.
+- **evidence:** SRC-204 (§1 U-2 / S-12.5), `Strategy.md` §12.1 (bounds, no funding entry) / §13.1 (funding non-negligible, enters NET) / §12.2 (risk precedence over closure); venue AA-4 (4%/hr cap, `userFunding`).
+- **decision:** "Option A — two-leg funding breaker: a signed-net accumulator `ACC` over `userFunding` events (idempotent dedup keyed (time,coin,delta)); reactive trigger `ACC ≥ X` and predictive trigger `ACC + r̂_F·T_close ≥ X`; response ladder warn → suspend new ENTRY_INTENT → emergency Basket closure under §12.2 (net-profit precondition WAIVED; residual-exposure precondition KEPT). `β_F = 0.02` CALIBRATABLE (fail-closed default); `X = β_F·E₀`; `T_close = 180 s`."
+- **alternatives:** A (two-leg breaker); B (make the NET-based freeze trigger threshold explicit, no dedicated breaker); C (owner alternative).
+- **rejected_alternatives:** B, C.
+- **affected_strategy_requirements:** STR-0234, STR-0235, STR-0236, STR-0246, STR-0221 (+ new STR-0352..STR-0355 — see §18).
+- **risk:** LOW–MEDIUM (first automatic escalation to closure; worst-case bleed bounded by `X + r̂_F·T_close`).
+- **reversibility:** HIGH.
+- **owner_required:** YES. **owner_decision:** Option A (2026-09-22).
+- **date:** 2026-09-22. **supersedes:** NONE.
+
+## DECISION-019 — Acute-correction precedence (from OWNER_GATE_017 / AMB-0051 / U-4)
+
+- **decision_id:** DECISION-019
+- **question:** "What is the precedence between §11.2 acute Hedge Recovery ('unconditional') and the §9.1/§10 economics floor for an acute EXPOSURE_CORRECTION_INTENT?"
+- **context:** `research/findings/U4_VERIFICATION.md`; `research/decisions/OWNER_GATE_017.md`.
+- **evidence:** SRC-204 (§1 U-4 / S-8.3, S-11.2), `Strategy.md` §8 inv.1 (L730) / §8 L759 / §9.1 (L781–784) / §10 (L827–830) / §11.2 (L869–874).
+- **decision:** "Option A — precedence rule: the NetExpectedEdge floor applies to `ENTRY_INTENT` and to non-acute `EXPOSURE_CORRECTION_INTENT`; it never applies to acute Hedge Recovery (§11.2), which is size-bounded by |ExposureDelta| and band-bounded by EmergencyTolerance. Pin `acute(Δ) := |Δ| > τ_I ∨ margin_distance < 2·d_emergency` (τ_I from MaxExposureImbalance §12.1; d_emergency from EmergencyTolerance §9.1)."
+- **alternatives:** A (precedence rule + acute() pin); B (leave precedence implicit); C (owner alternative).
+- **rejected_alternatives:** B, C.
+- **affected_strategy_requirements:** STR-0168, STR-0197, STR-0185, STR-0206, STR-0207 (+ new STR-0356..STR-0357 — see §18).
+- **risk:** LOW (resolves an ambiguity deterministically; makes gating a total order).
+- **reversibility:** HIGH.
+- **owner_required:** YES. **owner_decision:** Option A (2026-09-22).
+- **date:** 2026-09-22. **supersedes:** NONE.
+
+## DECISION-020 — MarginMode pinning (from OWNER_GATE_018 / AMB-0054 / U-7)
+
+- **decision_id:** DECISION-020
+- **question:** "Should the account margin mode be pinned, given the D-16 risk arithmetic silently assumes cross while the venue supports isolated?"
+- **context:** `research/findings/U7_VERIFICATION.md`; `research/decisions/OWNER_GATE_018.md`.
+- **evidence:** SRC-204 (§1 U-7 / R-8), `Strategy.md` §12.1 (MaxSafeNotional_margin) / §16 D-16 (maintenance fraction); venue `clearinghouseState.assetPositions[].leverage.type ∈ {cross, isolated}` and `position.type oneWay` (SRC-107); whole-file search: no `MarginMode` parameter exists in Strategy.md.
+- **decision:** "Option A — FIXED config parameter `MarginMode` = cross (with oneWay and account-level semantics; corresponding venue fields `marginMode` / `leverage.type` / `position.type`); owner-overridable only via an explicit Owner Gate. Config-resolution check: if `MarginMode` absent → ABORT before any side effect. Per-pass P0 assertion: every `clearinghouseState.assetPositions[].leverage.type == MarginMode` AND `position.type == oneWay`; mismatch → FREEZE."
+- **alternatives:** A (pin cross + assert); B (no pin); C (owner-specified mode).
+- **rejected_alternatives:** B, C.
+- **affected_strategy_requirements:** STR-0223, STR-0340, STR-0225, STR-0227, STR-0337 (+ new STR-0358..STR-0360 — see §18).
+- **risk:** LOW (removes silent risk-model invalidation across margin modes).
+- **reversibility:** HIGH (config value).
+- **owner_required:** YES. **owner_decision:** Option A (2026-09-22).
+- **date:** 2026-09-22. **supersedes:** NONE.

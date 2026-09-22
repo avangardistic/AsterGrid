@@ -63,6 +63,10 @@ On 2026-09-22 four secondary audit documents were registered as **non-authoritat
 
 On 2026-09-22 the eight `U` findings of `strategy_audit.md` (SRC-204) were independently re-derived against `Strategy.md` + venue evidence — see **`research/findings/U_VERIFICATION_SUMMARY.md`** and per-finding **`research/findings/U1..U8_VERIFICATION.md`**; AMB-0048..0055 recorded in **`research/findings/U_AMB_RECORD.md`**. Verdicts: U-1/U-3/U-4/U-5/U-7/U-8 **U_VERIFIED**, U-2/U-6 **U_CONDITIONAL**; none rejected. Blocking-pending (need an Owner Gate before Phase 7): **U-1, U-2, U-4, U-7**. Non-blocking (Phase-6 resolution): **U-3, U-5, U-6, U-8**. Key discrepancies with the audit's framing: U-2 (conditional on hedge-halt, not always-live), U-3 (opposite-group already handled by §5.6 L503), U-5 (already mitigated by DECISION-008), U-6 (moot at the default). **No fix applied, no gate opened, no DECISION created.**
 
+## Phase 4.10 — Owner Gate resolutions (U-1, U-2, U-4, U-7)
+
+On 2026-09-22 the Owner resolved all four U-blocking gates (Options A) and F-1\*'s GATE-014 (Q-1=A, Q-2=B, Q-3=A). New gates **GATE-015..GATE-018** created and RESOLVED; **DECISION-016..020** recorded in `decisions/DECISION_REGISTER.md`. Mechanical consequences: new requirements **STR-0345..STR-0362** added in `strategy/STRATEGY_CONTRACT.md` §18 (no `Strategy.md` change, no existing STR renumbered); `architecture/CAPABILITY_COVERAGE.md` updated to **362/362** mapped (incl. the previously-unmapped STR-0344). Fix-1 (STR-0345..0348) and the U-1/U-2/U-4/U-7 mitigations are contract-level specifications for Phase 6/7 implementation — no code written. **U-3/U-5/U-6/U-8 remain SEMANTIC_NON_BLOCKING**, scheduled for Phase 6 (recorded as STR-0361/0362 + `findings/U_AMB_RECORD.md`); no gate opened for them.
+
 ## Artifact layout (created only when a phase requires it)
 
 ```

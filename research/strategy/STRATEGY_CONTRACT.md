@@ -4,7 +4,8 @@
 > **Dedicated-account constraint (DECISION-005 / DECISION-011, 2026-09-21):** The trading account is dedicated exclusively to this system. No other bot, manual trading, or third-party activity is assumed to share the account. Any position change not attributable to a strategy intent is classified as contamination and triggers RECONCILIATION_REQUIRED / FREEZE per DECISION-005.
 > **Historical UNVERIFIED notes:** two non-field `UNVERIFIED` strings remain in this file at the field-legend and the Phase-1 STEP-5 report. Both are historical prose, not live requirement statuses. All 17 [HC] requirement fields were resolved in Phase 2/2.5+2b.
 > **Audit findings (Phase 4.5):** open semantic ambiguities and Owner Gates affecting these requirements are classified in `research/strategy/SEMANTIC_AMBIGUITIES.md` (AMB-0001..0046; GATE-003..GATE-013 OPEN).
-> **Open gate:** OWNER_GATE_014 (F-1* livelock cell). Until closed, the §5.2 exposure gate (STR-0339 / STR-0074) is not implementable in the D-16 default configuration.
+> **Open gate:** OWNER_GATE_014 (F-1* livelock cell). Until closed, the §5.2 exposure gate (STR-0339 / STR-0074) is not implementable in the D-16 default configuration. **[RESOLVED 2026-09-22 — DECISION-016 (Q-1=A/Q-2=B/Q-3=A); see §18 STR-0345..0348.]**
+> **Phase 4.10 additions:** STR-0345..STR-0362 — see §18; origins DECISION-016..020 and Phase-4.9 recommendations (STR-0361/0362 non-blocking).
 
 - **Purpose:** Derived, traceable contract of every normative requirement in `Strategy.md` v2.3-final, each with a stable `STR-*` ID. This is a DERIVED artifact — `Strategy.md` remains the sole authority. No requirement here invents semantics; ambiguities are surfaced in the OPEN section, never guessed.
 - **Version:** 1.0 (Phase 1)
@@ -2766,3 +2767,171 @@ These are the only intra-section gate consolidations; every other §8 gate and r
 - invariants: guarantees unique fill/delta→Level attribution (basis of DECISION-004); complements STR-0131 (LEVEL FILLED ⇔ order fill ∧ delta) and STR-0298 (cloid persisted before submit) | failure_behavior: reject second order (fail-closed); on attribution ambiguity → RECONCILIATION_REQUIRED, Level not verified | safety_impact: CRITICAL
 - dependencies: STR-0071, STR-0072, STR-0129, STR-0131, STR-0199, STR-0293 | impl: NOT_STARTED | verif: NOT_STARTED
 - origin: DECISION-004 (from GATE-003), 2026-09-21.
+
+---
+
+## §18 — Phase 4.10 owner-decision additions (new requirements STR-0345..STR-0362; existing STR-0001..0344 unchanged; no renumbering)
+
+> New requirements from Owner decisions DECISION-016..020 (Phase 4.10) and two Phase-4.9 non-blocking recommendations. No existing STR-* was renumbered or altered; no `Strategy.md` normative content changed (these are contract-layer additions that specify owner-decided mitigations). IDs continue after STR-0344.
+
+### STR-0345 — Tradability-quantized exposure gate T_enter(M) (Fix-1)
+- section: §18 (from GATE-014 / DECISION-016; applies at §5.2/§11.1 gate) | lines: N/A (owner-decision-derived) | type: INVARIANT | strength: MUST | tag: [UR][DEFINED]
+- wording: "The progression/correction gate uses a tradability-quantized threshold `T_enter(M) = (1 + ε_H) · max(τ_acc(M), q_min(M))` with `ε_H = 1`, where `τ_acc(M)` is the D-16 ExposureTolerance (retained as accounting residue) and `q_min(M) = MinNotional / M` (venue $10 minimum). Progression permitted ⟺ `|ExposureDelta| ≤ T_enter(M)`."
+- inputs: ExposureDelta; MarkPrice; τ_acc (STR-0339); q_min (venue $10) | outputs: quantized progression gate | preconditions: §4.7 P0 pass Δ read | postconditions: no blocked-and-unexecutable dead-band | state_effects: exposure-governor gate
+- formula: T_enter(M) = (1+ε_H)·max(τ_acc(M), q_min(M)); T_exit(M) = max(τ_acc(M), q_min(M)) | units: base-asset quantity
+- invariants: dead-band {τ_E < |Δ| < q_min} empty by construction (any trigger ≥ 2·q_min ⇒ order value ≥ $10 even at price M/2); does NOT change the D-16 τ_acc formula (STR-0339) — only the gate | failure_behavior: on 3 failed correction attempts → RECONCILIATION_REQUIRED (fail-closed) | safety_impact: CRITICAL
+- dependencies: STR-0339, STR-0074, STR-0077, STR-0083, STR-0296, STR-0346 | impl: NOT_STARTED | verif: NOT_STARTED
+- origin: DECISION-016 (from GATE-014, Q-1=A), 2026-09-22.
+
+### STR-0346 — Round-to-zero rule for 0 < |ExposureDelta| < T_exit
+- section: §18 (from GATE-014 / DECISION-016) | lines: N/A | type: STATE_TRANSITION | strength: MUST | tag: [UR][DEFINED]
+- wording: "For `0 < |ExposureDelta| < T_exit(M)` the residual is set to zero (round-to-zero, logged): `Δ̂ := 0`. This absorbs the sub-tradable residue that the venue would reject as a correction order."
+- inputs: ExposureDelta; T_exit(M) | outputs: zeroed residual (logged) | preconditions: residual below tradable exit bound | postconditions: no un-executable residual carried | state_effects: residual normalization
+- formula: if 0 < |Δ| < T_exit then Δ̂ := 0 | units: base-asset quantity
+- invariants: complements STR-0345 (governor); the zeroing is logged and auditable (reconstructability, STR-0315) | failure_behavior: NONE (deterministic) | safety_impact: HIGH
+- dependencies: STR-0345, STR-0315 | impl: NOT_STARTED | verif: NOT_STARTED
+- origin: DECISION-016 (from GATE-014, Q-1=A), 2026-09-22.
+
+### STR-0347 — Calibration warning StepBps × MaxBasketNotional ≥ 600,000 (WARNING_ONLY, non-blocking)
+- section: §18 (from GATE-014 / DECISION-016, Q-2=B) | lines: N/A | type: PARAMETER | strength: SHOULD | tag: [UR][DEFINED]
+- wording: "At config resolution, if `StepBps × MaxBasketNotional < 600,000` (the region where the pre-Fix-1 dead-band would be non-empty), a WARNING is logged — NOT an init-time abort. Fix-1 (STR-0345) already removes the dead-band structurally; this is a defence-in-depth signal only."
+- inputs: StepBps; MaxBasketNotional | outputs: calibration warning (logged) | preconditions: config resolution | postconditions: warning recorded if below threshold; run continues | state_effects: calibration diagnostics
+- formula: warn if StepBps × MaxBasketNotional < 600,000 | units: USD·bps (product)
+- invariants: WARNING_ONLY (non-blocking); does not reject current defaults (10 × 30,000 = 300,000) | failure_behavior: NONE (warning only) | safety_impact: LOW
+- dependencies: STR-0345, STR-0348 | impl: NOT_STARTED | verif: NOT_STARTED
+- origin: DECISION-016 (from GATE-014, Q-2=B), 2026-09-22.
+
+### STR-0348 — τ_E/q_min margin tracked in CALIBRATION-REPORT
+- section: §18 (from GATE-014 / DECISION-016) | lines: N/A | type: PERSISTENCE_RULE | strength: MUST | tag: [UR][DEFINED]
+- wording: "The τ_E vs q_min margin (and the StepBps × MaxBasketNotional product vs 600,000) MUST be reported in `research/validation/CALIBRATION-REPORT.md` for every candidate input set."
+- inputs: τ_E; q_min; StepBps; MaxBasketNotional | outputs: calibration-report row | preconditions: calibration evaluation | postconditions: margin recorded | state_effects: calibration audit trail
+- formula: NONE | units: USD notional (margin)
+- invariants: keeps the F-1* boundary observable across calibration | failure_behavior: NONE | safety_impact: LOW
+- dependencies: STR-0347, STR-0342 | impl: NOT_STARTED | verif: NOT_STARTED
+- origin: DECISION-016 (from GATE-014, Q-3 support), 2026-09-22.
+
+### STR-0349 — GrossGridEdge := StepBps (closed form)
+- section: §18 (from GATE-015 / DECISION-017; applies at §10) | lines: N/A | type: FORMULA | strength: MUST | tag: [UR][DEFINED]
+- wording: "`GrossGridEdge := StepBps` (constant, deterministic). This is the closed form used by the §10 NetExpectedEdge computation and the §8 gate-10 arming decision; it does not alter the §10 subtraction structure (Fee/Slippage/Funding/Other remain subtracted)."
+- inputs: StepBps | outputs: GrossGridEdge (bps) | preconditions: NetExpectedEdge evaluation | postconditions: computable, replay-deterministic edge | state_effects: economics gate input
+- formula: GrossGridEdge = StepBps | units: bps
+- invariants: matches the StepBps-denominated floor (STR-0273) and D-06's StepBps_as_USD (STR-0245); recorded as an owner decision, Strategy.md §10 unchanged | failure_behavior: NONE | safety_impact: HIGH
+- dependencies: STR-0193, STR-0179, STR-0197, STR-0273, STR-0350 | impl: NOT_STARTED | verif: NOT_STARTED
+- origin: DECISION-017 (from GATE-015), 2026-09-22.
+
+### STR-0350 — Arming validity condition GGE − 2·fee_maker − funding_est > floor
+- section: §18 (from GATE-015 / DECISION-017) | lines: N/A | type: GUARD | strength: MUST | tag: [UR][DEFINED]
+- wording: "A candidate configuration is valid only if `GrossGridEdge − 2·fee_maker − funding_est > NetExpectedEdgeFloor` at Tier-0 fees; otherwise the configuration is rejected at calibration/config resolution (fail-closed)."
+- inputs: GrossGridEdge (STR-0349); fee_maker (userFees); funding_est; NetExpectedEdgeFloor | outputs: validity verdict | preconditions: config resolution | postconditions: economically-armable config or rejection | state_effects: config validation
+- formula: GGE − 2·fee_maker − funding_est > floor | units: bps
+- invariants: at defaults 10 − 2·1.5 − 0 = 7 > 1 ✓ | failure_behavior: config rejected (fail-closed) if violated | safety_impact: MEDIUM
+- dependencies: STR-0349, STR-0194, STR-0273 | impl: NOT_STARTED | verif: NOT_STARTED
+- origin: DECISION-017 (from GATE-015), 2026-09-22.
+
+### STR-0351 — α·S/2 adverse-selection form recorded as future calibration proposal only
+- section: §18 (from GATE-015 / DECISION-017) | lines: N/A | type: PERSISTENCE_RULE | strength: MUST_NOT | tag: [UR][DEFINED]
+- wording: "The `GGE := StepBps − α·S/2` adverse-selection form (audit R-2 / strategy_fixes.md) is recorded as a PROPOSAL_ONLY calibration candidate; it MUST NOT be used as the runtime GrossGridEdge unless adopted by a future explicit Owner decision."
+- inputs: proposal record | outputs: none (documentation) | preconditions: N/A | postconditions: proposal retained, not active | state_effects: none
+- formula: NONE (proposal: StepBps − α·S/2) | units: bps
+- invariants: PROPOSAL_ONLY; runtime uses STR-0349 | failure_behavior: NONE | safety_impact: LOW
+- dependencies: STR-0349 | impl: NOT_STARTED | verif: NOT_STARTED
+- origin: DECISION-017 (from GATE-015), 2026-09-22.
+
+### STR-0352 — Funding-bleed bound with signed-net ACC accumulator
+- section: §18 (from GATE-016 / DECISION-018; extends §12.1) | lines: N/A | type: GUARD | strength: MUST | tag: [UR][DEFINED]
+- wording: "A signed-net funding accumulator `ACC := Σ userFunding deltas` (idempotent dedup keyed (time,coin,delta)) is maintained per Basket; it is the basis of the funding circuit-breaker. `ACC` resets to 0 at Basket INITIALIZING."
+- inputs: userFunding events | outputs: ACC (signed USDC) | preconditions: funding events observed | postconditions: replay-safe funding accumulation | state_effects: funding bleed tracker
+- formula: ACC = Σ_{e∈userFunding} usdc_e (paid>0, received<0) | units: USD
+- invariants: idempotent per event; venue-grounded (AA-4/AA-10); Basket-scoped | failure_behavior: duplicate event → no-op (logged) | safety_impact: HIGH
+- dependencies: STR-0234, STR-0236, STR-0353 | impl: NOT_STARTED | verif: NOT_STARTED
+- origin: DECISION-018 (from GATE-016), 2026-09-22.
+
+### STR-0353 — Reactive + predictive FUNDING_BREAK trigger
+- section: §18 (from GATE-016 / DECISION-018) | lines: N/A | type: FORMULA | strength: MUST | tag: [UR][DEFINED]
+- wording: "`FUNDING_BREAK ⟺ ACC ≥ X ∨ ACC + r̂_F·T_close ≥ X`, where `X = β_F·E₀`, `T_close = 180 s`, and `r̂_F` is the estimated net funding rate (cold start: worst-case AA-4 cap)."
+- inputs: ACC (STR-0352); r̂_F; X; T_close | outputs: FUNDING_BREAK boolean | preconditions: each pass | postconditions: breaker armed/disarmed | state_effects: breaker trigger
+- formula: ACC ≥ X ∨ ACC + r̂_F·T_close ≥ X | units: USD (ACC, X), USD/s·s (predictive term)
+- invariants: no spurious cold-start trigger under §12.1 caps (requires N ≥ ~$200k > N_max) | failure_behavior: fail-closed toward breaker if r̂_F unknown (worst-case) | safety_impact: HIGH
+- dependencies: STR-0352, STR-0355, STR-0354 | impl: NOT_STARTED | verif: NOT_STARTED
+- origin: DECISION-018 (from GATE-016), 2026-09-22.
+
+### STR-0354 — Funding response ladder: warn → suspend ENTRY_INTENT → emergency closure under §12.2
+- section: §18 (from GATE-016 / DECISION-018) | lines: N/A | type: STATE_TRANSITION | strength: MUST | tag: [UR][DEFINED]
+- wording: "On `ACC ≥ X/2` → FUNDING_WARN (suspend new ENTRY_INTENT arming; force Hedge-Recovery evaluation; corrections still permitted). On FUNDING_BREAK → invoke §13.4 closure in EMERGENCY mode under §12.2 precedence: net-profit precondition WAIVED, residual-exposure precondition ENFORCED. Overlay states never erase lifecycle state (ST-22 pattern)."
+- inputs: ACC; FUNDING_BREAK (STR-0353) | outputs: overlay state transitions | preconditions: warn/break thresholds | postconditions: bounded funding loss | state_effects: FUNDING_WARN / FUNDING_BREAK overlay
+- formula: NONE | units: NONE
+- invariants: authorized by §12.2 risk-precedence clause (STR-0232); corrections remain live (§13.3) | failure_behavior: residual unverifiable → RECOVERY (fail-closed) | safety_impact: CRITICAL
+- dependencies: STR-0232, STR-0353, STR-0243, STR-0247 | impl: NOT_STARTED | verif: NOT_STARTED
+- origin: DECISION-018 (from GATE-016), 2026-09-22.
+
+### STR-0355 — β_F CALIBRATABLE with fail-closed default 0.02
+- section: §18 (from GATE-016 / DECISION-018) | lines: N/A | type: PARAMETER | strength: MUST | tag: [UR][DEFINED]
+- wording: "`β_F` (funding budget as a fraction of equity) is CALIBRATABLE with a fail-closed default of `0.02` (2% of E₀); `X = β_F·E₀`. Proposal-only calibration per the §14 global rule; never frozen to an arbitrary value silently."
+- inputs: β_F; E₀ | outputs: X | preconditions: config resolution | postconditions: budget bound set | state_effects: breaker threshold
+- formula: X = β_F·E₀; default β_F = 0.02 | units: dimensionless (β_F), USD (X)
+- invariants: CALIBRATABLE; default is fail-closed conservative | failure_behavior: missing → default 0.02 | safety_impact: MEDIUM
+- dependencies: STR-0352, STR-0353 | impl: NOT_STARTED | verif: NOT_STARTED
+- origin: DECISION-018 (from GATE-016), 2026-09-22.
+
+### STR-0356 — Acute-correction precedence rule (floor never applies to acute Hedge Recovery)
+- section: §18 (from GATE-017 / DECISION-019; applies at §8/§9.1/§10/§11.2) | lines: N/A | type: PRECEDENCE_RULE | strength: MUST | tag: [UR][DEFINED]
+- wording: "The NetExpectedEdge floor applies to `ENTRY_INTENT` and to non-acute `EXPOSURE_CORRECTION_INTENT`; it NEVER applies to acute Hedge Recovery (§11.2), which is size-bounded by |ExposureDelta| and band-bounded by EmergencyTolerance. This is a total order on gating authority — no overlap, no gap."
+- inputs: intent classification; acute(Δ) (STR-0357); NetExpectedEdge floor | outputs: gating authority order | preconditions: correction path evaluation | postconditions: deterministic gate for acute vs non-acute | state_effects: correction gating
+- formula: NONE | units: NONE
+- invariants: reconciles §8-inv.1 (STR-0168), §9.1 floor (STR-0185), §10 floor (STR-0197), §11.2 acute (STR-0206) | failure_behavior: NONE (deterministic) | safety_impact: CRITICAL
+- dependencies: STR-0168, STR-0185, STR-0197, STR-0206, STR-0207, STR-0357 | impl: NOT_STARTED | verif: NOT_STARTED
+- origin: DECISION-019 (from GATE-017), 2026-09-22.
+
+### STR-0357 — acute(Δ) predicate definition
+- section: §18 (from GATE-017 / DECISION-019) | lines: N/A | type: GUARD | strength: MUST | tag: [UR][DEFINED]
+- wording: "`acute(Δ) := |Δ| > τ_I ∨ margin_distance < 2·d_emergency`, where `τ_I` is MaxExposureImbalance (§12.1, STR-0223/0340) and `d_emergency` is EmergencyTolerance (§9.1, STR-0338)."
+- inputs: ExposureDelta; τ_I; margin_distance; d_emergency | outputs: acute boolean | preconditions: correction path evaluation | postconditions: acute/non-acute classification | state_effects: correction classification
+- formula: acute(Δ) = (|Δ| > τ_I) ∨ (margin_distance < 2·d_emergency) | units: base-asset quantity / bps
+- invariants: τ_I and d_emergency reference their defining dynamic defaults (never re-derived independently) | failure_behavior: fail-closed toward acute if inputs stale | safety_impact: HIGH
+- dependencies: STR-0223, STR-0340, STR-0338, STR-0356 | impl: NOT_STARTED | verif: NOT_STARTED
+- origin: DECISION-019 (from GATE-017), 2026-09-22.
+
+### STR-0358 — FIXED MarginMode config parameter (= cross)
+- section: §18 (from GATE-018 / DECISION-020; extends §14) | lines: N/A | type: PARAMETER | strength: MUST | tag: [UR][DEFINED]
+- wording: "`MarginMode` is a FIXED config parameter = `cross` (with oneWay position semantics; venue fields `leverage.type` / `position.type`). Owner-overridable only via an explicit Owner Gate. The D-16 risk arithmetic assumes this mode."
+- inputs: config MarginMode | outputs: pinned margin mode | preconditions: config resolution | postconditions: risk model validity established | state_effects: config invariant
+- formula: NONE | units: enum {cross}
+- invariants: FIXED (not calibratable); the entire D-16 family (STR-0223/0340, STR-0225, STR-0227) presumes cross | failure_behavior: see STR-0359 (abort if absent) | safety_impact: CRITICAL
+- dependencies: STR-0223, STR-0340, STR-0225, STR-0227, STR-0337, STR-0359, STR-0360 | impl: NOT_STARTED | verif: NOT_STARTED
+- origin: DECISION-020 (from GATE-018), 2026-09-22.
+
+### STR-0359 — Init-time abort if MarginMode absent
+- section: §18 (from GATE-018 / DECISION-020) | lines: N/A | type: FAILURE_BEHAVIOR | strength: MUST | tag: [UR][DEFINED]
+- wording: "At config resolution, if `MarginMode` is absent/unset the system ABORTs before any side effect (fail-closed); no order, read, or state mutation occurs until it is set."
+- inputs: config MarginMode presence | outputs: abort or proceed | preconditions: startup / config resolution | postconditions: no side effect without a pinned mode | state_effects: startup guard
+- formula: NONE | units: NONE
+- invariants: fail-closed at init (mirrors STR-0343 no-invented-value discipline) | failure_behavior: ABORT before any side effect | safety_impact: CRITICAL
+- dependencies: STR-0358 | impl: NOT_STARTED | verif: NOT_STARTED
+- origin: DECISION-020 (from GATE-018), 2026-09-22.
+
+### STR-0360 — Per-pass P0 leverage.type / position.type assertion → FREEZE on mismatch
+- section: §18 (from GATE-018 / DECISION-020) | lines: N/A | type: GUARD | strength: MUST | tag: [UR][DEFINED]
+- wording: "Each §4.7 P0 pass asserts, for every position in `clearinghouseState.assetPositions[]`, `leverage.type == MarginMode` AND `position.type == oneWay`; any mismatch → FREEZE (fail-closed)."
+- inputs: clearinghouseState.assetPositions[].leverage.type / position.type; MarginMode | outputs: assertion verdict | preconditions: P0 each pass | postconditions: mode consistency enforced | state_effects: FREEZE overlay on mismatch
+- formula: ∀p: p.leverage.type == MarginMode ∧ p.type == oneWay | units: NONE
+- invariants: catches mid-run venue-side mode change; authoritative reads only from clearinghouseState (DECISION-002) | failure_behavior: mismatch → FREEZE | safety_impact: CRITICAL
+- dependencies: STR-0358, STR-0200, STR-0337 | impl: NOT_STARTED | verif: NOT_STARTED
+- origin: DECISION-020 (from GATE-018), 2026-09-22.
+
+### STR-0361 — N3 strengthened to minimum-separation ε (Phase-4.9 non-blocking recommendation)
+- section: §18 (Phase-4.9 recommendation, U-3; SEMANTIC_NON_BLOCKING) | lines: N/A | type: GUARD | strength: SHOULD | tag: [UR][DEFINED]
+- wording: "RECOMMENDATION (non-blocking, to be resolved in Phase 6): strengthen §5.6 N3 from exact-equality to a minimum separation `|p_new − p_live| ≥ max(1 tick, 0.1·StepBps·p/10⁴)` for still-live same-group same-Generation orders. No Owner Gate opened; fail-closed default (require separation) applies until decided."
+- inputs: new level prices; still-live same-group prices | outputs: separation check | preconditions: §5.6 non-overlap test | postconditions: no near-adjacent same-group stacking | state_effects: non-overlap gate (proposed)
+- formula: |p_new − p_live| ≥ max(1 tick, 0.1·StepBps·p/10⁴) | units: price
+- invariants: NON_BLOCKING; strengthens STR-0107 (N3) without changing it; Phase-6 resolution | failure_behavior: BLOCK on violation (proposed) | safety_impact: MEDIUM
+- dependencies: STR-0104, STR-0107, STR-0077 | impl: NOT_STARTED | verif: NOT_STARTED
+- origin: Phase-4.9 recommendation (U-3 / U3_VERIFICATION.md); SEMANTIC_NON_BLOCKING, no gate.
+
+### STR-0362 — REST rate-budget rule (Phase-4.9 non-blocking recommendation)
+- section: §18 (Phase-4.9 recommendation, U-8; SEMANTIC_NON_BLOCKING) | lines: N/A | type: PARAMETER | strength: SHOULD | tag: [UR][DEFINED]
+- wording: "RECOMMENDATION (non-blocking, to be resolved in Phase 6): add an operational REST weight budget (per-pass weight bounded; pass cadence ≤ 1200·headroom / W_pass; WS-first substitution for orderUpdates/userFills/clearinghouseState, weight 0). No Owner Gate opened; venue AA-8 limits apply; throttling degrades to fail-closed via freshness."
+- inputs: per-pass REST weight; venue weight limit (1200/min) | outputs: rate budget | preconditions: pass scheduling | postconditions: venue rate limit respected | state_effects: operational polling policy (proposed)
+- formula: pass cadence ≤ 1200·headroom / W_pass | units: requests·weight/min
+- invariants: NON_BLOCKING; operational; extends gate 6 (open-order cap, STR-0176) which covers only order count | failure_behavior: throttle → stale data → fail-closed gates | safety_impact: MEDIUM
+- dependencies: STR-0176, STR-0133 | impl: NOT_STARTED | verif: NOT_STARTED
+- origin: Phase-4.9 recommendation (U-8 / U8_VERIFICATION.md); SEMANTIC_NON_BLOCKING, no gate.

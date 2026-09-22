@@ -2,8 +2,8 @@
 
 - **Purpose:** Reverse map from every `STR-*` requirement to ≥1 capability (`CAP-*`), guaranteeing no requirement is dropped in capability discovery. Companion to `CAPABILITY_MAP.md`.
 - **Producer:** Claude Code (Opus 4.8), Phase 3.
-- **Inputs:** `STRATEGY_CONTRACT.md` (343 STR-*), `CAPABILITY_MAP.md` (24 CAP-*).
-- **Status:** COMPLETE — all 343 STR-* mapped; "STR-* without a CAP-*" section is empty.
+- **Inputs:** `STRATEGY_CONTRACT.md` (362 STR-*, incl. Phase 4.6/4.10 additions), `CAPABILITY_MAP.md` (24 CAP-*).
+- **Status:** COMPLETE — all 362 STR-* mapped (343 Phase 1 + STR-0344 Phase 4.6 + STR-0345..0362 Phase 4.10); "STR-* without a CAP-*" section is empty.
 
 > Notation: primary capability first; additional capabilities that also cover the requirement follow. §5.7 scenarios additionally map to CAP-0024 (differential-test inputs) — noted once here rather than repeated per row.
 
@@ -130,7 +130,24 @@
 
 ## Coverage counts
 
-- **STR-* total:** 343. **Mapped to ≥1 CAP-*:** 343 (100%).
+## Phase 4.10 STR additions
+
+> STR-0344 (Phase 4.6, previously unmapped — auditb6 GAP-1) and STR-0345..0362 (Phase 4.10) mapped here. Existing STR-0001..0343 mappings above unchanged; no CAP-* renumbered.
+
+| STR range | Topic | CAP-* |
+|-----------|-------|-------|
+| STR-0344 | one active order per Level (DECISION-004) | CAP-0003, CAP-0015 (enforcement projection CAP-0005) |
+| STR-0345..0348 | tradability-quantized exposure gate / round-to-zero / calibration warning / margin tracking (DECISION-016) | CAP-0016, CAP-0023, CAP-0020 |
+| STR-0349..0351 | GrossGridEdge closed form / validity condition / α·S/2 proposal (DECISION-017) | CAP-0013 |
+| STR-0352..0355 | funding accumulator / FUNDING_BREAK / response ladder / β_F (DECISION-018) | CAP-0017, CAP-0018 |
+| STR-0356..0357 | acute-correction precedence / acute() predicate (DECISION-019) | CAP-0011, CAP-0016 |
+| STR-0358..0360 | MarginMode pin / init abort / P0 assertion (DECISION-020) | CAP-0002, CAP-0017, CAP-0020 |
+| STR-0361 | N3 min-separation ε (Phase-4.9 recommendation; Phase 6) | CAP-0008, CAP-0009 |
+| STR-0362 | REST rate-budget rule (Phase-4.9 recommendation; Phase 6) | CAP-0001, CAP-0015 |
+
+## Summary (updated Phase 4.10)
+
+- **STR-* total:** 362 (STR-0001..0362). **Mapped to ≥1 CAP-*:** 362 (100%) — 343 (Phase 1) + STR-0344 (Phase 4.6) + STR-0345..0362 (Phase 4.10).
 - **Capabilities:** 24 (CAP-0001…CAP-0024). One (CAP-0024) is RESEARCH-ONLY / NON_RUNTIME.
 - **Capabilities with zero STR-* mapped:** none (every CAP-* is justified by ≥1 STR-*).
 

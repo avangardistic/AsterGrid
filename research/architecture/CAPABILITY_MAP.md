@@ -2,7 +2,7 @@
 
 - **Purpose:** Enumerate every behavior the Strategy materially requires, as **capabilities** (required behaviors), derived from evidence. Per `prompt.md` `<capability_discovery>`/`<boundary_discovery>`: **a capability is NOT a subsystem, service, module, process, or agent.** No boundaries, topology, or technology are decided here (that is Phase 4/5).
 - **Producer:** Claude Code (Opus 4.8), Phase 3.
-- **Inputs (evidence):** (a) 343 STR-* in `STRATEGY_CONTRACT.md`; (b) venue evidence base (`TOPIC_EVIDENCE.md`, `SDK_RECORD.md`, `SOURCE_MANIFEST.md`); (c) `DECISION_REGISTER.md` (DECISION-001, DECISION-002).
+- **Inputs (evidence):** (a) 362 STR-* in `STRATEGY_CONTRACT.md` (343 Phase 1 + STR-0344 Phase 4.6 + STR-0345..0362 Phase 4.10; mappings for the additions are in `CAPABILITY_COVERAGE.md`); (b) venue evidence base (`TOPIC_EVIDENCE.md`, `SDK_RECORD.md`, `SOURCE_MANIFEST.md`); (c) `DECISION_REGISTER.md` (DECISION-001, DECISION-002).
 - **Status:** COMPLETE for Phase 3 (24 capabilities; full STR-*→CAP-* coverage in `CAPABILITY_COVERAGE.md`).
 
 ---
