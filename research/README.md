@@ -55,6 +55,10 @@ Phase 4.5 is a bridge phase to classify the findings of three independent audit 
 
 On 2026-09-21 the Owner reviewed and decided all eleven blocking gates GATE-003..GATE-013; the decisions are recorded as **DECISION-004..DECISION-014** in `research/decisions/DECISION_REGISTER.md` (each gate file carries a RESOLVED status line). Mechanical consequences applied: a new invariant **STR-0344** ("at most one active order per Level at any time", from DECISION-004); **OPEN-01 CLOSED** by DECISION-009 (CycleReferenceDerivation must be set explicitly; runtime without it fails closed) and AMB-0042 marked RESOLVED; a **dedicated-account constraint** header note added to the contract (DECISION-005/011); and the **D-16 maintenance-margin model re-labelled HYPOTHESIS** (DECISION-006 — runtime reads venue liquidationPx/maintenance as primary; re-validation is a Live prerequisite). In `SEMANTIC_AMBIGUITIES.md`, all 11 SEMANTIC_BLOCKING rows (+AMB-0042) now read `RESOLVED_BY_DECISION_0NN`. See `DECISION_REGISTER.md`.
 
+## Audit ingestion + F-1\* verification (Phase 4.7)
+
+On 2026-09-22 four secondary audit documents were registered as **non-authoritative** sources (SRC-204 `strategy_audit.md`, SRC-205 `strategy_fixes.md`, SRC-206 `genetic_calibration_report.md`, SRC-207 `ga_arena.py`+`ga_results.json`; see `sources/SOURCE_MANIFEST.md` §5). The GA study is classified exploratory-only in **`research/findings/GA_CLASSIFICATION.md`** (Golden Genome = calibration PROPOSAL, remains `[DYNAMIC — CALIBRATION PENDING]`; not a runtime dependency; CAP-0024 is the reference model). The audit's **F-1\*** livelock claim was **independently re-derived from `Strategy.md` + venue evidence** in **`research/findings/F1_VERIFICATION.md`** — verdict **F1_CONDITIONAL** (confirmed at the D-16 default scenario: τ_E=$5 < venue q_min=$10, reachable dead-band $6–$9, no escape rule; absent when `StepBps·MaxBasketNotional ≥ 600,000`); recorded as AMB-0047 in **`research/findings/F1_SEMANTIC_RECORD.md`**. **No fix applied, no DECISION-016+ created, no Owner Gate opened** — the Owner decides next steps.
+
 ## Artifact layout (created only when a phase requires it)
 
 ```

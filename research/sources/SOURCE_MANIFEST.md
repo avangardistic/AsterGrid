@@ -77,3 +77,14 @@ AUDIT_SOURCE: independent audits. Treated as findings to be classified, not as a
 - Preserve conflicting evidence; never fabricate citations; never treat search snippets as authoritative.
 - For the SDK: record package name, version, git tag/release, commit SHA, repo URL, retrieval date. Treat as `TOOL_SOURCE` / `IMPLEMENTATION_REFERENCE`, never `VENUE_AUTHORITY`.
 - On docs / SDK / observation disagreement: do NOT silently pick one — open a `research/findings/CONFLICT-*.md`.
+
+## 5. Secondary audit / proposal sources (Phase 4.7)
+
+> Secondary sources: these documents are findings and proposals, not authority. Where any conflicts with `Strategy.md`, `Strategy.md` wins. Findings must be independently verified before any decision. (Registered 2026-09-22; no fix, decision, or strategy change is applied by registering them.)
+
+| ID | Path | Class | SHA-256 | Bytes | Date | Role |
+|----|------|-------|---------|-------|------|------|
+| SRC-204 | research/audits/strategy_audit.md | AUDIT_SOURCE | `7e25f54fd0ae3b8ff3b1b181c9027c0bb5ef4af6b753fdd1c7ddc15e8fbd9b7b` | 43566 | 2026-09-22 | Independent formal logical audit of Strategy.md. Findings are HYPOTHESES to be verified, NOT authority. |
+| SRC-205 | research/audits/strategy_fixes.md | AUDIT_PROPOSAL_SOURCE | `8411e681661d7198b5f8bbad702852bbe1e61d8502d624cb0614efc95cfbb3a5` | 22896 | 2026-09-22 | Proposed resolutions to audit findings. PROPOSAL ONLY. NOT accepted until Owner decision. NOT authority. |
+| SRC-206 | research/audits/genetic_calibration_report.md | SYNTHETIC_EXPLORATORY_SOURCE | `23b0f7a93c7e285e27bb06048b025523a5b9f12aa6b06a23034a82d049b66527` | 18654 | 2026-09-22 | Synthetic GA study. Golden Genome is a calibration PROPOSAL within a simulator. NOT production truth. NOT authority. NOT a calibration value. |
+| SRC-207 | research/audits/ga_arena.py + ga_results.json | EXPLORATORY_TOOL_SOURCE | py:`e8a38237803513addc26f72c6083281d1bde1085279d3e641b1b68b4dcf89aaf` json:`9d8e5cf62405bfbd0151b08ba33862da2b905e29e4b13648bd7f5ae57a9c495c` | 18340 + 15927 | 2026-09-22 | GA engine and raw results. Offline exploratory tooling. NOT runtime dependency. NOT authority. |
