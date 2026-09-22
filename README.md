@@ -19,9 +19,13 @@ it contains **no trading/domain logic** yet.
 
 ## Package layout (`src/hypergrid/`)
 
-- `core/` — **pure domain** (Phase 7b+). Stdlib-only; **must never import
-  `logging`**; single-threaded; no `float` in the decision/money path
-  (`int`/`decimal.Decimal` only). Enforced by `tests/test_core_no_logging.py`.
+- `core/` — **pure domain** (stdlib-only; never imports `logging`; single-threaded;
+  no `float` in the decision/money path). Phase 7b landed the deterministic
+  foundation: `core/events/` (ten event kinds + envelope + sha256 hash chain +
+  canonical order + watermark), `core/event_log/` (append-only port +
+  in-memory/SQLite logs; the log alone allocates `log_sequence` from 0), and
+  `core/serialization/` (canonical JSON frozen for OCaml interop). The domain
+  fold and pass engine are Phase 7c+. Guards enforced by `tests/test_core_*`.
 - `adapters/` — side-effect boundary (venue I/O, persistence, signing) — Phase 7b+.
 - `runtime/` — the process shell: logging, wiring, asyncio. `logging_setup.py`
   provides the JSON formatter + context + redaction.
