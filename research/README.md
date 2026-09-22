@@ -87,6 +87,10 @@ On 2026-09-22: **GATE-019 RESOLVED** — CAP-0024 reference model = **REF-D (fun
 
 On 2026-09-22: **coverage catch-up** — STR-0363..STR-0382 (Phase 6c) mapped to existing capabilities in `architecture/CAPABILITY_COVERAGE.md` (new "Phase 6c STR additions" table; **382/382 mapped, 0 unmapped, no CAP invented**); header counts updated to 382 in CAPABILITY_COVERAGE / CAPABILITY_MAP / STATE_OWNERSHIP. **Opened OWNER_GATE_020** (production runtime language — options A Python / B Rust / C Go / D TypeScript-Node; functional-language productions rejected as a family per DECISION-021 independence + DECISION-015 non-actor CAND-B; non-binding recommendation: Python, conditional on determinism discipline) and registered **DECISION-022 PENDING**. This is the last Phase-7 blocker. No language selected, no code, no gate resolution, no new DECISION beyond DECISION-022.
 
+## GATE-020/021 resolved + Phase 7a scaffolding
+
+On 2026-09-22: **GATE-020 RESOLVED** — production language = **Python** with 3 mandatory conditions (int/`Decimal` in the decision path; `mypy --strict`; core single-threaded/pure) (DECISION-022; Rust/Go/TS rejected; functional family rejected). **GATE-021 RESOLVED** — runtime/UI stack + 3-log system (DECISION-023: pure-Python core, asyncio adapters, SQLite event store, Pydantic+TOML config, FastAPI+HTMX UI; domain event log + operational log + owner audit trail; core never logs). **DECISION-021 ADDENDUM** — REF-D (CAP-0024) language **PINNED to OCaml** (Dune/QCheck/Yojson; JSON scenario exchange; no shared code). Owner UI requirement recorded in `implementation/UI_REQUIREMENT.md`. **Phase 7a scaffolding** built at the repo root (`src/hypergrid/{core,adapters,runtime,operator,config}`, `tests/`): package skeleton + §14 Pydantic config schema (34 fields, strict no-float `Decimal`) + JSON logging skeleton — **no domain logic, no venue code, no secrets**. `pytest` 14/14, `mypy --strict` clean, `ruff` clean. First trading code is Phase 7b+.
+
 ## Artifact layout (created only when a phase requires it)
 
 ```

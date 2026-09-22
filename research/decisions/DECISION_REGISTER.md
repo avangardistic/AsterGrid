@@ -334,19 +334,49 @@
 - **date:** 2026-09-22.
 - **supersedes:** NONE.
 
-## DECISION-022 — Production runtime language/paradigm (from OWNER_GATE_020) — PENDING
+### DECISION-021 ADDENDUM (2026-09-22) — REF-D language
+
+The concrete language for CAP-0024 (REF-D) is now PINNED to **OCaml** (toolchain: **Dune** for build, **QCheck** for property testing, **Yojson** for JSON). Rationale:
+- REF-D's paradigm-distinctness requirement (per DECISION-021) is satisfied: OCaml is functional; production is Python (imperative).
+- OCaml was chosen on the advisor's technical recommendation — strict evaluation semantics, strong static types, pattern matching, and mature property-testing (QCheck) and JSON (Yojson) libraries — which the Owner reviewed and approved. The Owner delegated the concrete functional-language pick to the advisor and made NO claim of prior fluency in any functional language. (No owner skill claim recorded.)
+- Haskell is documented as a viable functional alternative that was NOT selected (strictness/laziness tradeoff and heavier toolchain noted by the advisor); it is not rejected on owner-fluency grounds.
+- Scenario exchange between CAP-0024 and the production differential harness uses JSON — with NO shared domain code between the two (per VALIDATION_PLAN §4).
+- The differential harness itself is Python (no shared domain code with production).
+
+DECISION-021 status: CONDITIONAL → **PINNED**.
+
+## DECISION-022 — Production runtime language/paradigm (from OWNER_GATE_020) — RESOLVED
 
 - **decision_id:** DECISION-022
 - **question:** "Which production runtime language/paradigm should implement CAND-B?"
 - **context:** `research/decisions/OWNER_GATE_020.md`.
-- **evidence:** prompt.md backend preference (Python-first unless another technology materially improves correctness/safety/performance/operability/maintainability); DECISION-015 (CAND-B); DECISION-021 (REF-D functional → production must be non-functional for independence); existing GA tooling (`ga_arena.py`, Python); the advisor's non-binding language analysis (Python-leaning, recorded as context only). The Owner has NOT pre-decided; no owner preference is recorded here.
-- **decision:** "PENDING — awaiting Owner resolution of GATE-020."
+- **evidence:** prompt.md backend preference (Python-first unless another technology materially improves correctness/safety/performance/operability/maintainability); DECISION-015 (CAND-B); DECISION-021 (REF-D functional → production must be non-functional for independence); existing GA tooling (`ga_arena.py`, Python); venue/SDK evidence (SRC-106: hyperliquid-python-sdk 0.24.0, Python).
+- **decision:** "Option A (Python), with three mandatory, enforceable conditions: (1) MONEY/DECISION-PATH: int or `decimal.Decimal` ONLY — never `float` in the deterministic decision path, PnL accounting, sizing, or any value that flows into a gate predicate or recorded state. Enforced by CI grep + mypy plugin + a dedicated unit test. (2) TYPING: `mypy --strict` enabled; `Any` forbidden except at explicit adapter-boundary fenced zones (declared in a single mypy-override file). (3) CONCURRENCY: the core is single-threaded and pure; `asyncio` is permitted ONLY inside `adapters/` and `runtime/`, NEVER inside `core/`. Enforced by CI import check."
 - **alternatives:** A (Python), B (Rust), C (Go), D (TypeScript/Node); functional-language productions rejected as a family (see GATE-020).
-- **rejected_alternatives:** not yet decided for A–D; functional family rejected (documented in GATE-020: collides with DECISION-021 independence and DECISION-015 non-actor CAND-B).
+- **rejected_alternatives:** B (Rust), C (Go), D (TypeScript/Node) — rejected because Python is the prompt.md backend preference, the venue/SDK evidence recorded in this program (SRC-106: hyperliquid-python-sdk 0.24.0) is Python, the existing GA tooling is Python, and — with the three conditions above — the determinism risks that would otherwise argue for Rust/Go are neutralized. Functional-language productions remain rejected as a family (see GATE-020).
 - **affected_strategy_requirements:** none directly (runtime-layer decision).
-- **risk:** LOW while unresolved (Phase 7 cannot start).
-- **reversibility:** MEDIUM (language choice is a high-cost commitment; the pure Core carries over to a different language only with substantial rework).
+- **risk:** LOW after resolution, GIVEN the 3 conditions hold under CI enforcement; MEDIUM if any condition is weakened.
+- **reversibility:** MEDIUM.
 - **owner_required:** YES.
-- **owner_decision:** PENDING.
+- **owner_decision:** Option A (Python) with conditions 1–3 (2026-09-22).
+- **date:** 2026-09-22.
+- **supersedes:** NONE.
+
+## DECISION-023 — Runtime/UI stack + logging system (from OWNER_GATE_021) — RESOLVED
+
+- **decision_id:** DECISION-023
+- **question:** "Which runtime/UI stack and logging system should implement CAND-B, given the Owner's pre-supplied answers?"
+- **context:** `research/decisions/OWNER_GATE_021.md`.
+- **evidence:** prompt.md; ARCHITECTURE_DECISION §3–§8; DECISION-007; DECISION-022.
+- **decision:**
+  - **Runtime / service:** Core = pure Python, stdlib-only, ZERO third-party frameworks inside `core/`. Service = single-process asyncio (adapters/runtime only). Venue client = thin hand-rolled HTTP+WS client (`httpx` + `websockets`) behind a port; signing via `eth-account`; official Hyperliquid SDK is REFERENCE ONLY, not a runtime dependency. Event store = SQLite file-backed, behind a port (Redis/Kafka prohibited by CAND-B). Config = Pydantic v2 models derived from §14; TOML on disk, versioned. UI = FastAPI API-first + Jinja/HTMX (no JS build step); Streamlit rejected for the operational console (possible future offline tool only). Auth = username/password + separate roles + TOTP-ready. Deployment = Docker single-container.
+  - **Logging system:** three SEPARATE logs — (1) DOMAIN event log = the append-only SQLite event store (source of truth; replayable; permanent); (2) OPERATIONAL log = JSON lines, rotating; (3) OWNER AUDIT trail = permanent, surfaced in UI. The pure `core/` MUST NEVER log (returns decisions/events; the runtime shell logs; enforced by an automated test asserting no `import logging` in `core/`). Logging = stdlib `logging` + JSON formatter; every line carries `run_id`, `basket_id`, a monotonic counter, and local wall-clock + monotonic timestamps; a venue server-timestamp is attached ONLY on venue-event records (B4 watermark tuple). Secrets NEVER in any log; raw venue payloads only at the adapter edge, debug level, size-capped. Routine fail-closed transitions logged at INFO with a reason code (NOT ERROR); ERROR reserved for operator-attention conditions; NO log-and-continue in the domain path. Hash chain on the domain event log (tamper-evident); redaction test in CI.
+- **alternatives:** documented neutral alternatives in OWNER_GATE_021 (not selected).
+- **rejected_alternatives:** Redis/Kafka for the event store (CAND-B prohibits); Streamlit for the operational console (kept as future offline tool only); Node/JS build for the UI (chose HTMX to avoid a build step).
+- **affected_strategy_requirements:** none directly (runtime/logging-layer decision).
+- **risk:** LOW (stack aligns with CAND-B constraints; each choice is behind a port and reversible within the CAND-B architecture).
+- **reversibility:** MEDIUM (each component is behind a port; swapping is a Phase-6/7+ change with a recorded DECISION).
+- **owner_required:** YES.
+- **owner_decision:** Runtime/UI stack + logging system as above (2026-09-22).
 - **date:** 2026-09-22.
 - **supersedes:** NONE.

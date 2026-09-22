@@ -34,4 +34,4 @@ runtime باید **قطعی (deterministic)**، **AI-independent** و مطابق
 ## ۷. توصیه (Recommendation)
 شواهد (ترجیحِ صریحِ prompt.md بر Python-first؛ SDK رسمیِ Python؛ ابزارِ GAِ موجودِ Python؛ استقلالِ پارادایمی از REF-Dِ فانکشنال که با هر گزینهٔ A–D حفظ می‌شود) به‌طور عینی از **گزینه A (Python)** به‌عنوانِ گزینهٔ پیش‌فرضِ منطقی پشتیبانی می‌کنند، **مشروط بر** رعایتِ انضباطِ determinism (بدونِ float در مسیرِ تصمیم؛ `Decimal`/`int`؛ core تک‌نخی و خالص؛ typing با `mypy`). **این توصیه الزام‌آور نیست**؛ اگر مالک correctness/performance را بر velocity مقدم بداند، **B (Rust)** جایگزینِ قویِ type-safe است. انتخابِ نهایی با مالک است؛ هیچ گزینه‌ای در این run انتخاب نمی‌شود.
 
-**STATUS: OPEN — awaiting Owner selection of production runtime language (GATE-020).**
+**STATUS: RESOLVED — Option A (Python), with 3 mandatory conditions (owner, 2026-09-22).** See DECISION_REGISTER.md DECISION-022.
