@@ -75,6 +75,10 @@ On 2026-09-22: created **`validation/VALIDATION_PLAN.md`** (the verification str
 
 On 2026-09-22: created **`implementation/EVENT_MODEL.md`** (10 conceptual event KINDS; event identity with DECISION-007 canonical-order keys; 7 cross-cutting invariants; the per-stream venue-sequence watermark; and the snapshot concept — "an optimization over the log, never a replacement authority") and **`implementation/INTERFACE_MAP.md`** (6 boundaries: Core↔Log, Core↔Adapters, Adapters↔Venue, Signing, Operator, Persistence — each with never/must/failure/invariant; the external observation model; and a CAP-0024 governance forward-reference). Conceptual design only — no language/framework/DB/serialization/snapshot format chosen, no code, no CAP-0024 design (Phase 6b-2), no new DECISION, no gate. 6b-1/6b-2/6c are working subdivisions of Phase 6.
 
+## Phase 6b-2 — CAP-0024 reference-model design + GATE-019
+
+On 2026-09-22: created **`implementation/CAP0024_DESIGN.md`** — the independent reference model (primary oracle per VALIDATION_PLAN §2/§3.2/§4): purpose + independence requirements (no shared code with production), inputs/outputs, **20 behavioral obligations (B-01..B-20) each mapped to a VALIDATION_PLAN §3.x mechanism**, explicit out-of-scope (live venue access, dynamic-default values), **6 candidate languages/paradigms REF-A..F with recommendation-strength and ABSOLUTE/CONDITIONAL framing (no selection)**, and conceptual differential/exhaustive harness requirements. Opened **OWNER_GATE_019** (language/paradigm selection) and registered **DECISION-021 PENDING**. No selection made, no code, no GATE-019 resolution. Phase 6c may proceed on the finalized behavioral design without the language selection.
+
 ## Artifact layout (created only when a phase requires it)
 
 ```
