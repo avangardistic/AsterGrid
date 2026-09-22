@@ -238,3 +238,10 @@ The following MUST be on the Live-readiness critical path (Phase 13):
 - **AMB-0035 — economic/risk realism** (gap risk, execution latency, liquidity collapse, adverse selection, funding shock). → Phase 10 (economic validation) + Phase 12 (Testnet observation). **Simulation is explicitly NOT treated as proof of economic correctness** (per the GA classification, `research/findings/GA_CLASSIFICATION.md`, Phase 4.7).
 
 Both remain DEFERRED (traceable to `SEMANTIC_AMBIGUITIES.md` rows AMB-0034 / AMB-0035), but their phase-of-resolution is now explicit.
+
+## Phase 6c — Deferred obligations status
+
+- **AMB-0034 (verification obligations):** the VALIDATION_PLAN §3.x mechanism set is the concrete artifact satisfying this obligation; the run-time artifacts (reports) are produced in Phases 7, 9, 10–12 as scheduled in §3. **Status: SCHEDULED.**
+- **AMB-0035 (economic / risk realism):** Phase 10 (economic validation) + Phase 12 (Testnet observation). Simulation is explicitly NOT a proof of economic correctness (`GA_CLASSIFICATION.md`). **Status: SCHEDULED.**
+
+No change to the underlying `SEMANTIC_AMBIGUITIES.md` rows.

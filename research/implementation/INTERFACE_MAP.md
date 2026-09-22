@@ -79,6 +79,8 @@ An **observation event** (EVENT_MODEL §A2(e)) is an authoritative/observed venu
 - Each data type (mark/oracle, book, meta, fee, account state, fills) has a **maximum age** (a per-type max-age; concrete numbers are Phase-6c/7 — VALIDATION_PLAN §3.7/§3.17, AMB-0019).
 - **Stale → the observation event is recorded as STALE**; any gate that depends on it **fails closed** (no decision on stale data).
 
+> **phase6c_note (2026-09-22) — concrete per-type max-age (overridable via Owner Gate only):** mark/oracle = **6 s** (2× the ~3 s AA-9 cadence); book (L2) = **1 pass**; meta = **60 s**; fee tier = **300 s**; account state (clearinghouseState) = **6 s**; fills = **1 pass**; funding = **3600 s** (hourly accrual). An observation older than its max-age is recorded STALE → dependent gate fails closed (STR-0369). This does not change §C1/§C3/§C4.
+
 ### §C3 — Venue-emitted snapshot handling
 - A venue snapshot is **marked as snapshot** (not incremental);
 - **snapshot duplication is a no-op keyed by content fingerprint** (idempotent — cf. STR-0352 funding dedup);

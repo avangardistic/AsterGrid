@@ -6,6 +6,7 @@
 > **Audit findings (Phase 4.5):** open semantic ambiguities and Owner Gates affecting these requirements are classified in `research/strategy/SEMANTIC_AMBIGUITIES.md` (AMB-0001..0046; GATE-003..GATE-013 OPEN). *(historical — Phase-4.5 status; superseded; all 18 gates GATE-001..GATE-018 are RESOLVED as of Phase 4.10. See DECISION_REGISTER.md DECISION-001..020.)*
 > **Open gate:** OWNER_GATE_014 (F-1* livelock cell). Until closed, the §5.2 exposure gate (STR-0339 / STR-0074) is not implementable in the D-16 default configuration. **[RESOLVED 2026-09-22 — DECISION-016 (Q-1=A/Q-2=B/Q-3=A); see §18 STR-0345..0348.]**
 > **Phase 4.10 additions:** STR-0345..STR-0362 — see §18; origins DECISION-016..020 and Phase-4.9 recommendations (STR-0361/0362 non-blocking).
+> **Phase 6c additions:** STR-0363..STR-0382 — see §19; resolutions of the 22 SEMANTIC_NON_BLOCKING findings (AMB-0012..0033). Deterministic/fail-closed; no gate, no DECISION. AMB-0014→STR-0345, AMB-0025→STR-0358 as phase6c_note annotations; U-3/U-5/U-6/U-8 resolved as phase6c_note on STR-0361/0133/0290/0362.
 
 - **Purpose:** Derived, traceable contract of every normative requirement in `Strategy.md` v2.3-final, each with a stable `STR-*` ID. This is a DERIVED artifact — `Strategy.md` remains the sole authority. No requirement here invents semantics; ambiguities are surfaced in the OPEN section, never guessed.
 - **Version:** 1.0 (Phase 1)
@@ -1123,6 +1124,7 @@ Tag semantics are exactly as recorded in `STRATEGY_SOURCE_RECORD.md` §4. Tags a
 - venue_evidence_status: VERIFIED (Phase 2/2b — cloid 128-bit, ack resting/filled/error, orderStatus, WS orderUpdates, WS userFills snapshot-tagged, userFillsByTime ≤10000, TIF Alo/Gtc/Ioc all confirmed. Note: cloid duplicate-submission de-dup is NOT documented — deferred observation item; does not affect the enumerated mechanisms)
 - venue_evidence_refs: [SRC-104, SRC-105, SRC-107, SRC-109, SRC-110]
 - dependencies: NONE | impl: NOT_STARTED | verif: NOT_STARTED
+- phase6c_note (2026-09-22, U-5 RESOLVED): clarification — `cloid` is a RECONCILIATION IDENTITY (lookup / cancel-by-cloid); idempotency is ESTABLISHED via `orderStatus`, never ASSUMED (venue does not document duplicate-cloid dedup). DECISION-008 governs the runtime path (UNKNOWN_SUBMISSION + reconcile-before-retry). No runtime change; the §6 "idempotent" wording in Strategy.md is immutable and corrected here at the contract layer. Verify: VALIDATION_PLAN §3.5.
 
 ### STR-0134 — Trigger orders evaluated against oracle mark price, not last trade
 - section: §6.2 Hyperliquid mechanisms | lines: L574 | type: EVENT_SEMANTICS | strength: MUST | tag: [HC][DEFINED]
@@ -2405,6 +2407,7 @@ Tag semantics are exactly as recorded in `STRATEGY_SOURCE_RECORD.md` §4. Tags a
 - inputs: StepBps; MaxBasketNotional; GridLevels; szDecimals | outputs: tolerance | preconditions: NONE | postconditions: bound | state_effects: register | formula: round_to_min_tradable_size((StepBps × MaxBasketNotional / 10000) / GridLevels) | units: USD → base-asset size
 - invariants: calibration_status = DERIVED | failure_behavior: NONE | safety_impact: HIGH
 - dependencies: STR-0248 | impl: NOT_STARTED | verif: NOT_STARTED
+- phase6c_note (2026-09-22, U-6 RESOLVED): concrete rounding direction fixed — `ResidualExposureToleranceAtClosure := max(ceil_lot(f), q_min(M))` (ceil onto the szDecimals lot grid, floored at the asset's minimum-tradable quantity `q_min(M) = MinNotional/M`). Feasibility: after a final min-size sweep `szi → 0` exactly; avoids demanding unreachable exact zero. Formula precision only (D-07(F) form unchanged). Verify: VALIDATION_PLAN §3.8.
 
 ### STR-0291 — BasketCloseMode = HYBRID (default of three §13.4 options) (§13.4) — FIXED
 - section: §14 Parameter Reference | lines: L1176 | type: PARAMETER | strength: MUST | tag: [DEFINED]
@@ -2782,6 +2785,7 @@ These are the only intra-section gate consolidations; every other §8 gate and r
 - invariants: dead-band {τ_E < |Δ| < q_min} empty by construction (any trigger ≥ 2·q_min ⇒ order value ≥ $10 even at price M/2); does NOT change the D-16 τ_acc formula (STR-0339) — only the gate | failure_behavior: on 3 failed correction attempts → RECONCILIATION_REQUIRED (fail-closed) | safety_impact: CRITICAL
 - dependencies: STR-0339, STR-0074, STR-0077, STR-0083, STR-0296, STR-0346 | impl: NOT_STARTED | verif: NOT_STARTED
 - origin: DECISION-016 (from GATE-014, Q-1=A), 2026-09-22.
+- phase6c_note (2026-09-22, AMB-0014): the "ExposureTolerance below min-tradable size; quantization/compare + round-to-zero undefined" finding is RESOLVED by this requirement (tradability-quantized gate) together with STR-0346 (round-to-zero for `0 < |Δ| < T_exit`). No new STR added for AMB-0014. Verify: VALIDATION_PLAN §3.10, §3.3.
 
 ### STR-0346 — Round-to-zero rule for 0 < |ExposureDelta| < T_exit
 - section: §18 (from GATE-014 / DECISION-016) | lines: N/A | type: STATE_TRANSITION | strength: MUST | tag: [UR][DEFINED]
@@ -2899,6 +2903,7 @@ These are the only intra-section gate consolidations; every other §8 gate and r
 - invariants: FIXED (not calibratable); the entire D-16 family (STR-0223/0340, STR-0225, STR-0227) presumes cross | failure_behavior: see STR-0359 (abort if absent) | safety_impact: CRITICAL
 - dependencies: STR-0223, STR-0340, STR-0225, STR-0227, STR-0337, STR-0359, STR-0360 | impl: NOT_STARTED | verif: NOT_STARTED
 - origin: DECISION-020 (from GATE-018), 2026-09-22.
+- phase6c_note (2026-09-22, AMB-0025): the "account/margin/position-mode must be pinned" finding is SUPERSEDED by this requirement (MarginMode pin) + STR-0359/0360; not duplicated. Additionally (per VENUE_DRIFT_2026-09-22 DRIFT-1) reject trading any asset whose venue `meta.marginMode`/`onlyIsolated` forbids cross. Verify: VALIDATION_PLAN §3.9, §3.3.
 
 ### STR-0359 — Init-time abort if MarginMode absent
 - section: §18 (from GATE-018 / DECISION-020) | lines: N/A | type: FAILURE_BEHAVIOR | strength: MUST | tag: [UR][DEFINED]
@@ -2926,6 +2931,7 @@ These are the only intra-section gate consolidations; every other §8 gate and r
 - invariants: NON_BLOCKING; strengthens STR-0107 (N3) without changing it; Phase-6 resolution | failure_behavior: BLOCK on violation (proposed) | safety_impact: MEDIUM
 - dependencies: STR-0104, STR-0107, STR-0077 | impl: NOT_STARTED | verif: NOT_STARTED
 - origin: Phase-4.9 recommendation (U-3 / U3_VERIFICATION.md); SEMANTIC_NON_BLOCKING, no gate.
+- phase6c_note (2026-09-22, U-3 RESOLVED): concrete predicate adopted — for every still-live same-group, same-Generation order, require `|p_new − p_live| ≥ max(1 tick, 0.1 × StepBps · p/10⁴)`, evaluated on tick/lot-normalized submittable prices (STR-0363); violation → §5.6 BLOCK (fail-closed). Verify: VALIDATION_PLAN §3.8.
 
 ### STR-0362 — REST rate-budget rule (Phase-4.9 non-blocking recommendation)
 - section: §18 (Phase-4.9 recommendation, U-8; SEMANTIC_NON_BLOCKING) | lines: N/A | type: PARAMETER | strength: SHOULD | tag: [UR][DEFINED]
@@ -2935,3 +2941,130 @@ These are the only intra-section gate consolidations; every other §8 gate and r
 - invariants: NON_BLOCKING; operational; extends gate 6 (open-order cap, STR-0176) which covers only order count | failure_behavior: throttle → stale data → fail-closed gates | safety_impact: MEDIUM
 - dependencies: STR-0176, STR-0133 | impl: NOT_STARTED | verif: NOT_STARTED
 - origin: Phase-4.9 recommendation (U-8 / U8_VERIFICATION.md); SEMANTIC_NON_BLOCKING, no gate.
+- phase6c_note (2026-09-22): concrete operational rule — per-pass REST weight bounded; pass cadence `≤ (0.5 × 1200) / W_pass` per minute (50% headroom); WS-first substitution for `orderUpdates`, `userFills`, `clearinghouseState` (weight 0). Resolves U-8. Verify: VALIDATION_PLAN §3.17 (Phase 12) + operational review Phase 7. Fail-closed: exceed budget → defer non-critical reads; stale inputs → dependent gate fails closed.
+
+---
+
+## §19 — Phase 6c non-blocking constraint resolutions (new requirements STR-0363..STR-0382; existing STR-0001..0362 unchanged; no renumbering)
+
+> Resolutions of the 22 SEMANTIC_NON_BLOCKING findings (AMB-0012..0033). Each is the smallest deterministic, fail-closed, replay-safe rule that closes the gap; no `Strategy.md` normative content changed. Two findings are annotations on existing STR (AMB-0014 → STR-0345 phase6c_note; AMB-0025 → STR-0358 phase6c_note) rather than new rows. No Owner Gate opened; no DECISION created (verification-layer / deterministic-design resolutions). None escalated (PHASE6C_ESCALATION: none).
+
+### STR-0363 — Non-overlap evaluated on tick/lot-normalized submittable prices (AMB-0012)
+- section: §19 (AMB-0012) | type: GUARD | strength: MUST | tag: [UR][DEFINED]
+- wording: "The §5.6 non-overlap test (N1–N3, and the STR-0361 ε separation) MUST be evaluated on tick/lot-normalized submittable prices (post-§6.3 normalization), never on real-valued unrounded prices."
+- fail_closed_default: if a price cannot be normalized to the venue tick/lot grid → BLOCKED (transition not made); RECONCILIATION_REQUIRED.
+- affects: STR-0104, STR-0105, STR-0106, STR-0107, STR-0361, STR-0093 | verify: VALIDATION_PLAN §3.8 (precision) | origin: AMB-0012, Phase 6c.
+
+### STR-0364 — MarketDepth coverage-completeness vs l2Book depth window (AMB-0013)
+- section: §19 (AMB-0013) | type: GUARD | strength: MUST | tag: [UR][DEFINED]
+- wording: "MarketDepth used by gate 1 / MaxBasketNotional MUST be assessed for coverage completeness against the l2Book depth actually available (≤20 levels/side) within the ±(10 × StepBps) window; if the window is not fully covered by returned levels, the depth is treated as INCOMPLETE."
+- fail_closed_default: INCOMPLETE depth → the dependent gate (arming / cap computation) fails closed (no arm; use the conservative available depth, never extrapolate).
+- affects: STR-0228, STR-0227 | verify: VALIDATION_PLAN §3.7, §3.8 | origin: AMB-0013, Phase 6c (STR-0228 remains PARTIALLY_VERIFIED design note).
+
+### STR-0365 — Rounding-direction & boundary-equality canon (AMB-0015)
+- section: §19 (AMB-0015) | type: GUARD | strength: MUST | tag: [UR][DEFINED]
+- wording: "A single conservative rounding & boundary canon applies across all formulas: entry qty → floor_lot; correction/closure qty → ceil_lot; Ioc price → aggressive (buy ceil_tick, sell floor_tick); Alo price → passive (buy floor_tick, sell ceil_tick); every trigger threshold → ceil (a trigger never fires below an executable size). Boundary comparisons are explicit: gate-permit uses `≤` (inclusive), breach uses `>` — as already fixed per requirement."
+- fail_closed_default: ambiguous rounding/boundary at a value not on the grid → conservative direction (toward non-action / smaller exposure); if still ambiguous → BLOCKED.
+- affects: STR-0083, STR-0153, STR-0248, STR-0135..0138 | verify: VALIDATION_PLAN §3.8 | origin: AMB-0015, Phase 6c.
+
+### STR-0366 — Record dynamic-default inputs + calibration version/effective-time for replay (AMB-0016)
+- section: §19 (AMB-0016) | type: PERSISTENCE_RULE | strength: MUST | tag: [UR][DEFINED]
+- wording: "Every decision-affecting dynamic-default input (StepBps, MaxBasketNotional, MarkPrice used, Leverage_effective, calibration version, effective-time) MUST be recorded as part of the event that consumed it, so replay is deterministic."
+- fail_closed_default: a dynamic value used without its inputs recorded is a defect → the transition is not replay-safe → treated as BLOCKED at review; runtime records-or-fails.
+- affects: STR-0336, STR-0338, STR-0339, STR-0340, STR-0341 | verify: VALIDATION_PLAN §3.1 (replay), §3.3 | origin: AMB-0016, Phase 6c (event-discipline; EVENT_MODEL §A2(e)/§A4).
+
+### STR-0367 — Side-effect ordering / atomic decision boundary beyond §4.7 (AMB-0017)
+- section: §19 (AMB-0017) | type: PRECEDENCE_RULE | strength: MUST | tag: [UR][DEFINED]
+- wording: "Within a single deterministic pass (CAP-0005), all decisions are computed from the folded state BEFORE any side effect is emitted; the emission order of command events follows §4.7 P0–P6 and, within a pass, a fixed deterministic iteration order (Hedge/EXPOSURE_CORRECTION before Profit/ENTRY; closure before new entry; lower GenerationID first). No decision reads a side effect produced earlier in the same pass."
+- fail_closed_default: if two side effects would race within a pass → serialize per the fixed order; if order is undefined for a case → BLOCKED, RECONCILIATION_REQUIRED.
+- affects: STR-0063, STR-0203, STR-0335 | verify: VALIDATION_PLAN §3.1, §3.6, §3.13 | origin: AMB-0017, Phase 6c.
+
+### STR-0368 — Evidence gap ≠ continuity in confirmation window (AMB-0018)
+- section: §19 (AMB-0018) | type: GUARD | strength: MUST | tag: [UR][DEFINED]
+- wording: "During a continuous-confirmation window (§4.2), an evidence gap (missing/stale observation) MUST NOT be read as continued satisfaction; a gap pauses and resets the window (fail-closed), never advances it."
+- fail_closed_default: gap during the window → window reset; confirmation not granted.
+- affects: STR-0036, STR-0037, STR-0038, STR-0039 | verify: VALIDATION_PLAN §3.7 | origin: AMB-0018, Phase 6c.
+
+### STR-0369 — Per-data-type freshness/age policy (AMB-0019)
+- section: §19 (AMB-0019) | type: PARAMETER | strength: MUST | tag: [UR][DEFINED]
+- wording: "Each data type carries a maximum age; an observation older than its max-age is recorded STALE and any gate depending on it fails closed. Concrete per-type values are recorded in INTERFACE_MAP.md §C2 (phase6c_note); values are overridable via Owner Gate only."
+- fail_closed_default: stale/missing → dependent gate fails closed (no decision on stale data).
+- affects: STR-0163, STR-0200, STR-0228 | verify: VALIDATION_PLAN §3.7 | origin: AMB-0019, Phase 6c (numbers in INTERFACE_MAP §C2).
+
+### STR-0370 — REST vs WS precedence / reconciliation (AMB-0020)
+- section: §19 (AMB-0020) | type: PRECEDENCE_RULE | strength: MUST | tag: [UR][DEFINED]
+- wording: "When REST and WS disagree, `clearinghouseState` is authoritative for position/margin (DECISION-002); the more recent authoritative read (by canonical order, DECISION-007) wins; a disagreement beyond freshness tolerance → RECONCILIATION_REQUIRED before any decision."
+- fail_closed_default: unresolved REST/WS disagreement → RECONCILIATION_REQUIRED (no decision).
+- affects: STR-0200 | verify: VALIDATION_PLAN §3.7, §3.9 | origin: AMB-0020, Phase 6c (DECISION-002 authority).
+
+### STR-0371 — TWAP parent/child mapping, remaining-qty, crash-mid-TWAP (AMB-0021)
+- section: §19 (AMB-0021) | type: STATE_TRANSITION | strength: MUST | tag: [UR][DEFINED]
+- wording: "A TWAP is modeled as a parent intent with child sub-order fills; remaining quantity is tracked from authoritative fills only; a TWAP is NEVER assumed complete without verified fills; on crash mid-TWAP, recovery reconciles child fills via userFills/clearinghouseState before any new action (DECISION-008)."
+- fail_closed_default: unknown TWAP progress → RECONCILIATION_REQUIRED; remaining treated as still-working, never as closed.
+- affects: STR-0254 | verify: VALIDATION_PLAN §3.5, §3.14 | origin: AMB-0021, Phase 6c.
+
+### STR-0372 — Cancellation-in-flight state (AMB-0022)
+- section: §19 (AMB-0022) | type: STATE_TRANSITION | strength: MUST | tag: [UR][DEFINED]
+- wording: "A cancel request enters an explicit CANCEL_IN_FLIGHT state from send until authoritative confirmation (orderStatus/openOrders); the order is not treated as cancelled until confirmed; a cancel and a fill may race — the authoritative outcome (delta) resolves it."
+- fail_closed_default: unconfirmed cancel → treat the order as still live (no second order on the Level, STR-0344); ambiguity → RECONCILIATION_REQUIRED.
+- affects: STR-0075, STR-0085, STR-0129 | verify: VALIDATION_PLAN §3.5, §3.7 | origin: AMB-0022, Phase 6c.
+
+### STR-0373 — Rejection taxonomy → skip/retry/recalc/freeze (AMB-0023)
+- section: §19 (AMB-0023) | type: STATE_TRANSITION | strength: MUST | tag: [UR][DEFINED]
+- wording: "Venue rejections are mapped deterministically by reason: precision → recalc-and-renormalize (§6.3) once, else skip; margin → skip/hedge per exposure; rate-limit → backoff (STR-0362) then retry; price/post-only-cross → reprice (§9.2) or skip; risk/other → FREEZE. Each path is deterministic and logged with the venue reason."
+- fail_closed_default: unrecognized rejection reason → FREEZE (fail-closed), operator escalation.
+- affects: STR-0163, STR-0182, STR-0190 | verify: VALIDATION_PLAN §3.5, §3.7 | origin: AMB-0023, Phase 6c.
+
+### STR-0374 — Market/IOC slippage propagation to reference/cost/non-overlap (AMB-0024)
+- section: §19 (AMB-0024) | type: GUARD | strength: MUST | tag: [UR][DEFINED]
+- wording: "The reference price after an Ioc/emergency fill is the execution-grounded fill price (§5.4), not the pre-trade target; realized slippage is booked into NET PnL/cost accounting; the post-fill reference is subject to §5.4.1 tolerance and the §5.6 non-overlap test before ladder construction."
+- fail_closed_default: reference beyond §5.4.1 tolerance → BLOCKED, RECONCILIATION_REQUIRED (no ladder on a drifted reference).
+- affects: STR-0091, STR-0185, STR-0193 | verify: VALIDATION_PLAN §3.8, §3.11 | origin: AMB-0024, Phase 6c.
+
+### STR-0375 — Venue drift handling + Strategy/venue version binding (AMB-0026)
+- section: §19 (AMB-0026) | type: GUARD | strength: MUST | tag: [UR][DEFINED]
+- wording: "Venue metadata (tick/lot/szDecimals/maxLeverage/fee tier/margin tables/schema) is read live (DECISION-001) and version-pinned per run (commit/date); a detected drift from the pinned evidence (schema/precision/leverage/fee change) → fail-closed on the affected path until the change is reconciled and re-pinned."
+- fail_closed_default: drift detected → affected operations BLOCKED/FREEZE until re-pinned; never silently adopt a changed venue value in a binding formula mid-Basket.
+- affects: STR-0135, STR-0137, STR-0337, STR-0257 | verify: VALIDATION_PLAN §3.17 | origin: AMB-0026, Phase 6c (DECISION-001 live-read; VENUE_DRIFT process).
+
+### STR-0376 — Output/reporting contract; no success-before-settlement (AMB-0027)
+- section: §19 (AMB-0027) | type: PERSISTENCE_RULE | strength: MUST | tag: [UR][DEFINED]
+- wording: "All reported outcomes carry: reason code, freshness/provenance, desired-vs-observed distinction, and partial-success residuals. No action is reported as successful before authoritative settlement (fill ∧ delta, STR-0131); intents/commands are reported as such, never as completed positions."
+- fail_closed_default: absent settlement evidence → report as PENDING/UNRESOLVED, never SUCCESS.
+- affects: STR-0131, STR-0293, STR-0035 | verify: VALIDATION_PLAN §3.13 | origin: AMB-0027, Phase 6c.
+
+### STR-0377 — Rate-limit / backoff / open-order-cap operational model (AMB-0028)
+- section: §19 (AMB-0028) | type: PARAMETER | strength: MUST | tag: [UR][DEFINED]
+- wording: "Operational model: exponential backoff on rate-limit rejections; open-order count kept below the venue cap with reserved hedge headroom (STR-0176); the REST weight budget (STR-0362) bounds pass cadence; timers/risk windows are evaluated on recorded events, not wall-clock during backoff."
+- fail_closed_default: at/above open-order cap → no new ENTRY arming (hedge headroom preserved); persistent rate-limit → fail-closed via freshness.
+- affects: STR-0176 | verify: VALIDATION_PLAN §3.17 | origin: AMB-0028, Phase 6c (composes with STR-0362).
+
+### STR-0378 — Signer verifies correct, non-stale intent; forensic trail (AMB-0029)
+- section: §19 (AMB-0029) | type: GUARD | strength: MUST | tag: [UR][DEFINED]
+- wording: "Before signing, the signer MUST verify the command matches its recorded intent (cloid, size, side, price concept) and is not stale (within freshness/`expiresAfter`); a forensic trail (request + signature metadata, NO secret material) is recorded. Secrets never cross into the log/Core/observability (ARCHITECTURE_DECISION §7)."
+- fail_closed_default: intent mismatch or stale → refuse to sign; RECONCILIATION_REQUIRED.
+- affects: STR-0298, STR-0171 | verify: VALIDATION_PLAN §3.5, §3.9 | origin: AMB-0029, Phase 6c (security; INTERFACE_MAP B1.4).
+
+### STR-0379 — API-key rotation / revoke / recovery lifecycle (AMB-0030)
+- section: §19 (AMB-0030) | type: PERSISTENCE_RULE | strength: MUST | tag: [UR][DEFINED]
+- wording: "Signer credential lifecycle (rotation, revoke, expiry, recovery) is an operational security procedure executed OUTSIDE the Core; key material never enters the log/Core; a revoked/expired key → signing fails → fail-closed (no side effect). Rotation is an administrative event (EVENT_MODEL §A2(j)) recording only non-secret metadata."
+- fail_closed_default: invalid/expired/revoked key → no signing, no side effect (fail-closed).
+- affects: STR-0298 | verify: VALIDATION_PLAN §3.5 | origin: AMB-0030, Phase 6c (security/ops).
+
+### STR-0380 — Kill-switch / cancel-all / flatten-all semantics (AMB-0031)
+- section: §19 (AMB-0031) | type: STATE_TRANSITION | strength: MUST | tag: [UR][DEFINED]
+- wording: "Kill-switch / cancel-all / flatten-all are operator events (EVENT_MODEL §A2(i)) with a uniform, deterministic effect: cancel-all → cancel every resting order (confirm via orderStatus), flatten-all → reduce exposure to zero via EXPOSURE_CORRECTION_INTENT, kill-switch → FREEZE + cancel-all (positions retained unless flatten also invoked); all record identity/timestamp/evidence; exit requires Owner clearance (DECISION-014)."
+- fail_closed_default: partial/unconfirmed effect → RECONCILIATION_REQUIRED / RECOVERY; never assume the switch completed without authoritative confirmation.
+- affects: STR-0239, STR-0240 | verify: VALIDATION_PLAN §3.5, §3.14 | origin: AMB-0031, Phase 6c (overlaps external-change GATE-004/DECISION-005 for manual orders).
+
+### STR-0381 — Owner-gate/policy/calibration versioning during an active Basket (AMB-0032)
+- section: §19 (AMB-0032) | type: PERSISTENCE_RULE | strength: MUST | tag: [UR][DEFINED]
+- wording: "Config/policy/calibration is resolved once and binding for a Basket (§14 global rule, STR-0011); a mid-Basket change to a gate/policy/calibration value does NOT retroactively alter prior state — it is an administrative event with an effective-time, applied only to subsequent Baskets (or a subsequent explicitly-authorized re-resolution). Prior state remains reconstructable under the version it was computed with."
+- fail_closed_default: an attempt to apply a changed binding value to an in-flight Basket → rejected (fail-closed); requires a new Basket or explicit owner re-resolution.
+- affects: STR-0257 | verify: VALIDATION_PLAN §3.1 (replay under recorded version) | origin: AMB-0032, Phase 6c (§14 computed-once).
+
+### STR-0382 — Numeric domain / type system & boundary cases (AMB-0033)
+- section: §19 (AMB-0033) | type: GUARD | strength: MUST | tag: [UR][DEFINED]
+- wording: "A defined numeric domain with explicit guards: prices/sizes are positive and on the venue grid; zero/near-zero price, StepBps domain, spread, leverage/tier bounds, and overflow are guarded; any value outside its declared domain → fail-closed (BLOCKED), never a silent wrap/NaN/clip. Arithmetic uses a deterministic representation (no ambient float nondeterminism in decisions)."
+- fail_closed_default: out-of-domain value → BLOCKED; no decision on an undefined numeric.
+- affects: STR-0135, STR-0153, STR-0140 | verify: VALIDATION_PLAN §3.8, §3.3 | origin: AMB-0033, Phase 6c (type-system design; ties to CAP-0024 determinism).

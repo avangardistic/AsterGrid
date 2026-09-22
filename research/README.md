@@ -79,6 +79,10 @@ On 2026-09-22: created **`implementation/EVENT_MODEL.md`** (10 conceptual event 
 
 On 2026-09-22: created **`implementation/CAP0024_DESIGN.md`** — the independent reference model (primary oracle per VALIDATION_PLAN §2/§3.2/§4): purpose + independence requirements (no shared code with production), inputs/outputs, **20 behavioral obligations (B-01..B-20) each mapped to a VALIDATION_PLAN §3.x mechanism**, explicit out-of-scope (live venue access, dynamic-default values), **6 candidate languages/paradigms REF-A..F with recommendation-strength and ABSOLUTE/CONDITIONAL framing (no selection)**, and conceptual differential/exhaustive harness requirements. Opened **OWNER_GATE_019** (language/paradigm selection) and registered **DECISION-021 PENDING**. No selection made, no code, no GATE-019 resolution. Phase 6c may proceed on the finalized behavioral design without the language selection.
 
+## GATE-019 resolution + Phase 6c — non-blocking constraints resolved
+
+On 2026-09-22: **GATE-019 RESOLVED** — CAP-0024 reference model = **REF-D (functional), CONDITIONAL** (DECISION-021; REF-A rejected; REF-C retained as a Phase-9+ complementary note; no production-language commitment). **Phase 6c** closed the non-blocking constraint set: the 22 SEMANTIC_NON_BLOCKING findings (AMB-0012..0033) resolved as **20 new requirements STR-0363..STR-0382 (§19)** + 2 annotations (AMB-0014→STR-0345, AMB-0025→STR-0358); U-3/U-5/U-6/U-8 resolved as phase6c_note on STR-0361/0133/0290/0362; concrete numbers added as `phase6c_note` (snapshot cadence + watermark encoding in `EVENT_MODEL.md`; per-type freshness in `INTERFACE_MAP.md`); AMB-0034/0035 marked SCHEDULED in `VALIDATION_PLAN.md`. Corpus now **382 STR-***. **None escalated** (no genuinely-semantic finding). No production language chosen, no code, no new gate, no new DECISION beyond DECISION-021.
+
 ## Artifact layout (created only when a phase requires it)
 
 ```

@@ -114,4 +114,8 @@ Requires:
 
 ## Status
 
-Behavioral design (Part B, 20 obligations) is **final as specified** and Phase 6c (non-blocking constraint resolution) may proceed on it — **6c does not need the language selection**. The **reference-model implementation and the differential harness (Phase 7)** cannot be built until **GATE-019** selects the language/paradigm (DECISION-021 PENDING).
+Behavioral design (Part B, 20 obligations) is **final as specified** and Phase 6c (non-blocking constraint resolution) may proceed on it — **6c does not need the language selection**. The **reference-model implementation and the differential harness (Phase 7)** cannot be built until **GATE-019** selects the language/paradigm (**RESOLVED 2026-09-22 — see below**).
+
+## Forward note (GATE-019 resolution, 2026-09-22)
+
+Selected: **REF-D** (functional reference), CONDITIONAL. **REF-C (formal/spec) is retained as a possible complementary slice in Phase 9+ for invariant/exhaustive verification** — NOT a second CAP-0024 language, and NOT selected in this Gate. No production runtime language commitment is made. (DECISION-021; OWNER_GATE_019.)

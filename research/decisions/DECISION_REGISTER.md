@@ -317,19 +317,19 @@
 - **owner_required:** YES. **owner_decision:** Option A (2026-09-22).
 - **date:** 2026-09-22. **supersedes:** NONE.
 
-## DECISION-021 — CAP-0024 reference-model language/paradigm (from OWNER_GATE_019) — PENDING
+## DECISION-021 — CAP-0024 reference-model language/paradigm (from OWNER_GATE_019) — RESOLVED
 
 - **decision_id:** DECISION-021
 - **question:** "Which language/paradigm should CAP-0024 (the reference model) be implemented in, to satisfy VALIDATION_PLAN §4's independence requirement (no shared code with production)?"
 - **context:** `research/implementation/CAP0024_DESIGN.md`; `research/decisions/OWNER_GATE_019.md`. Note: the production runtime language is itself not yet selected (a separate future Owner Gate), so the answer may be ABSOLUTE, CONDITIONAL on the production choice, or DEFER (see GATE-019 §3).
 - **evidence:** VALIDATION_PLAN §4 (independence); ARCHITECTURE_DECISION §4 (Research layer, offline/NON_RUNTIME); candidate list in CAP0024_DESIGN.md Part C (REF-A..F).
-- **decision:** "PENDING — awaiting Owner resolution of GATE-019."
+- **decision:** "REF-D (functional reference), CONDITIONAL. Framing (verbatim): 'CAP-0024 in a functional language, paradigm-distinct from whatever the production runtime uses; concrete language pinned when the production language is chosen (separate future Gate).' REF-A REJECTED (common-mode risk). REF-C recorded as a FORWARD NOTE only — a formal/spec slice complementing the differential harness may be considered in Phase 9+; NOT a second selection in this Gate. No commitment is made in this decision on the production runtime language."
 - **alternatives:** the option set from GATE-019 — REF-A (same lang, separate codebase), REF-B (different general-purpose lang), REF-C (formal/spec tool), REF-D (functional reference), REF-E (declarative/constraint), REF-F (hybrid functional/formal + comparator).
-- **rejected_alternatives:** not yet decided (PENDING).
-- **affected_strategy_requirements:** none directly (this is a verification-layer decision).
-- **risk:** LOW while unresolved (Phase 7 cannot start, so no production risk); MEDIUM after the decision if the chosen paradigm is not structurally independent (common-mode-bug risk).
-- **reversibility:** MEDIUM (the reference model is not shipped to production, so a change is low-cost but requires re-running the differential suite).
+- **rejected_alternatives:** REF-A (common-mode bug risk); all other REFs not selected; REF-C retained as a forward note only.
+- **affected_strategy_requirements:** none directly (verification-layer decision).
+- **risk:** LOW after resolution: REF-D is paradigm-distinct from any likely imperative production, structurally independent, and suited to the pure event fold.
+- **reversibility:** MEDIUM (the reference model is not shipped; changing it requires re-running the differential suite).
 - **owner_required:** YES.
-- **owner_decision:** PENDING.
+- **owner_decision:** REF-D, CONDITIONAL (2026-09-22).
 - **date:** 2026-09-22.
 - **supersedes:** NONE.

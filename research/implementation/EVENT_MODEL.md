@@ -86,6 +86,8 @@ For each external stream, whether the venue provides a monotonic sequence, and t
 
 > Where the venue exposes a genuine monotonic per-stream sequence field, the watermark is that field's highest value; where it does not, the watermark is the highest canonical-order key tuple observed on that stream (see §D2). The watermark is **stored as part of the log, per stream** (conceptually a per-stream counter/tuple in the log; **no storage technology chosen**).
 
+> **phase6c_note (2026-09-22) — concrete watermark encoding (still conceptual, no storage tech):** per stream, the watermark is the tuple `(stream_id, last_sequence_value, last_server_ts, last_local_ts, last_monotonic_counter, content_fingerprint)`. For streams WITHOUT a venue sequence, `last_sequence_value` is null and ordering is by `(server_ts, local_ts, monotonic_counter)` per DECISION-007. Advanced only by folding a recorded event (§D3).
+
 ### §D2 — Streams without a venue sequence
 
 For REST reads and WS events lacking a venue sequence:
@@ -121,6 +123,8 @@ A snapshot captures, conceptually:
 - **periodic** (policy-driven cadence);
 - on an observed **log-size threshold**;
 - **never during an active side-effect window** — a snapshot must not race with an unresolved command event (it is taken only at a consistent fold boundary).
+
+> **phase6c_note (2026-09-22):** concrete default policy (format still conceptual): take a snapshot every **N = 10,000 events OR every T = 5 minutes**, whichever comes first; a **forced snapshot before any long-running recovery replay**; plus a **log-size-threshold** trigger (the concrete size value is Phase-7 operational tuning). Policy = "periodic OR size OR pre-recovery". This does not change §E1–§E2/§E4–§E5; the snapshot remains an optimization, never an authority.
 
 ### §E4 — Snapshot correctness invariants
 

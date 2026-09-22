@@ -19,3 +19,11 @@ Proposal: `τ_R := max(ceil_lot(f), q_min(M))` (fixes A-10) — the `q_min` floo
 Scheduled: Phase 6c (operational policy); MAY be promoted to Phase 6b if the event model imposes cadence/refresh constraints that need the budget defined earlier. Owner: Phase 6c (or 6b, if referenced by the design).
 
 > These four are BINDING Phase-6/7 work items with fail-closed defaults until resolved (per ARCHITECTURE_DECISION §11), but they are NOT Owner strategy-semantic decisions. No gate opened; no DECISION created.
+
+## Phase 6c resolution status (2026-09-22)
+
+All four RESOLVED in Phase 6c (deterministic, fail-closed, no gate, no DECISION):
+- **U-3 — RESOLVED:** concrete N3 min-separation predicate `|p_new − p_live| ≥ max(1 tick, 0.1 × StepBps · p/10⁴)` on tick/lot-normalized prices → STR-0361 phase6c_note (+ STR-0363).
+- **U-5 — RESOLVED:** cloid = reconciliation identity; idempotency established via orderStatus, never assumed (DECISION-008 governs) → STR-0133 phase6c_note.
+- **U-6 — RESOLVED:** `τ_R := max(ceil_lot(f), q_min(M))` → STR-0290 phase6c_note.
+- **U-8 — RESOLVED:** per-pass REST weight bounded; cadence `≤ (0.5 × 1200)/W_pass`; WS-first substitution → STR-0362 phase6c_note (+ STR-0377).

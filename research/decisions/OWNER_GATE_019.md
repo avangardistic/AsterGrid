@@ -36,4 +36,4 @@ CAP-0024 اوراکلِ اصلیِ هستهٔ قطعی است (VALIDATION_PLAN �
 ## ۷. توصیه (Recommendation)
 شواهدِ Part C به‌طور عینی از **استقلالِ ساختاریِ قوی** پشتیبانی می‌کنند (یعنی نه REF-A). میانِ گزینه‌های مستقل، **REF-D (فانکشنال، سازگار با fold)** یا **REF-F (هیبرید)** بیشترین پوششِ برابریِ رفتاری را با استقلالِ خوب می‌دهند، و **REF-C** برای لایهٔ invariant/exhaustive قوی‌ترین است (احتمالاً مکمّلِ REF-B/D برای برابریِ emitted-event). **این توصیه الزام‌آور نیست**؛ انتخابِ نهایی — و شکلِ ABSOLUTE/CONDITIONAL/DEFER — با مالک است. هیچ گزینه‌ای در این run انتخاب نمی‌شود.
 
-**STATUS: OPEN — awaiting Owner selection of language/paradigm (GATE-019).**
+**STATUS: RESOLVED — REF-D (functional reference), CONDITIONAL (owner, 2026-09-22).** See DECISION_REGISTER.md DECISION-021.
