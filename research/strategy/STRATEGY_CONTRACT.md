@@ -4,6 +4,7 @@
 > **Dedicated-account constraint (DECISION-005 / DECISION-011, 2026-09-21):** The trading account is dedicated exclusively to this system. No other bot, manual trading, or third-party activity is assumed to share the account. Any position change not attributable to a strategy intent is classified as contamination and triggers RECONCILIATION_REQUIRED / FREEZE per DECISION-005.
 > **Historical UNVERIFIED notes:** two non-field `UNVERIFIED` strings remain in this file at the field-legend and the Phase-1 STEP-5 report. Both are historical prose, not live requirement statuses. All 17 [HC] requirement fields were resolved in Phase 2/2.5+2b.
 > **Audit findings (Phase 4.5):** open semantic ambiguities and Owner Gates affecting these requirements are classified in `research/strategy/SEMANTIC_AMBIGUITIES.md` (AMB-0001..0046; GATE-003..GATE-013 OPEN).
+> **Open gate:** OWNER_GATE_014 (F-1* livelock cell). Until closed, the §5.2 exposure gate (STR-0339 / STR-0074) is not implementable in the D-16 default configuration.
 
 - **Purpose:** Derived, traceable contract of every normative requirement in `Strategy.md` v2.3-final, each with a stable `STR-*` ID. This is a DERIVED artifact — `Strategy.md` remains the sole authority. No requirement here invents semantics; ambiguities are surfaced in the OPEN section, never guessed.
 - **Version:** 1.0 (Phase 1)
@@ -2682,6 +2683,7 @@ Tag semantics are exactly as recorded in `STRATEGY_SOURCE_RECORD.md` §4. Tags a
 - invariants: ExposureTolerance < MaxExposureImbalance < one level (consistency note); supersedes (0.1×level) [TEMP] | failure_behavior: NONE | safety_impact: CRITICAL
 - dynamic_note: must remain dynamic — never freeze to a constant (D-16); must be calibrated
 - dependencies: STR-0140, STR-0227, STR-0141, STR-0278, STR-0083, STR-0342 | impl: NOT_STARTED | verif: NOT_STARTED
+- f1_status_note: "F-1* verified CONDITIONAL (F1_VERIFICATION.md, Phase 4.7). Dead-band reachable at defaults when StepBps × MaxBasketNotional < 600,000. Resolution pending OWNER_GATE_014 / DECISION-016. Until resolved, the §5.2 gate is marked PENDING_FIX — not implementable as written." (annotation only; STR-0339 normative content unchanged)
 
 ### STR-0340 — [DYN] CANONICAL MaxExposureImbalance := (0.25 × 0.5/Leverage_effective) × NotionalPerLevel/MarkPrice (D-16) — must remain dynamic
 - section: §16 Dynamic Defaults | lines: L1296–L1325 | type: PARAMETER | strength: MUST | tag: [DYN][DEFINED]

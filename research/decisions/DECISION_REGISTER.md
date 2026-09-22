@@ -239,3 +239,20 @@
 - **reversibility:** MEDIUM (the pure Core carries over unchanged to CAND-A or CAND-C; the commitment is the event schema / log-as-truth, so migrating away means a log/schema migration — see ARCHITECTURE_DECISION.md §9).
 - **owner_required:** YES. **owner_decision:** CAND-B (2026-09-21).
 - **date:** 2026-09-21. **supersedes:** NONE.
+
+## DECISION-016 — F-1* livelock cell resolution (from OWNER_GATE_014 / AMB-0047) — PENDING
+
+- **decision_id:** DECISION-016
+- **question:** "Should the F-1* livelock cell be resolved by adopting Fix-1 (tradability-quantized exposure gate), by a calibration constraint (StepBps × MaxBasketNotional ≥ 600,000), or both?"
+- **context:** `research/findings/F1_VERIFICATION.md` (independent verification, verdict F1_CONDITIONAL); `research/decisions/OWNER_GATE_014.md` (Q-1 Fix-1 adoption; Q-2 calibration constraint; Q-3 contract annotation).
+- **evidence:** SRC-204 (`strategy_audit.md` §1 F-1*/§3), SRC-202 (`strategy_issues.md` category C), SRC-104 (`page-exchange-endpoint.md` — venue $10 minimum order value, hard reject), `Strategy.md` §5.2 / §11.1 (gate predicate `|ExposureDelta| ≤ ExposureTolerance`) / §16 D-16 (τ_E formula).
+- **decision:** "**PENDING** — awaiting Owner resolution of OWNER_GATE_014 Q-1, Q-2, Q-3."
+- **alternatives:** the option sets in OWNER_GATE_014 — Q-1 {A adopt Fix-1 / B keep τ_E, rely on calibration / C other}; Q-2 {A hard config invariant / B warn-only / C other}; Q-3 {A annotation only, D-16 unchanged / B leave contract as-is / C other}.
+- **rejected_alternatives:** not yet decided (PENDING).
+- **affected_strategy_requirements:** STR-0339, STR-0298, STR-0315, STR-0074, STR-0077.
+- **risk:** HIGH while unresolved (livelock reachable at defaults, StepBps × MaxBasketNotional < 600,000); LOW after resolution if Fix-1 adopted; MEDIUM if only the calibration constraint is adopted (a future config change could re-open the dead-band unless enforced fail-closed).
+- **reversibility:** HIGH (Fix-1 is additive; a calibration constraint is a config value).
+- **owner_required:** YES.
+- **owner_decision:** **PENDING**.
+- **date:** 2026-09-22.
+- **supersedes:** NONE.
