@@ -119,3 +119,7 @@ Behavioral design (Part B, 20 obligations) is **final as specified** and Phase 6
 ## Forward note (GATE-019 resolution, 2026-09-22)
 
 Selected: **REF-D** (functional reference), CONDITIONAL. **REF-C (formal/spec) is retained as a possible complementary slice in Phase 9+ for invariant/exhaustive verification** — NOT a second CAP-0024 language, and NOT selected in this Gate. No production runtime language commitment is made. (DECISION-021; OWNER_GATE_019.)
+
+## Forward note (GATE-020 opened, 2026-09-22)
+
+The concrete language for REF-D (CAP-0024) will be pinned once GATE-020 selects the production runtime language, so that REF-D remains paradigm-distinct from production (per DECISION-021). Candidate for CAP-0024: a functional language (e.g. Haskell, OCaml, Clojure). Final pin is dependent on GATE-020 (DECISION-022, PENDING).

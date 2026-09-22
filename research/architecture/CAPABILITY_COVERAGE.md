@@ -2,8 +2,8 @@
 
 - **Purpose:** Reverse map from every `STR-*` requirement to ≥1 capability (`CAP-*`), guaranteeing no requirement is dropped in capability discovery. Companion to `CAPABILITY_MAP.md`.
 - **Producer:** Claude Code (Opus 4.8), Phase 3.
-- **Inputs:** `STRATEGY_CONTRACT.md` (362 STR-*, incl. Phase 4.6/4.10 additions), `CAPABILITY_MAP.md` (24 CAP-*).
-- **Status:** COMPLETE — all 362 STR-* mapped (343 Phase 1 + STR-0344 Phase 4.6 + STR-0345..0362 Phase 4.10); "STR-* without a CAP-*" section is empty.
+- **Inputs:** `STRATEGY_CONTRACT.md` (382 STR-*, incl. Phase 4.6/4.10/6c additions), `CAPABILITY_MAP.md` (24 CAP-*).
+- **Status:** COMPLETE — all 382 STR-* mapped (343 Phase 1 + STR-0344 Phase 4.6 + STR-0345..0362 Phase 4.10 + STR-0363..0382 Phase 6c); "STR-* without a CAP-*" section is empty.
 
 > Notation: primary capability first; additional capabilities that also cover the requirement follow. §5.7 scenarios additionally map to CAP-0024 (differential-test inputs) — noted once here rather than repeated per row.
 
@@ -145,11 +145,39 @@
 | STR-0361 | N3 min-separation ε (Phase-4.9 recommendation; Phase 6) | CAP-0008, CAP-0009 |
 | STR-0362 | REST rate-budget rule (Phase-4.9 recommendation; Phase 6) | CAP-0001, CAP-0015 |
 
-## Summary (updated Phase 4.10)
+## Phase 6c STR additions (STR-0363..STR-0382)
 
-- **STR-* total:** 362 (STR-0001..0362). **Mapped to ≥1 CAP-*:** 362 (100%) — 343 (Phase 1) + STR-0344 (Phase 4.6) + STR-0345..0362 (Phase 4.10).
+> Resolutions of the 22 SEMANTIC_NON_BLOCKING findings (STRATEGY_CONTRACT §19). Mapped from each STR's `affects`/`verify` fields to existing CAP-* — no CAP-* invented, none renumbered. (AMB-0014 and AMB-0025 were resolved as phase6c_note annotations on STR-0345 / STR-0358 and are already covered by those rows above.)
+
+| STR | Topic | CAP-* |
+|-----|-------|-------|
+| STR-0363 | non-overlap on tick/lot-normalized submittable prices | CAP-0008, CAP-0009 |
+| STR-0364 | MarketDepth coverage-completeness vs l2Book window | CAP-0001, CAP-0010 |
+| STR-0365 | rounding-direction & boundary-equality canon | CAP-0013, CAP-0014 |
+| STR-0366 | record dynamic-default inputs + calibration version for replay | CAP-0021, CAP-0005 |
+| STR-0367 | side-effect ordering / atomic decision boundary beyond §4.7 | CAP-0005 |
+| STR-0368 | evidence gap ≠ continuity in confirmation window | CAP-0007, CAP-0002 |
+| STR-0369 | per-data-type freshness/age policy | CAP-0001, CAP-0002 |
+| STR-0370 | REST vs WS precedence/reconciliation | CAP-0002 |
+| STR-0371 | TWAP parent/child, remaining-qty, crash-mid-TWAP | CAP-0015, CAP-0018 |
+| STR-0372 | cancellation-in-flight state | CAP-0015 |
+| STR-0373 | rejection taxonomy → skip/retry/recalc/freeze | CAP-0015 |
+| STR-0374 | market/IOC slippage propagation to reference/cost | CAP-0008, CAP-0013 |
+| STR-0375 | venue drift handling + version binding | CAP-0001, CAP-0020 |
+| STR-0376 | output/reporting contract; no success-before-settlement | CAP-0022, CAP-0021 |
+| STR-0377 | rate-limit/backoff/open-order-cap model | CAP-0001, CAP-0015 |
+| STR-0378 | signer verifies correct non-stale intent; forensic trail | CAP-0014 |
+| STR-0379 | API-key rotation/revoke/recovery lifecycle | CAP-0014 |
+| STR-0380 | kill-switch / cancel-all / flatten-all semantics | CAP-0018, CAP-0019 |
+| STR-0381 | owner-gate/policy/calibration versioning during active Basket | CAP-0020 |
+| STR-0382 | numeric domain/type system & boundary cases | CAP-0013, CAP-0023 |
+
+## Summary (updated Phase 6c)
+
+- **STR-* total:** 382 (STR-0001..0382). **Mapped to ≥1 CAP-*:** 382 (100%) — 343 (Phase 1) + STR-0344 (Phase 4.6) + STR-0345..0362 (Phase 4.10) + STR-0363..0382 (Phase 6c).
 - **Capabilities:** 24 (CAP-0001…CAP-0024). One (CAP-0024) is RESEARCH-ONLY / NON_RUNTIME.
 - **Capabilities with zero STR-* mapped:** none (every CAP-* is justified by ≥1 STR-*).
+- **Unmapped STR-*:** none (0). No STR-0363..0382 required a new capability.
 
 ### Approx. primary-coverage load per capability (primary mentions)
 CAP-0004 (identity) and CAP-0006 (generation), CAP-0008 (cycle), CAP-0016 (exposure/hedge), CAP-0018 (basket/closure), CAP-0020 (config/calibration) carry the largest primary loads; CAP-0005/0021/0022/0023 are cross-cutting; CAP-0024 is non-runtime.

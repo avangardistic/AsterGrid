@@ -83,6 +83,10 @@ On 2026-09-22: created **`implementation/CAP0024_DESIGN.md`** — the independen
 
 On 2026-09-22: **GATE-019 RESOLVED** — CAP-0024 reference model = **REF-D (functional), CONDITIONAL** (DECISION-021; REF-A rejected; REF-C retained as a Phase-9+ complementary note; no production-language commitment). **Phase 6c** closed the non-blocking constraint set: the 22 SEMANTIC_NON_BLOCKING findings (AMB-0012..0033) resolved as **20 new requirements STR-0363..STR-0382 (§19)** + 2 annotations (AMB-0014→STR-0345, AMB-0025→STR-0358); U-3/U-5/U-6/U-8 resolved as phase6c_note on STR-0361/0133/0290/0362; concrete numbers added as `phase6c_note` (snapshot cadence + watermark encoding in `EVENT_MODEL.md`; per-type freshness in `INTERFACE_MAP.md`); AMB-0034/0035 marked SCHEDULED in `VALIDATION_PLAN.md`. Corpus now **382 STR-***. **None escalated** (no genuinely-semantic finding). No production language chosen, no code, no new gate, no new DECISION beyond DECISION-021.
 
+## Coverage catch-up + GATE-020 (production runtime language)
+
+On 2026-09-22: **coverage catch-up** — STR-0363..STR-0382 (Phase 6c) mapped to existing capabilities in `architecture/CAPABILITY_COVERAGE.md` (new "Phase 6c STR additions" table; **382/382 mapped, 0 unmapped, no CAP invented**); header counts updated to 382 in CAPABILITY_COVERAGE / CAPABILITY_MAP / STATE_OWNERSHIP. **Opened OWNER_GATE_020** (production runtime language — options A Python / B Rust / C Go / D TypeScript-Node; functional-language productions rejected as a family per DECISION-021 independence + DECISION-015 non-actor CAND-B; non-binding recommendation: Python, conditional on determinism discipline) and registered **DECISION-022 PENDING**. This is the last Phase-7 blocker. No language selected, no code, no gate resolution, no new DECISION beyond DECISION-022.
+
 ## Artifact layout (created only when a phase requires it)
 
 ```

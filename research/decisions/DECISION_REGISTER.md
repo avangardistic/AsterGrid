@@ -333,3 +333,20 @@
 - **owner_decision:** REF-D, CONDITIONAL (2026-09-22).
 - **date:** 2026-09-22.
 - **supersedes:** NONE.
+
+## DECISION-022 — Production runtime language/paradigm (from OWNER_GATE_020) — PENDING
+
+- **decision_id:** DECISION-022
+- **question:** "Which production runtime language/paradigm should implement CAND-B?"
+- **context:** `research/decisions/OWNER_GATE_020.md`.
+- **evidence:** prompt.md backend preference (Python-first unless another technology materially improves correctness/safety/performance/operability/maintainability); DECISION-015 (CAND-B); DECISION-021 (REF-D functional → production must be non-functional for independence); existing GA tooling (`ga_arena.py`, Python); the advisor's non-binding language analysis (Python-leaning, recorded as context only). The Owner has NOT pre-decided; no owner preference is recorded here.
+- **decision:** "PENDING — awaiting Owner resolution of GATE-020."
+- **alternatives:** A (Python), B (Rust), C (Go), D (TypeScript/Node); functional-language productions rejected as a family (see GATE-020).
+- **rejected_alternatives:** not yet decided for A–D; functional family rejected (documented in GATE-020: collides with DECISION-021 independence and DECISION-015 non-actor CAND-B).
+- **affected_strategy_requirements:** none directly (runtime-layer decision).
+- **risk:** LOW while unresolved (Phase 7 cannot start).
+- **reversibility:** MEDIUM (language choice is a high-cost commitment; the pure Core carries over to a different language only with substantial rework).
+- **owner_required:** YES.
+- **owner_decision:** PENDING.
+- **date:** 2026-09-22.
+- **supersedes:** NONE.

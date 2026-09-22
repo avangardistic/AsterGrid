@@ -2,7 +2,7 @@
 
 - **Purpose:** For every authoritative runtime state the Strategy requires, name exactly one owner, its source of truth, writers/readers, persistence, consistency, recovery, and reconciliation trigger (per `prompt.md` `<state_ownership>`). Prerequisite input to architecture comparison. **No architecture chosen here.**
 - **Producer:** Claude Code (Opus 4.8), Phase 4.
-- **Inputs (read-only):** `STRATEGY_CONTRACT.md` (362 STR-*, incl. Phase 4.6/4.10 additions), `CAPABILITY_MAP.md` (CAP-0001..0024), `DECISION_REGISTER.md` (DECISION-002 binds ActualExposure/CapitalBase to clearinghouseState).
+- **Inputs (read-only):** `STRATEGY_CONTRACT.md` (382 STR-*, incl. Phase 4.6/4.10/6c additions), `CAPABILITY_MAP.md` (CAP-0001..0024), `DECISION_REGISTER.md` (DECISION-002 binds ActualExposure/CapitalBase to clearinghouseState).
 - **Status:** COMPLETE — 23 states; each has a single owner (zero multi-owner states).
 
 ## State-kind legend (per `prompt.md` `<state_ownership>`)
