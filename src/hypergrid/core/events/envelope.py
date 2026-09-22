@@ -16,7 +16,7 @@ from typing import TYPE_CHECKING
 
 from hypergrid.core.events.codec import event_to_payload
 from hypergrid.core.events.kinds import AnyEvent
-from hypergrid.core.serialization import canonical_dumps
+from hypergrid.core.serialization import canonical_dumps, is_iso_utc_micros
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Sequence
@@ -38,6 +38,19 @@ class ObservedMeta:
     venue_sequence: int | None
     server_ts: str | None
     local_receive_ts: str
+
+    def __post_init__(self) -> None:
+        # G2-b: validate timestamps once, at construction (single-sourced). An
+        # invalid ObservedMeta cannot exist, so no log can append an invalid
+        # record or advance its head from one.
+        if not is_iso_utc_micros(self.local_receive_ts):
+            raise ValueError(
+                "local_receive_ts must be an ISO-8601-Z microsecond timestamp"
+            )
+        if self.server_ts is not None and not is_iso_utc_micros(self.server_ts):
+            raise ValueError(
+                "server_ts must be an ISO-8601-Z microsecond timestamp when present"
+            )
 
 
 @dataclass(frozen=True, slots=True)

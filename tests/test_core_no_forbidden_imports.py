@@ -71,13 +71,17 @@ def test_no_forbidden_imports() -> None:
 
 
 def test_no_float_in_core() -> None:
+    # Forbid the ways a float VALUE enters: float literals and float(...) calls.
+    # A bare `float` type reference is allowed ONLY as an isinstance() argument —
+    # that is a rejection guard (canonical_dumps._reject_forbidden, G1), which
+    # keeps floats OUT rather than introducing one.
     for path in _core_files():
         tree = ast.parse(path.read_text(encoding="utf-8"))
         for node in ast.walk(tree):
             if isinstance(node, ast.Constant):
                 assert not isinstance(node.value, float), f"{path} has a float literal"
-            if isinstance(node, ast.Name):
-                assert node.id != "float", f"{path} references the float builtin"
+            if isinstance(node, ast.Call) and isinstance(node.func, ast.Name):
+                assert node.func.id != "float", f"{path} constructs a float via float()"
 
 
 def test_hashlib_only_in_envelope() -> None:

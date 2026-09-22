@@ -65,6 +65,24 @@ def test_float_literal_rejected_on_load() -> None:
         canonical_loads('{"x":1.5}')
 
 
+def test_g1_reject_float_and_none() -> None:
+    for bad in (1.5, float("nan"), float("inf"), None):
+        with pytest.raises(TypeError):
+            canonical_dumps(bad)
+    with pytest.raises(TypeError):
+        canonical_dumps({"a": None})
+    with pytest.raises(TypeError):
+        canonical_dumps({"a": [1, 1.5]})
+
+
+def test_g1_decimal_tag_still_works_but_rejects_smuggled_float() -> None:
+    assert canonical_dumps({"__decimal__": "1.10"}) == '{"__decimal__":"1.10"}'
+    assert canonical_loads(canonical_dumps({"__decimal__": "1.10"})) == Decimal("1.10")
+    assert canonical_dumps(Decimal("1.10")) == '{"__decimal__":"1.10"}'
+    with pytest.raises(TypeError):
+        canonical_dumps({"__decimal__": 1.5})
+
+
 def test_rjson4_7_8_scenario_envelope() -> None:
     log = InMemoryEventLog()
     log.append(CommandEvent(cloid="c1", action="submit", tif="Alo"), _META)

@@ -49,8 +49,44 @@ def _encode(value: object) -> object:
     raise TypeError(f"non-canonical type for JSON: {type(value).__name__}")
 
 
+def _reject_forbidden(value: object) -> None:
+    """Pure recursive pre-scan: forbid ``float`` and ``None`` at any depth.
+
+    ``None`` is not a canonical value — absent optionals are OMITTED (R-JSON-6).
+    ``float`` is forbidden everywhere. Accepts bool/int/str/Decimal and traverses
+    dict/list/tuple. ``__decimal__`` is a RESERVED key (R-JSON-2) carrying a
+    string payload; it is traversed like any dict, so a float/None smuggled
+    inside the tag still raises. No clock/random/network/filesystem; no side
+    effects.
+    """
+    if isinstance(value, bool):
+        return
+    if isinstance(value, float):
+        raise TypeError("float is not a canonical JSON value")
+    if value is None:
+        raise TypeError("None is not a canonical JSON value (omit absent optionals)")
+    if isinstance(value, (int, str, Decimal)):
+        return
+    if isinstance(value, dict):
+        for key, item in value.items():
+            if not isinstance(key, str):
+                raise TypeError("canonical object keys must be strings")
+            _reject_forbidden(item)
+        return
+    if isinstance(value, (list, tuple)):
+        for item in value:
+            _reject_forbidden(item)
+        return
+    raise TypeError(f"non-canonical type: {type(value).__name__}")
+
+
 def canonical_dumps(value: object) -> str:
-    """Serialize ``value`` to canonical JSON (R-JSON-1..3, R-JSON-6..7)."""
+    """Serialize ``value`` to canonical JSON (R-JSON-1..3, R-JSON-6..7).
+
+    Pre-scans with :func:`_reject_forbidden` so a ``float`` or ``None`` at any
+    depth raises before serialization.
+    """
+    _reject_forbidden(value)
     return json.dumps(
         value,
         default=_encode,

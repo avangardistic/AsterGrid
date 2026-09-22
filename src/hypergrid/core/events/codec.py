@@ -24,6 +24,7 @@ from hypergrid.core.events.kinds import (
     StateTransitionEvent,
     TimerEvent,
 )
+from hypergrid.core.serialization import is_iso_utc_micros
 
 
 def event_to_payload(event: AnyEvent) -> dict[str, object]:
@@ -75,6 +76,16 @@ def _req_bool(payload: dict[str, object], key: str) -> bool:
     value = _require(payload, key)
     if not isinstance(value, bool):
         raise ValueError(f"field {key!r} must be a bool")
+    return value
+
+
+def _req_ts(payload: dict[str, object], key: str) -> str:
+    """Require an ISO-8601-Z microsecond timestamp string (R-JSON-5)."""
+    value = _req_str(payload, key)
+    if not is_iso_utc_micros(value):
+        raise ValueError(
+            f"field {key!r} must be an ISO-8601-Z microsecond timestamp"
+        )
     return value
 
 
@@ -152,7 +163,7 @@ def _build_fill(p: dict[str, object]) -> FillEvent:
 def _build_observation(p: dict[str, object]) -> ObservationEvent:
     return ObservationEvent(
         source_endpoint=_req_str(p, "source_endpoint"),
-        read_timestamp=_req_str(p, "read_timestamp"),
+        read_timestamp=_req_ts(p, "read_timestamp"),
         payload_fingerprint=_req_str(p, "payload_fingerprint"),
         freshness_window_seconds=_req_int(p, "freshness_window_seconds"),
         is_full=_req_bool(p, "is_full"),
@@ -163,7 +174,7 @@ def _build_observation(p: dict[str, object]) -> ObservationEvent:
 def _build_timer(p: dict[str, object]) -> TimerEvent:
     return TimerEvent(
         timer_kind=_req_str(p, "timer_kind"),
-        fire_timestamp=_req_str(p, "fire_timestamp"),
+        fire_timestamp=_req_ts(p, "fire_timestamp"),
         associated_entity=_req_str(p, "associated_entity"),
         causal_predecessors=_preds(p),
     )
@@ -190,7 +201,7 @@ def _build_state_transition(p: dict[str, object]) -> StateTransitionEvent:
 def _build_operator(p: dict[str, object]) -> OperatorEvent:
     return OperatorEvent(
         operator_identity=_req_str(p, "operator_identity"),
-        timestamp=_req_str(p, "timestamp"),
+        timestamp=_req_ts(p, "timestamp"),
         action=_req_str(p, "action"),
         target=_req_str(p, "target"),
         causal_predecessors=_preds(p),
@@ -200,7 +211,7 @@ def _build_operator(p: dict[str, object]) -> OperatorEvent:
 def _build_administrative(p: dict[str, object]) -> AdministrativeEvent:
     return AdministrativeEvent(
         config_identity=_req_str(p, "config_identity"),
-        effective_time=_req_str(p, "effective_time"),
+        effective_time=_req_ts(p, "effective_time"),
         provenance=_req_str(p, "provenance"),
         causal_predecessors=_preds(p),
     )
