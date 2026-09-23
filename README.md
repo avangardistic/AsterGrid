@@ -30,9 +30,11 @@ it contains **no trading/domain logic** yet.
   `core/pass_engine.py` (`run_pass`, the P0–P6 stages — P2/P3/P4 real, the rest
   stubs) and `core/transitions/` (§4.7 locks + precedence + reason codes). Phase 7e
   added the §4 Evolution transition + permanent successor lock (`generation.py`,
-  executed inside P4; typed ST-02/14/15/16 in `generation_state.py`). The
-  remaining §4–§13 domain rules (Cycle transitions, risk/hedge) are Phase 7f+.
-  Guards: `tests/test_core_*`.
+  executed inside P4; typed ST-02/14/15/16 in `generation_state.py`). Phase 7f
+  made P5 real: the §5 Cycle transition (`cycle.py`) with execution-grounded
+  reference capture (§5.4/§5.4.1) and the §5.6 non-overlap test; typed ST-03/ST-10
+  in `cycle_state.py`. The remaining §6–§13 rules (real P0/P1 reconciliation,
+  risk/hedge) are later phases. Guards: `tests/test_core_*`.
 - `adapters/` — side-effect boundary (venue I/O, persistence, signing) — Phase 7b+.
 - `runtime/` — the process shell: logging, wiring, asyncio. `logging_setup.py`
   provides the JSON formatter + context + redaction.

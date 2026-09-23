@@ -23,6 +23,8 @@ _EXPECTED = {
     "RETURN_LEVEL_UNVERIFIED",
     "SUCCESSOR_LOCK_ACTIVE",
     "GENERATION_ID_LIMIT",
+    # Phase 7f (one)
+    "RECONCILIATION_REQUIRED",
 }
 
 
@@ -40,9 +42,9 @@ def test_members_are_nonempty_str() -> None:
         assert member.value == member.name  # value == name (auto())
 
 
-def test_membership_is_exactly_the_nine_codes() -> None:
+def test_membership_is_exactly_the_ten_codes() -> None:
     assert {m.name for m in ReasonCode} == _EXPECTED
-    assert len(_EXPECTED) == 9
+    assert len(_EXPECTED) == 10
 
 
 def test_each_member_has_same_line_provenance() -> None:

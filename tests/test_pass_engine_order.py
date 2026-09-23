@@ -21,8 +21,8 @@ from hypergrid.core.transitions import (
 
 # Strategy.md §4.7 defines seven passes, P0 through P6.
 _STAGES = ("P0", "P1", "P2", "P3", "P4", "P5", "P6")
-_STUBBED = ("P0", "P1", "P5", "P6")
-_REAL = ("P2", "P3", "P4")
+_STUBBED = ("P0", "P1", "P6")  # P5 became real in Phase 7f
+_REAL = ("P2", "P3", "P4", "P5")
 
 
 @contextmanager
@@ -92,6 +92,23 @@ def test_no_p4_exec_stage_name() -> None:
     names = [s.stage for s in report.stages]
     assert names == list(_STAGES)  # exactly seven, P0..P6
     assert "P4_EXEC" not in names
+
+
+def test_no_p5_exec_stage_name() -> None:
+    _, report = run_pass(_empty_state(), [])
+    names = [s.stage for s in report.stages]
+    assert names == list(_STAGES)  # still exactly seven; P5 is real, not renamed
+    assert "P5_EXEC" not in names
+
+
+def test_p5_compat_pin_markers_absent() -> None:
+    # No cycle markers => P5 NO_OP and the canonical State is unchanged.
+    state = _empty_state()
+    before = canonical_dumps(state.to_canonical_obj())
+    new_state, report = run_pass(state, [])
+    p5 = {s.stage: s for s in report.stages}["P5"]
+    assert p5.status == "NO_OP"
+    assert canonical_dumps(new_state.to_canonical_obj()) == before
 
 
 def _complete_window(gid: int, origin: str = "SL") -> EvolutionCandidateWindow:

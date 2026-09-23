@@ -1,6 +1,7 @@
 """State object: frozen, validated, canonical-serializable (Phase 7c)."""
 
 import dataclasses
+from decimal import Decimal
 
 import pytest
 
@@ -9,9 +10,12 @@ from hypergrid.core.fold import _empty_state
 from hypergrid.core.serialization import canonical_dumps
 from hypergrid.core.state import _EVENT_KINDS, State
 from hypergrid.core.transitions import (
+    CycleState,
+    CycleTerminalMarkers,
     DominanceFlag,
     EvolutionCandidateWindow,
     GenerationState,
+    ReferencePriceRecord,
     SuccessorLock,
 )
 
@@ -170,3 +174,79 @@ def test_window_coherence_rejected() -> None:
         EvolutionCandidateWindow(0, "SL", (1, 2), 2, False, True, True)
     with pytest.raises(ValueError):  # bad group
         EvolutionCandidateWindow(0, "XX", (1, 2), None, False, False, True)
+
+
+# ------------------------ Phase 7f: typed ST-03/10 + markers --------------------
+
+
+def test_typed_cycle_fields_default_none() -> None:
+    s = _valid_state()
+    assert s.st03_cycle_states is None
+    assert s.st10_reference_prices is None
+    assert s.effective_cycle_limit is None
+    assert s.current_cycle_id_by_generation is None
+    assert s.p3_ineligible_cycles is None
+    assert s.cycle_terminal_markers is None
+
+
+def test_typed_cycle_fields_serialize_cleanly() -> None:
+    s = dataclasses.replace(
+        _valid_state(),
+        st03_cycle_states=(CycleState(0, 0, "ACTIVE"),),
+        st10_reference_prices=(
+            ReferencePriceRecord(0, 1, Decimal("100000"), "TERMINAL_EXECUTION"),
+        ),
+        effective_cycle_limit=99,
+        current_cycle_id_by_generation=((0, 3),),
+        p3_ineligible_cycles=((0, 3),),
+        cycle_terminal_markers=(CycleTerminalMarkers(0, 0),),
+    )
+    canonical_dumps(s.to_canonical_obj())  # no None/float at any depth
+    obj = s.to_canonical_obj()
+    assert obj["effective_cycle_limit"] == 99
+    assert obj["current_cycle_id_by_generation"] == [[0, 3]]
+    assert obj["st03_cycle_states"] == [
+        {"generation_id": 0, "cycle_id": 0, "lifecycle": "ACTIVE"}
+    ]
+
+
+def test_cycle_ordering_invariants_rejected() -> None:
+    with pytest.raises(ValueError, match="sorted"):
+        dataclasses.replace(
+            _valid_state(),
+            st03_cycle_states=(CycleState(0, 1, "ACTIVE"), CycleState(0, 0, "ACTIVE")),
+        )
+    with pytest.raises(ValueError, match="sorted"):
+        dataclasses.replace(
+            _valid_state(), p3_ineligible_cycles=((0, 1), (0, 1))
+        )
+    with pytest.raises(ValueError, match="sorted"):
+        dataclasses.replace(
+            _valid_state(),
+            current_cycle_id_by_generation=((1, 0), (0, 0)),
+        )
+
+
+def test_cycle_limit_range_and_bool_rejected() -> None:
+    with pytest.raises(ValueError, match=r"0\.\.99"):
+        dataclasses.replace(_valid_state(), effective_cycle_limit=100)
+    with pytest.raises(ValueError, match="int"):
+        dataclasses.replace(_valid_state(), effective_cycle_limit=True)
+
+
+def test_cycle_id_out_of_range_rejected() -> None:
+    with pytest.raises(ValueError):
+        CycleState(0, 100, "ACTIVE")
+    with pytest.raises(ValueError):
+        dataclasses.replace(
+            _valid_state(), p3_ineligible_cycles=((0, 100),)
+        )
+
+
+def test_bad_cycle_strings_rejected() -> None:
+    with pytest.raises(ValueError):  # bad lifecycle
+        CycleState(0, 0, "FROZEN")
+    with pytest.raises(ValueError):  # bad derivation
+        ReferencePriceRecord(0, 1, Decimal("1"), "BOGUS")
+    with pytest.raises(ValueError):  # reference must be Decimal, > 0
+        ReferencePriceRecord(0, 1, Decimal("0"), "TERMINAL_MID")

@@ -20,6 +20,11 @@ Grouping by stage:
         RETURN_LEVEL_UNVERIFIED, SUCCESSOR_LOCK_ACTIVE, GENERATION_ID_LIMIT
         (EVOLUTION_IN_FLIGHT_LOCKED is REUSED for the §4.3 basket-in-flight and
         §4.7 P2 single-admission blocks — no second code is coined).
+  * P5 (cycle execution, §5.2/§5.3/§5.4.1/§5.6 — Phase 7f):
+        RECONCILIATION_REQUIRED (the §5.2 step 4 / §5.4.1 / §5.6 fail-closed
+        block); CYCLE_LIMIT_REACHED is REUSED for the §5.3 disable transition and
+        CYCLE_TRANSITION_IN_FLIGHT_LOCKED for the §4.7 P2 per-Generation single
+        admission — no second codes are coined.
 """
 
 from __future__ import annotations
@@ -50,3 +55,5 @@ class ReasonCode(StrEnum):
     RETURN_LEVEL_UNVERIFIED = auto()  # §4.1 + DECISION-013 — VERBATIM
     SUCCESSOR_LOCK_ACTIVE = auto()  # §4.4 + DECISION-013 — VERBATIM
     GENERATION_ID_LIMIT = auto()  # §4.6 + DECISION-013 — VERBATIM
+    # --- P5 cycle execution (§5.2/§5.4.1/§5.6, Phase 7f) ---
+    RECONCILIATION_REQUIRED = auto()  # §5.2 step 4 / §5.4.1 / §5.6 — VERBATIM

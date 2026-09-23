@@ -59,7 +59,25 @@ def apply_same_generation_precedence(
         reason_codes.append(ReasonCode.SAME_GEN_DISABLE_BEATS_EVOLUTION.value)
         reason_codes.append(ReasonCode.CYCLE_LIMIT_REACHED.value)
 
-    new_state = dataclasses.replace(state, p3_decisions=ineligible)
+    # Phase-7f multi-pass bridge (added, not replacing the per-pass decision): for
+    # each ineligible G whose CURRENT Cycle is known, persist (G, C) so a later
+    # pass in the SAME Cycle still binds Evolution (DECISION-013 per-Cycle
+    # persistence). Unknown current Cycle ⟹ add nothing. All markers None ⟹ the
+    # persistent set is left untouched, so 7d behaviour is byte-identical. Pruning
+    # stale (completed-cycle) entries is a later-phase GC note, not done here.
+    current = dict(state.current_cycle_id_by_generation or ())
+    added = {(g, current[g]) for g in ineligible if g in current}
+    if added:
+        existing = set(state.p3_ineligible_cycles or ())
+        new_ineligible: tuple[tuple[int, int], ...] | None = tuple(
+            sorted(existing | added)
+        )
+    else:
+        new_ineligible = state.p3_ineligible_cycles
+
+    new_state = dataclasses.replace(
+        state, p3_decisions=ineligible, p3_ineligible_cycles=new_ineligible
+    )
     note = (
         f"P3 same-gen: {len(ineligible)} evolution candidate(s) ineligible "
         f"({count} envelopes)"

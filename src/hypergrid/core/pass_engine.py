@@ -8,7 +8,7 @@ implements the deterministic ordering substrate only:
   P2  LOCKS                                        — REAL (transitions.locks)
   P3  SAME-GENERATION CONFLICT                     — REAL (transitions.precedence)
   P4  ACROSS-GEN PRECEDENCE + EVOLUTION EXECUTION  — REAL (precedence + generation)
-  P5  CYCLE TRANSITIONS                            — STUB (§5.2/§5.3, later)
+  P5  CYCLE TRANSITIONS                            — REAL (transitions.cycle)
   P6  LEVEL ARMING / ORDER PLACEMENT               — STUB (later)
 
 Strategy.md §4.7 defines seven passes, P0 through P6; ``run_pass`` therefore
@@ -28,6 +28,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
+from hypergrid.core.transitions.cycle import apply_cycle
 from hypergrid.core.transitions.generation import apply_evolution
 from hypergrid.core.transitions.locks import apply_locks
 from hypergrid.core.transitions.markers import StageReport
@@ -105,7 +106,10 @@ def run_pass(
     state, p4_execution = apply_evolution(state, materialized)
     stages.append(_combine_p4(p4_arbitration, p4_execution))
 
-    stages.append(_stub("P5"))
+    # P5 is real (Phase 7f): the §5 Cycle transition, threaded after P4 so §4.7's
+    # P4-before-P5 holds by construction. Still exactly stage "P5" (no P5_EXEC).
+    state, p5 = apply_cycle(state, materialized)
+    stages.append(p5)
     stages.append(_stub("P6"))
 
     return state, PassReport(stages=tuple(stages))

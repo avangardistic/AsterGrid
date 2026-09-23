@@ -19,6 +19,13 @@ real P0 will populate ST-16 windows from envelopes; a real P1 will own the
 ``guards_passed`` verdict; timers will drive ``return_confirmation_held`` across
 passes. ``apply_evolution`` itself never reads an envelope.
 
+PHASE-7f BRIDGE (rule (2)): besides this pass's ``p3_decisions``, rule (2) also
+honours a PERSISTENT per-Cycle P3 verdict — ``p3_ineligible_cycles`` keyed
+(G, current-Cycle) via ``current_cycle_id_by_generation``. If G's current Cycle is
+known and was recorded ineligible by P3 in any pass of this Cycle, the Evolution
+stays silently bound (no code; P3 owns ``CYCLE_LIMIT_REACHED``). An unknown current
+Cycle yields no opinion; all-None markers reproduce Phase-7e behaviour exactly.
+
 DESIGN DECISION (Owner, binding): ``p2_locks.evolution_in_flight`` (§4.7 P2,
 transient/per-pass/Basket-wide) and the ST-15 successor lock (§4.4,
 permanent/per-Generation) are DISTINCT and never merged. This transition reads
@@ -74,6 +81,13 @@ def apply_evolution(
     limit = state.effective_generation_limit
     effective_limit = _DEFAULT_GENERATION_LIMIT if limit is None else limit
     p3_block = set(state.p3_decisions or ())
+    # Phase-7f multi-pass P3 bridge (rule (2)): a persistent per-Cycle
+    # ineligibility set, keyed (G, current-Cycle). If G's current Cycle is known
+    # and (G, C) was recorded ineligible by P3 in ANY pass of this Cycle, the
+    # Evolution is still bound (silent, no code — P3 owns CYCLE_LIMIT_REACHED).
+    # Unknown current Cycle ⟹ no opinion. All-None ⟹ byte-identical 7e behaviour.
+    current_cycle = dict(state.current_cycle_id_by_generation or ())
+    ineligible_cycles = set(state.p3_ineligible_cycles or ())
 
     lifecycle_by_id = {g.generation_id: g.lifecycle for g in st02}
     locked_ids = {s.generation_id for s in st15 if s.locked}
@@ -98,7 +112,9 @@ def apply_evolution(
 
         # (2) P3 BINDING — P3 already recorded CYCLE_LIMIT_REACHED; add no code.
         if g in p3_block:
-            continue  # silent
+            continue  # silent (this pass's P3 verdict)
+        if g in current_cycle and (g, current_cycle[g]) in ineligible_cycles:
+            continue  # silent (persistent per-Cycle P3 verdict, Phase-7f bridge)
 
         # (3) GUARDS — a failure is P1-real's verdict to record, not evolution's.
         if not window.guards_passed:

@@ -4,12 +4,19 @@ The State carries fold metadata (last log_sequence, head_hash, event_count,
 per-kind counts), one field per ST-01..ST-23 (STATE_OWNERSHIP.md), the Phase-7d
 §4.7 arbitration markers, and the Phase-7e ``effective_generation_limit`` marker.
 
-Phase 7e types the generation-lifecycle family ST-02/14/15/16 (frozen dataclasses
-in ``transitions/generation_state.py``) and enforces their ordering/coherence
-invariants at construction. The remaining ST-* (ST-01, ST-03..ST-13, ST-17..ST-23)
-stay ``object | None`` placeholders until their rule is implemented (Phase 7f+).
-The State is frozen and validates its own invariants, so no invalid State can be
-serialized.
+Phase 7e types the generation-lifecycle family ST-02/14/15/16 (in
+``transitions/generation_state.py``). Phase 7f types the cycle family ST-03/ST-10
+(in ``transitions/cycle_state.py``) and adds the §5 arbitration markers
+(``effective_cycle_limit``, ``current_cycle_id_by_generation``,
+``p3_ineligible_cycles``, ``cycle_terminal_markers``). Both enforce their
+ordering/range invariants at construction.
+
+Forward notes: ST-01 (basket lifecycle) goes with the freeze/closure phase — no
+7f reader/writer. ST-04 (level pipeline) / ST-18 (open-order registry) are typed
+when the real cancel/reconcile path arrives (Phase 7g+). The remaining ST-* (ST-01,
+ST-04..ST-09, ST-11..ST-13, ST-17..ST-23) stay ``object | None`` placeholders
+until their rule is implemented (P0/P1/P6 phases). The State is frozen and
+validates its own invariants, so no invalid State can be serialized.
 """
 
 from __future__ import annotations
@@ -27,6 +34,11 @@ from hypergrid.core.events import (
     OperatorEvent,
     StateTransitionEvent,
     TimerEvent,
+)
+from hypergrid.core.transitions.cycle_state import (
+    CycleState,
+    CycleTerminalMarkers,
+    ReferencePriceRecord,
 )
 from hypergrid.core.transitions.generation_state import (
     DominanceFlag,
@@ -84,14 +96,14 @@ class State:
     # typed when their rule is implemented (Phase 7f+).
     st01_basket_lifecycle_state: object | None = None  # ST-01
     st02_generation_states: tuple[GenerationState, ...] | None = None  # ST-02 (7e)
-    st03_cycle_states: object | None = None  # ST-03
+    st03_cycle_states: tuple[CycleState, ...] | None = None  # ST-03 (7f)
     st04_level_pipeline_states: object | None = None  # ST-04
     st05_order_intents_and_outcomes: object | None = None  # ST-05
     st06_cloid_registry: object | None = None  # ST-06
     st07_expected_exposure: object | None = None  # ST-07
     st08_actual_exposure: object | None = None  # ST-08
     st09_exposure_delta: object | None = None  # ST-09
-    st10_reference_prices: object | None = None  # ST-10
+    st10_reference_prices: tuple[ReferencePriceRecord, ...] | None = None  # ST-10 (7f)
     st11_calibration_configuration: object | None = None  # ST-11
     st12_operator_arm_requests: object | None = None  # ST-12
     st13_event_log_audit_trail: object | None = None  # ST-13
@@ -128,6 +140,13 @@ class State:
     # concern; the transition only ever reads this marker.
     effective_generation_limit: int | None = None
 
+    # Phase-7f arbitration markers (NOT ST-* fields; like p2_/p3_/p4_). The Cycle
+    # transition + the multi-pass P3 bridge read these. None ⟹ default/absent.
+    effective_cycle_limit: int | None = None  # §3; None ⟹ 99
+    current_cycle_id_by_generation: tuple[tuple[int, int], ...] | None = None
+    p3_ineligible_cycles: tuple[tuple[int, int], ...] | None = None
+    cycle_terminal_markers: tuple[CycleTerminalMarkers, ...] | None = None
+
     def __post_init__(self) -> None:
         if self.event_count < 0:
             raise ValueError("event_count must be >= 0")
@@ -143,6 +162,7 @@ class State:
         if any(count < 0 for _, count in self.per_kind_count):
             raise ValueError("per_kind_count values must be >= 0")
         self._validate_generation_invariants()
+        self._validate_cycle_invariants()
 
     def _validate_generation_invariants(self) -> None:
         """Phase-7e ordering + coherence invariants on ST-02/14/15/16.
@@ -184,6 +204,49 @@ class State:
             if pending & locked:
                 raise ValueError("EVOLUTION_PENDING generation must not be locked")
 
+    def _validate_cycle_invariants(self) -> None:
+        """Phase-7f ordering + range invariants on ST-03/10 and the cycle markers.
+
+        Enforced: ST-03/ST-10/cycle_terminal_markers sorted by
+        (generation_id, cycle_id) with no duplicate pairs; the two
+        (generation, cycle) marker maps sorted with no duplicate keys; every id in
+        those fields within 0..99; effective_cycle_limit, when set, a real int in
+        0..99 (bool rejected). No cross-field lifecycle↔marker invariant is added
+        (7e-deviation doctrine: gating lives in the transition).
+        """
+        for name, rows in (
+            ("st03_cycle_states", self.st03_cycle_states),
+            ("st10_reference_prices", self.st10_reference_prices),
+            ("cycle_terminal_markers", self.cycle_terminal_markers),
+        ):
+            if rows is None:
+                continue
+            keys = [(r.generation_id, r.cycle_id) for r in rows]
+            if keys != sorted(keys) or len(set(keys)) != len(keys):
+                raise ValueError(f"{name} must be sorted by (gen, cycle), no dups")
+        if self.current_cycle_id_by_generation is not None:
+            gens = [g for g, _ in self.current_cycle_id_by_generation]
+            if gens != sorted(gens) or len(set(gens)) != len(gens):
+                raise ValueError(
+                    "current_cycle_id_by_generation must be sorted, no dup gens"
+                )
+            for gen, cyc in self.current_cycle_id_by_generation:
+                if not (0 <= gen <= 99 and 0 <= cyc <= 99):
+                    raise ValueError("current_cycle_id_by_generation id out of 0..99")
+        if self.p3_ineligible_cycles is not None:
+            pairs = list(self.p3_ineligible_cycles)
+            if pairs != sorted(pairs) or len(set(pairs)) != len(pairs):
+                raise ValueError("p3_ineligible_cycles must be sorted, no dups")
+            for gen, cyc in pairs:
+                if not (0 <= gen <= 99 and 0 <= cyc <= 99):
+                    raise ValueError("p3_ineligible_cycles id out of 0..99")
+        if self.effective_cycle_limit is not None:
+            # bool is an int subclass — reject it explicitly (isinstance(True, int)).
+            if type(self.effective_cycle_limit) is not int:
+                raise ValueError("effective_cycle_limit must be an int")
+            if not (0 <= self.effective_cycle_limit <= 99):
+                raise ValueError("effective_cycle_limit must be within 0..99")
+
     def to_canonical_obj(self) -> dict[str, object]:
         """Canonical dict for :func:`canonical_dumps` (no None/float in output)."""
         obj: dict[str, object] = {
@@ -220,6 +283,29 @@ class State:
             ]
         if self.effective_generation_limit is not None:
             obj["effective_generation_limit"] = self.effective_generation_limit
+        # Phase-7f typed cycle state + markers (omit when None; else recurse).
+        if self.st03_cycle_states is not None:
+            obj["st03_cycle_states"] = [
+                c.to_canonical_obj() for c in self.st03_cycle_states
+            ]
+        if self.st10_reference_prices is not None:
+            obj["st10_reference_prices"] = [
+                r.to_canonical_obj() for r in self.st10_reference_prices
+            ]
+        if self.effective_cycle_limit is not None:
+            obj["effective_cycle_limit"] = self.effective_cycle_limit
+        if self.current_cycle_id_by_generation is not None:
+            obj["current_cycle_id_by_generation"] = [
+                [gen, cyc] for gen, cyc in self.current_cycle_id_by_generation
+            ]
+        if self.p3_ineligible_cycles is not None:
+            obj["p3_ineligible_cycles"] = [
+                [gen, cyc] for gen, cyc in sorted(self.p3_ineligible_cycles)
+            ]
+        if self.cycle_terminal_markers is not None:
+            obj["cycle_terminal_markers"] = [
+                m.to_canonical_obj() for m in self.cycle_terminal_markers
+            ]
         # Phase-7d arbitration markers: omit when None (R-JSON-6), else recurse.
         if self.p2_locks is not None:
             obj["p2_locks"] = self.p2_locks.to_canonical_obj()
@@ -248,11 +334,17 @@ _ARBITRATION_FIELD_NAMES = frozenset(
         "p4_candidates",
         "p4_decisions",
         "effective_generation_limit",
+        "effective_cycle_limit",
+        "current_cycle_id_by_generation",
+        "p3_ineligible_cycles",
+        "cycle_terminal_markers",
     }
 )
 _TYPED_ST_FIELD_NAMES = frozenset(
     {
         "st02_generation_states",
+        "st03_cycle_states",
+        "st10_reference_prices",
         "st14_dominance_flags",
         "st15_successor_locks",
         "st16_evolution_candidate_windows",
