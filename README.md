@@ -26,8 +26,10 @@ it contains **no trading/domain logic** yet.
   in-memory/SQLite logs; the log alone allocates `log_sequence` from 0), and
   `core/serialization/` (canonical JSON frozen for OCaml interop). Phase 7c added
   `core/state.py` (frozen `State`, one placeholder per ST-01..ST-23) and
-  `core/fold.py` (a pure, metadata-only `fold(envelopes) -> State`). The §4–§13
-  domain rules and the P0–P6 pass engine are Phase 7d+. Guards: `tests/test_core_*`.
+  `core/fold.py` (a pure, metadata-only `fold(envelopes) -> State`). Phase 7d added
+  `core/pass_engine.py` (`run_pass`, the P0–P6 stages — P2/P3/P4 real, the rest
+  stubs) and `core/transitions/` (§4.7 locks + precedence + reason codes). The
+  remaining §4–§13 domain rules are Phase 7e+. Guards: `tests/test_core_*`.
 - `adapters/` — side-effect boundary (venue I/O, persistence, signing) — Phase 7b+.
 - `runtime/` — the process shell: logging, wiring, asyncio. `logging_setup.py`
   provides the JSON formatter + context + redaction.

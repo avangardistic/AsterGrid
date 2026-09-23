@@ -70,18 +70,89 @@ def test_no_forbidden_imports() -> None:
                     )
 
 
+def _annotation_nodes(node: ast.AST) -> list[ast.expr]:
+    """The annotation expressions a node introduces (AnnAssign / arg / returns)."""
+    out: list[ast.expr] = []
+    if isinstance(node, ast.AnnAssign) and node.annotation is not None:
+        out.append(node.annotation)
+    if isinstance(node, ast.arg) and node.annotation is not None:
+        out.append(node.annotation)
+    if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and (
+        node.returns is not None
+    ):
+        out.append(node.returns)
+    return out
+
+
+def _float_violations(src: str) -> list[str]:
+    """Every way a ``float`` could enter core, EXCEPT ``isinstance(x, float)``.
+
+    Rejected: float literals (``1.5``); ``float(...)`` calls; ``float`` as a
+    variable/call name; ``float`` in any annotation (``x: float``, return type,
+    ``arg``); ``float`` as a typing subscript arg (``list[float]``,
+    ``Optional[float]``, ``Union[..., float]`` — all surface as ``Name('float')``
+    inside the subscript); and the exact-string annotation ``x: "float"``.
+    Allowed: ``float`` as the 2nd arg of ``isinstance(...)`` — the G1 rejection
+    guard in canonical_dumps, which keeps floats OUT rather than introducing one.
+    Incidental "float" inside docstrings/messages is NOT an annotation and does
+    not trip the checker (only annotation positions are string-scanned).
+    """
+    tree = ast.parse(src)
+    violations: list[str] = []
+
+    # Whitelist the `float` Name node that is the 2nd positional arg of isinstance.
+    allowed: set[int] = set()
+    for node in ast.walk(tree):
+        if (
+            isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Name)
+            and node.func.id == "isinstance"
+            and len(node.args) >= 2
+            and isinstance(node.args[1], ast.Name)
+            and node.args[1].id == "float"
+        ):
+            allowed.add(id(node.args[1]))
+
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Constant) and isinstance(node.value, float):
+            violations.append("float-literal")
+        # A bare `float` Name covers: float() calls (func Name), variable/call
+        # names, annotations (x: float), and subscript args (list[float]).
+        if (
+            isinstance(node, ast.Name)
+            and node.id == "float"
+            and id(node) not in allowed
+        ):
+            violations.append("float-name")
+
+    # Exact-string annotation: x: "float".
+    for node in ast.walk(tree):
+        for ann in _annotation_nodes(node):
+            for sub in ast.walk(ann):
+                if isinstance(sub, ast.Constant) and sub.value == "float":
+                    violations.append("float-string-annotation")
+
+    return violations
+
+
 def test_no_float_in_core() -> None:
-    # Forbid the ways a float VALUE enters: float literals and float(...) calls.
-    # A bare `float` type reference is allowed ONLY as an isinstance() argument —
-    # that is a rejection guard (canonical_dumps._reject_forbidden, G1), which
-    # keeps floats OUT rather than introducing one.
     for path in _core_files():
-        tree = ast.parse(path.read_text(encoding="utf-8"))
-        for node in ast.walk(tree):
-            if isinstance(node, ast.Constant):
-                assert not isinstance(node.value, float), f"{path} has a float literal"
-            if isinstance(node, ast.Call) and isinstance(node.func, ast.Name):
-                assert node.func.id != "float", f"{path} constructs a float via float()"
+        violations = _float_violations(path.read_text(encoding="utf-8"))
+        assert not violations, f"{path} has float usage: {violations}"
+
+
+def test_float_checker_rejects_and_accepts() -> None:
+    # REJECT: annotation, exact-string annotation, subscript arg, call, literal.
+    assert _float_violations("x: float = 1")
+    assert _float_violations('x: "float" = 1')
+    assert _float_violations("y: list[float] = []")
+    assert _float_violations("def f() -> float: ...")
+    assert _float_violations("def g(a: float) -> int: ...")
+    assert _float_violations("z = float(1)")
+    assert _float_violations("w = 1.5")
+    # ACCEPT: the isinstance rejection guard (and float-free code).
+    assert not _float_violations("isinstance(v, float)")
+    assert not _float_violations("x: int = 1")
 
 
 def test_hashlib_only_in_envelope() -> None:

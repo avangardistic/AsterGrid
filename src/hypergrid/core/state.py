@@ -23,6 +23,13 @@ from hypergrid.core.events import (
     StateTransitionEvent,
     TimerEvent,
 )
+from hypergrid.core.transitions.markers import (
+    P2Attempts,
+    P2LocksState,
+    P3CandidateMarkers,
+    P4CandidateMarkers,
+    P4Decision,
+)
 
 # The ten R-JSON-7 kind tags, sorted ascending — derived from the event classes
 # (no duplicated hardcoded list).
@@ -85,6 +92,19 @@ class State:
     st22_freeze_error_recovery_overlay: object | None = None  # ST-22
     st23_mirror_targets_hedge_intents: object | None = None  # ST-23
 
+    # --- Phase-7d §4.7 arbitration markers (typed here; 7d-owned only) ---
+    # Forward note: these p2_/p3_/p4_ fields are the §4.7 pass-arbitration markers.
+    # They will be RECONCILED with (not duplicated by) the ST-* domain fields when
+    # Phase 7e types those (e.g. ST-15 successor lock, ST-16 evolution candidate
+    # window). Until then they stand alone and default to None.
+    p2_locks: P2LocksState | None = None  # §4.7 P2 in-flight locks
+    p2_attempts: P2Attempts | None = None  # §4.7 P2 per-pass attempts
+    p3_candidates: P3CandidateMarkers | None = None  # §4.7 P3 candidates
+    # §4.7 P3 ineligible Evolution GenerationIDs this pass (reason CYCLE_LIMIT_REACHED)
+    p3_decisions: tuple[int, ...] | None = None
+    p4_candidates: P4CandidateMarkers | None = None  # §4.7 P4 candidates
+    p4_decisions: tuple[P4Decision, ...] | None = None  # §4.7 P4 ordered admissions
+
     def __post_init__(self) -> None:
         if self.event_count < 0:
             raise ValueError("event_count must be >= 0")
@@ -110,13 +130,41 @@ class State:
         }
         if self.log_sequence is not None:
             obj["log_sequence"] = self.log_sequence
+        # ST-* placeholders are always None in 7d, so this loop emits nothing yet.
         for name in _DOMAIN_FIELD_NAMES:
             value = getattr(self, name)
             if value is not None:
                 obj[name] = value
+        # Phase-7d arbitration markers: omit when None (R-JSON-6), else recurse.
+        if self.p2_locks is not None:
+            obj["p2_locks"] = self.p2_locks.to_canonical_obj()
+        if self.p2_attempts is not None:
+            obj["p2_attempts"] = self.p2_attempts.to_canonical_obj()
+        if self.p3_candidates is not None:
+            obj["p3_candidates"] = self.p3_candidates.to_canonical_obj()
+        if self.p3_decisions is not None:
+            obj["p3_decisions"] = sorted(self.p3_decisions)
+        if self.p4_candidates is not None:
+            obj["p4_candidates"] = self.p4_candidates.to_canonical_obj()
+        if self.p4_decisions is not None:
+            obj["p4_decisions"] = [d.to_canonical_obj() for d in self.p4_decisions]
         return obj
 
 
+# The Phase-7d arbitration fields are serialized explicitly above; keep them out
+# of the generic placeholder loop (which just passes through the always-None ST-*).
+_ARBITRATION_FIELD_NAMES = frozenset(
+    {
+        "p2_locks",
+        "p2_attempts",
+        "p3_candidates",
+        "p3_decisions",
+        "p4_candidates",
+        "p4_decisions",
+    }
+)
 _DOMAIN_FIELD_NAMES: tuple[str, ...] = tuple(
-    f.name for f in fields(State) if f.name not in _METADATA_FIELDS
+    f.name
+    for f in fields(State)
+    if f.name not in _METADATA_FIELDS and f.name not in _ARBITRATION_FIELD_NAMES
 )
