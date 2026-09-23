@@ -13,8 +13,8 @@ P3 (§4.7 P3) — SAME-GENERATION CONFLICT:
   §4.7 P3). Output ``p3_decisions`` = the ineligible Evolution GenerationIDs for
   THIS pass, sorted ascending.
   BOUNDARY: Cycle-scoped persistence of ineligibility ("no candidate after
-  INELIGIBLE within the same Cycle", DECISION-013) is Phase-7e semantics; Phase
-  7d records the per-pass decision only.
+  INELIGIBLE within the same Cycle", DECISION-013) is Phase-7f semantics (needs
+  ST-03 cycle identity); Phase 7d records the per-pass decision only.
 
 P4 (§4.7 P4) — ACROSS-GENERATION PRECEDENCE:
   Evolution transitions execute BEFORE Cycle transitions

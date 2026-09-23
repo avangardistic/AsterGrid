@@ -6,6 +6,13 @@ centralized reason codes. Pure, stdlib-only, no domain logic beyond §4.7
 ordering; no envelope-content interpretation.
 """
 
+from hypergrid.core.transitions.generation import apply_evolution
+from hypergrid.core.transitions.generation_state import (
+    DominanceFlag,
+    EvolutionCandidateWindow,
+    GenerationState,
+    SuccessorLock,
+)
 from hypergrid.core.transitions.locks import apply_locks
 from hypergrid.core.transitions.markers import (
     P2Attempts,
@@ -22,6 +29,9 @@ from hypergrid.core.transitions.precedence import (
 from hypergrid.core.transitions.reason_codes import ReasonCode
 
 __all__ = [
+    "DominanceFlag",
+    "EvolutionCandidateWindow",
+    "GenerationState",
     "P2Attempts",
     "P2LocksState",
     "P3CandidateMarkers",
@@ -29,7 +39,9 @@ __all__ = [
     "P4Decision",
     "ReasonCode",
     "StageReport",
+    "SuccessorLock",
     "apply_across_generation_precedence",
+    "apply_evolution",
     "apply_locks",
     "apply_same_generation_precedence",
 ]

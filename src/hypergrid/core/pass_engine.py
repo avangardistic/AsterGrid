@@ -7,7 +7,7 @@ implements the deterministic ordering substrate only:
   P1  RISK/EXPOSURE PROTECTION & HEDGE RECOVERY    — STUB (§11.1/§11.2, later)
   P2  LOCKS                                        — REAL (transitions.locks)
   P3  SAME-GENERATION CONFLICT                     — REAL (transitions.precedence)
-  P4  ACROSS-GENERATION PRECEDENCE                 — REAL (transitions.precedence)
+  P4  ACROSS-GEN PRECEDENCE + EVOLUTION EXECUTION  — REAL (precedence + generation)
   P5  CYCLE TRANSITIONS                            — STUB (§5.2/§5.3, later)
   P6  LEVEL ARMING / ORDER PLACEMENT               — STUB (later)
 
@@ -28,6 +28,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
+from hypergrid.core.transitions.generation import apply_evolution
 from hypergrid.core.transitions.locks import apply_locks
 from hypergrid.core.transitions.markers import StageReport
 from hypergrid.core.transitions.precedence import (
@@ -62,6 +63,26 @@ def _stub(stage: str) -> StageReport:
     )
 
 
+def _combine_p4(arbitration: StageReport, execution: StageReport) -> StageReport:
+    """Merge the P4 arbitration (7d) and evolution-execution (7e) sub-reports.
+
+    §4.7 P4's own text orders AND executes evolutions before Cycle transitions, so
+    P4 is the home of evolution execution — no vocabulary beyond P0..P6 ever enters
+    reports (OCaml compares these strings in a later phase). The combined report:
+    codes = arbitration codes then execution codes; status APPLIED iff either
+    sub-step applied; notes = the arbitration note plus an execution suffix ONLY
+    when the execution sub-step did observable work. 7d-COMPATIBILITY PIN: when the
+    generation markers are absent the execution sub-step is NO_OP with empty
+    codes/note, so this returns a P4 report byte-identical to the Phase-7d one.
+    """
+    codes = tuple(arbitration.reason_codes) + tuple(execution.reason_codes)
+    applied = arbitration.status == "APPLIED" or execution.status == "APPLIED"
+    notes = arbitration.notes
+    if execution.status == "APPLIED" and execution.notes:
+        notes = f"{notes}; {execution.notes}"
+    return StageReport("P4", "APPLIED" if applied else "NO_OP", codes, notes)
+
+
 def run_pass(
     state: State,
     envelopes: Iterable[EventEnvelope],
@@ -77,8 +98,12 @@ def run_pass(
     stages.append(p2)
     state, p3 = apply_same_generation_precedence(state, materialized)
     stages.append(p3)
-    state, p4 = apply_across_generation_precedence(state, materialized)
-    stages.append(p4)
+    # P4 is a composition over the same state thread: FIRST the 7d across-gen
+    # arbitration, THEN the 7e evolution execution (§4.7 P4 executes evolutions
+    # here). No new stage is introduced — the report is still named "P4".
+    state, p4_arbitration = apply_across_generation_precedence(state, materialized)
+    state, p4_execution = apply_evolution(state, materialized)
+    stages.append(_combine_p4(p4_arbitration, p4_execution))
 
     stages.append(_stub("P5"))
     stages.append(_stub("P6"))

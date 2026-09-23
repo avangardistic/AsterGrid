@@ -16,10 +16,10 @@ Grouping by stage:
         CYCLE_LIMIT_REACHED, SAME_GEN_DISABLE_BEATS_EVOLUTION
   * P4 (across-generation precedence, §4.7 P4):
         ACROSS_GEN_EVOLUTION_BEFORE_CYCLE, ACROSS_GEN_LOWER_GEN_ID_FIRST
-
-Codes reserved for Phase 7e/7f are intentionally ABSENT (they need §4/§5 or P0
-semantics not present in Phase 7d): RETURN_LEVEL_UNVERIFIED, SUCCESSOR_LOCK_ACTIVE,
-GENERATION_ID_LIMIT (all DECISION-013). Do NOT add them here.
+  * P4 (evolution execution, §4.1/§4.4/§4.6 — Phase 7e; DECISION-013):
+        RETURN_LEVEL_UNVERIFIED, SUCCESSOR_LOCK_ACTIVE, GENERATION_ID_LIMIT
+        (EVOLUTION_IN_FLIGHT_LOCKED is REUSED for the §4.3 basket-in-flight and
+        §4.7 P2 single-admission blocks — no second code is coined).
 """
 
 from __future__ import annotations
@@ -46,3 +46,7 @@ class ReasonCode(StrEnum):
     # --- P4 across-generation precedence (§4.7 P4) ---
     ACROSS_GEN_EVOLUTION_BEFORE_CYCLE = auto()  # §4.7 P4 — COINED in 7d
     ACROSS_GEN_LOWER_GEN_ID_FIRST = auto()  # §4.7 P4 — COINED in 7d
+    # --- P4 evolution execution (§4.1/§4.4/§4.6, Phase 7e) ---
+    RETURN_LEVEL_UNVERIFIED = auto()  # §4.1 + DECISION-013 — VERBATIM
+    SUCCESSOR_LOCK_ACTIVE = auto()  # §4.4 + DECISION-013 — VERBATIM
+    GENERATION_ID_LIMIT = auto()  # §4.6 + DECISION-013 — VERBATIM

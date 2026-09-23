@@ -5,18 +5,24 @@ from pathlib import Path
 
 from hypergrid.core.transitions.reason_codes import ReasonCode
 
-# Codes reserved for Phase 7e/7f — MUST NOT be members yet (DECISION-013).
-_FUTURE = ("RETURN_LEVEL_UNVERIFIED", "SUCCESSOR_LOCK_ACTIVE", "GENERATION_ID_LIMIT")
+# All DECISION-013 codes are now present (Phase 7e added the last three); there are
+# no further deferred codes for later phases.
+_FUTURE: tuple[str, ...] = ()
 _SOURCE_MARKERS = ("STR-", "§", "DECISION-")
 _KIND_MARKERS = ("VERBATIM", "COINED")
 
 _EXPECTED = {
+    # Phase 7d (six)
     "EVOLUTION_IN_FLIGHT_LOCKED",
     "CYCLE_TRANSITION_IN_FLIGHT_LOCKED",
     "CYCLE_LIMIT_REACHED",
     "SAME_GEN_DISABLE_BEATS_EVOLUTION",
     "ACROSS_GEN_EVOLUTION_BEFORE_CYCLE",
     "ACROSS_GEN_LOWER_GEN_ID_FIRST",
+    # Phase 7e (three)
+    "RETURN_LEVEL_UNVERIFIED",
+    "SUCCESSOR_LOCK_ACTIVE",
+    "GENERATION_ID_LIMIT",
 }
 
 
@@ -34,8 +40,9 @@ def test_members_are_nonempty_str() -> None:
         assert member.value == member.name  # value == name (auto())
 
 
-def test_membership_is_exactly_the_six_phase_7d_codes() -> None:
+def test_membership_is_exactly_the_nine_codes() -> None:
     assert {m.name for m in ReasonCode} == _EXPECTED
+    assert len(_EXPECTED) == 9
 
 
 def test_each_member_has_same_line_provenance() -> None:
