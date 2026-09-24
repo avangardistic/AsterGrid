@@ -20,6 +20,8 @@ from hypergrid.core.transitions.generation_state import (
     GenerationState,
     SuccessorLock,
 )
+from hypergrid.core.transitions.geometry import compute_ladder_geometry
+from hypergrid.core.transitions.level_state import LevelState
 from hypergrid.core.transitions.locks import apply_locks
 from hypergrid.core.transitions.markers import (
     P2Attempts,
@@ -33,6 +35,10 @@ from hypergrid.core.transitions.precedence import (
     apply_across_generation_precedence,
     apply_same_generation_precedence,
 )
+from hypergrid.core.transitions.protection_lock import (
+    apply_protection_unlock,
+    is_protection_locked_initial,
+)
 from hypergrid.core.transitions.reason_codes import ReasonCode
 
 __all__ = [
@@ -41,6 +47,7 @@ __all__ = [
     "DominanceFlag",
     "EvolutionCandidateWindow",
     "GenerationState",
+    "LevelState",
     "NonOverlapData",
     "P2Attempts",
     "P2LocksState",
@@ -55,5 +62,8 @@ __all__ = [
     "apply_cycle",
     "apply_evolution",
     "apply_locks",
+    "apply_protection_unlock",
     "apply_same_generation_precedence",
+    "compute_ladder_geometry",
+    "is_protection_locked_initial",
 ]

@@ -6,17 +6,19 @@ per-kind counts), one field per ST-01..ST-23 (STATE_OWNERSHIP.md), the Phase-7d
 
 Phase 7e types the generation-lifecycle family ST-02/14/15/16 (in
 ``transitions/generation_state.py``). Phase 7f types the cycle family ST-03/ST-10
-(in ``transitions/cycle_state.py``) and adds the §5 arbitration markers
-(``effective_cycle_limit``, ``current_cycle_id_by_generation``,
-``p3_ineligible_cycles``, ``cycle_terminal_markers``). Both enforce their
-ordering/range invariants at construction.
+(in ``transitions/cycle_state.py``) and adds the §5 arbitration markers. Phase
+7g-1 types ST-04 (``transitions/level_state.py``) with ONLY what its §7.1 geometry
++ §7.2 protection-lock logic touches (identity, ``target_price``,
+``is_protection_locked``). Each enforces its ordering/range invariants at
+construction.
 
-Forward notes: ST-01 (basket lifecycle) goes with the freeze/closure phase — no
-7f reader/writer. ST-04 (level pipeline) / ST-18 (open-order registry) are typed
-when the real cancel/reconcile path arrives (Phase 7g+). The remaining ST-* (ST-01,
-ST-04..ST-09, ST-11..ST-13, ST-17..ST-23) stay ``object | None`` placeholders
-until their rule is implemented (P0/P1/P6 phases). The State is frozen and
-validates its own invariants, so no invalid State can be serialized.
+Forward notes: ST-04's ``size_notional_usd`` arrives WITH the §7.3 sizing function
+in Phase 7g-2; ST-04 lifecycle / filled_quantity / order_state / cloid-oid linkage
+are DEFERRED to Phase 7h (arming + real P0). ST-01 (basket lifecycle) goes with the
+freeze/closure phase. The remaining ST-* (ST-01, ST-05..ST-09, ST-11..ST-13,
+ST-17..ST-23) stay ``object | None`` placeholders until their rule is implemented.
+The State is frozen and validates its own invariants, so no invalid State can be
+serialized.
 """
 
 from __future__ import annotations
@@ -46,6 +48,7 @@ from hypergrid.core.transitions.generation_state import (
     GenerationState,
     SuccessorLock,
 )
+from hypergrid.core.transitions.level_state import LevelState
 from hypergrid.core.transitions.markers import (
     P2Attempts,
     P2LocksState,
@@ -97,7 +100,7 @@ class State:
     st01_basket_lifecycle_state: object | None = None  # ST-01
     st02_generation_states: tuple[GenerationState, ...] | None = None  # ST-02 (7e)
     st03_cycle_states: tuple[CycleState, ...] | None = None  # ST-03 (7f)
-    st04_level_pipeline_states: object | None = None  # ST-04
+    st04_level_pipeline_states: tuple[LevelState, ...] | None = None  # ST-04 (7g-1)
     st05_order_intents_and_outcomes: object | None = None  # ST-05
     st06_cloid_registry: object | None = None  # ST-06
     st07_expected_exposure: object | None = None  # ST-07
@@ -109,9 +112,9 @@ class State:
     st13_event_log_audit_trail: object | None = None  # ST-13
     st14_dominance_flags: tuple[DominanceFlag, ...] | None = None  # ST-14 (7e)
     st15_successor_locks: tuple[SuccessorLock, ...] | None = None  # ST-15 (7e)
-    st16_evolution_candidate_windows: (
-        tuple[EvolutionCandidateWindow, ...] | None
-    ) = None  # ST-16 (7e)
+    st16_evolution_candidate_windows: tuple[EvolutionCandidateWindow, ...] | None = (
+        None  # ST-16 (7e)
+    )
     st17_account_equity_capital_base: object | None = None  # ST-17
     st18_open_order_registry: object | None = None  # ST-18
     st19_market_observation_cache: object | None = None  # ST-19
@@ -163,6 +166,7 @@ class State:
             raise ValueError("per_kind_count values must be >= 0")
         self._validate_generation_invariants()
         self._validate_cycle_invariants()
+        self._validate_level_invariants()
 
     def _validate_generation_invariants(self) -> None:
         """Phase-7e ordering + coherence invariants on ST-02/14/15/16.
@@ -198,9 +202,7 @@ class State:
                 for g in self.st02_generation_states
                 if g.lifecycle == "EVOLUTION_PENDING"
             }
-            locked = {
-                s.generation_id for s in self.st15_successor_locks if s.locked
-            }
+            locked = {s.generation_id for s in self.st15_successor_locks if s.locked}
             if pending & locked:
                 raise ValueError("EVOLUTION_PENDING generation must not be locked")
 
@@ -247,6 +249,24 @@ class State:
             if not (0 <= self.effective_cycle_limit <= 99):
                 raise ValueError("effective_cycle_limit must be within 0..99")
 
+    def _validate_level_invariants(self) -> None:
+        """Phase-7g-1 ordering + range invariant on ST-04 (LevelState).
+
+        Enforced: ST-04 sorted by (generation_id, cycle_id, direction, level_id)
+        ascending ("BU" < "SL" lexicographically) with no duplicate identity
+        quadruples; ids within range (per-field ranges are validated by LevelState
+        itself). No cross-field lifecycle<->marker invariant (7e-deviation doctrine).
+        """
+        rows = self.st04_level_pipeline_states
+        if rows is None:
+            return
+        keys = [(r.generation_id, r.cycle_id, r.direction, r.level_id) for r in rows]
+        if keys != sorted(keys) or len(set(keys)) != len(keys):
+            raise ValueError(
+                "st04_level_pipeline_states must be sorted by "
+                "(gen, cycle, direction, level), no dups"
+            )
+
     def to_canonical_obj(self) -> dict[str, object]:
         """Canonical dict for :func:`canonical_dumps` (no None/float in output)."""
         obj: dict[str, object] = {
@@ -276,6 +296,10 @@ class State:
         if self.st15_successor_locks is not None:
             obj["st15_successor_locks"] = [
                 s.to_canonical_obj() for s in self.st15_successor_locks
+            ]
+        if self.st04_level_pipeline_states is not None:
+            obj["st04_level_pipeline_states"] = [
+                lvl.to_canonical_obj() for lvl in self.st04_level_pipeline_states
             ]
         if self.st16_evolution_candidate_windows is not None:
             obj["st16_evolution_candidate_windows"] = [
@@ -344,6 +368,7 @@ _TYPED_ST_FIELD_NAMES = frozenset(
     {
         "st02_generation_states",
         "st03_cycle_states",
+        "st04_level_pipeline_states",
         "st10_reference_prices",
         "st14_dominance_flags",
         "st15_successor_locks",

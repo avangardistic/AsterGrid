@@ -33,8 +33,11 @@ it contains **no trading/domain logic** yet.
   executed inside P4; typed ST-02/14/15/16 in `generation_state.py`). Phase 7f
   made P5 real: the §5 Cycle transition (`cycle.py`) with execution-grounded
   reference capture (§5.4/§5.4.1) and the §5.6 non-overlap test; typed ST-03/ST-10
-  in `cycle_state.py`. The remaining §6–§13 rules (real P0/P1 reconciliation,
-  risk/hedge) are later phases. Guards: `tests/test_core_*`.
+  in `cycle_state.py`. Phase 7g-1 added the §7.1 grid geometry (`geometry.py`) and
+  §7.2 protection locking (`protection_lock.py`) as pure functions, plus minimal
+  ST-04 typing (`level_state.py`) — no `run_pass` wiring. The remaining §7.3
+  sizing, §8 arming, and §11 exposure/hedge rules are later phases. Guards:
+  `tests/test_core_*`.
 - `adapters/` — side-effect boundary (venue I/O, persistence, signing) — Phase 7b+.
 - `runtime/` — the process shell: logging, wiring, asyncio. `logging_setup.py`
   provides the JSON formatter + context + redaction.

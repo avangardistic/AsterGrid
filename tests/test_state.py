@@ -15,6 +15,7 @@ from hypergrid.core.transitions import (
     DominanceFlag,
     EvolutionCandidateWindow,
     GenerationState,
+    LevelState,
     ReferencePriceRecord,
     SuccessorLock,
 )
@@ -217,9 +218,7 @@ def test_cycle_ordering_invariants_rejected() -> None:
             st03_cycle_states=(CycleState(0, 1, "ACTIVE"), CycleState(0, 0, "ACTIVE")),
         )
     with pytest.raises(ValueError, match="sorted"):
-        dataclasses.replace(
-            _valid_state(), p3_ineligible_cycles=((0, 1), (0, 1))
-        )
+        dataclasses.replace(_valid_state(), p3_ineligible_cycles=((0, 1), (0, 1)))
     with pytest.raises(ValueError, match="sorted"):
         dataclasses.replace(
             _valid_state(),
@@ -238,9 +237,7 @@ def test_cycle_id_out_of_range_rejected() -> None:
     with pytest.raises(ValueError):
         CycleState(0, 100, "ACTIVE")
     with pytest.raises(ValueError):
-        dataclasses.replace(
-            _valid_state(), p3_ineligible_cycles=((0, 100),)
-        )
+        dataclasses.replace(_valid_state(), p3_ineligible_cycles=((0, 100),))
 
 
 def test_bad_cycle_strings_rejected() -> None:
@@ -250,3 +247,74 @@ def test_bad_cycle_strings_rejected() -> None:
         ReferencePriceRecord(0, 1, Decimal("1"), "BOGUS")
     with pytest.raises(ValueError):  # reference must be Decimal, > 0
         ReferencePriceRecord(0, 1, Decimal("0"), "TERMINAL_MID")
+
+
+# ------------------------ Phase 7g-1: typed ST-04 ------------------------
+
+
+def test_st04_defaults_none() -> None:
+    assert _valid_state().st04_level_pipeline_states is None
+
+
+def test_st04_ordering_invariant_rejected() -> None:
+    with pytest.raises(ValueError, match="sorted"):
+        dataclasses.replace(
+            _valid_state(),
+            st04_level_pipeline_states=(
+                LevelState(0, 0, "BU", 2, Decimal("100300.2"), False),
+                LevelState(0, 0, "BU", 1, Decimal("100200"), False),
+            ),
+        )
+    with pytest.raises(ValueError, match="sorted"):  # duplicate quadruple
+        dataclasses.replace(
+            _valid_state(),
+            st04_level_pipeline_states=(
+                LevelState(0, 0, "BU", 1, Decimal("100200"), False),
+                LevelState(0, 0, "BU", 1, Decimal("100200"), False),
+            ),
+        )
+
+
+def test_st04_bu_before_sl_ordering_accepted() -> None:
+    # "BU" < "SL" lexicographically — this order is valid.
+    dataclasses.replace(
+        _valid_state(),
+        st04_level_pipeline_states=(
+            LevelState(0, 0, "BU", 1, Decimal("100200"), False),
+            LevelState(0, 0, "SL", 1, Decimal("99800"), True),
+        ),
+    )
+
+
+def test_fully_populated_7g1_state_serializes() -> None:
+    state = dataclasses.replace(
+        _valid_state(),
+        st03_cycle_states=(CycleState(0, 0, "ACTIVE"),),
+        st04_level_pipeline_states=(
+            LevelState(0, 0, "BU", 1, Decimal("100200"), False),
+            LevelState(0, 0, "SL", 1, Decimal("99800"), True),
+        ),
+        st10_reference_prices=(
+            ReferencePriceRecord(0, 1, Decimal("100000"), "TERMINAL_EXECUTION"),
+        ),
+    )
+    canonical_dumps(state.to_canonical_obj())  # no None/float at any depth
+    obj = state.to_canonical_obj()
+    assert obj["st04_level_pipeline_states"] == [
+        {
+            "generation_id": 0,
+            "cycle_id": 0,
+            "direction": "BU",
+            "level_id": 1,
+            "target_price": Decimal("100200"),
+            "is_protection_locked": False,
+        },
+        {
+            "generation_id": 0,
+            "cycle_id": 0,
+            "direction": "SL",
+            "level_id": 1,
+            "target_price": Decimal("99800"),
+            "is_protection_locked": True,
+        },
+    ]
