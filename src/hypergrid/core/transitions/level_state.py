@@ -9,8 +9,9 @@ protection-lock (§7.2) logic reads or writes: the identity quadruple, the ladde
 DEFERRED (typed when the rule that uses it lands), to avoid the C2-7e error of
 over-strict invariants on fields no code populates yet:
 
-  * ``size_notional_usd`` — Phase 7g-2, WITH the §7.3 sizing + hard caps (splitting
-    volume computation from cap-enforcement would create two sizing truths).
+  * ``size_notional_usd`` — TYPED in Phase 7g-2 (this field), defaulted None;
+    populated by the 7h arming caller. Its §7.3 sizing + hard caps live in
+    ``transitions/sizing.py``.
   * lifecycle (§6.1 PARTIALLY_FILLED/FILLED/POSITION_VERIFIED/CANCELLED/EMERGENCY/
     SKIPPED/ERROR, LOCKED->IDLE) — Phase 7h (real P0/P6). FORWARD NOTE: when the
     §6.1 lifecycle arrives, 7h MUST define the single-source coherence rule between
@@ -42,6 +43,9 @@ class LevelState:
     level_id: int  # 1..12 (max representable ladder; config bound GridLevels)
     target_price: Decimal  # > 0, Decimal instance (§7.1 ladder price)
     is_protection_locked: bool  # §7.2 LOCKED state
+    # §7.3 per-level USD notional (Phase 7g-2): typed here, populated by the 7h
+    # arming caller. Appended LAST so 7g-1 positional construction keeps working.
+    size_notional_usd: Decimal | None = None
 
     def __post_init__(self) -> None:
         if not (0 <= self.generation_id <= 99):
@@ -56,9 +60,14 @@ class LevelState:
             raise ValueError("target_price must be a Decimal instance")
         if self.target_price <= 0:
             raise ValueError("target_price must be > 0")
+        if self.size_notional_usd is not None:
+            if not isinstance(self.size_notional_usd, Decimal):
+                raise ValueError("size_notional_usd must be a Decimal instance")
+            if self.size_notional_usd <= 0:
+                raise ValueError("size_notional_usd must be > 0")
 
     def to_canonical_obj(self) -> dict[str, object]:
-        return {
+        obj: dict[str, object] = {
             "generation_id": self.generation_id,
             "cycle_id": self.cycle_id,
             "direction": self.direction,
@@ -66,3 +75,6 @@ class LevelState:
             "target_price": self.target_price,  # stays Decimal; tagged at dumps
             "is_protection_locked": self.is_protection_locked,
         }
+        if self.size_notional_usd is not None:  # R-JSON-6: omit absent optional
+            obj["size_notional_usd"] = self.size_notional_usd
+        return obj

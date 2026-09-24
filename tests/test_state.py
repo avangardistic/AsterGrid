@@ -286,6 +286,26 @@ def test_st04_bu_before_sl_ordering_accepted() -> None:
     )
 
 
+def test_st04_with_size_serializes_and_duplicate_identity_rejected() -> None:
+    state = dataclasses.replace(
+        _valid_state(),
+        st04_level_pipeline_states=(
+            LevelState(0, 0, "BU", 1, Decimal("100200"), False, Decimal("5000")),
+            LevelState(0, 0, "BU", 2, Decimal("100300.2"), False, Decimal("5000")),
+        ),
+    )
+    canonical_dumps(state.to_canonical_obj())  # no None/float at any depth
+    # Rows with the SAME identity quadruple but different size are still duplicates.
+    with pytest.raises(ValueError, match="sorted"):
+        dataclasses.replace(
+            _valid_state(),
+            st04_level_pipeline_states=(
+                LevelState(0, 0, "BU", 1, Decimal("100200"), False, Decimal("5000")),
+                LevelState(0, 0, "BU", 1, Decimal("100200"), False, Decimal("7500")),
+            ),
+        )
+
+
 def test_fully_populated_7g1_state_serializes() -> None:
     state = dataclasses.replace(
         _valid_state(),

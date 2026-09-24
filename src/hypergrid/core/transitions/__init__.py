@@ -40,6 +40,17 @@ from hypergrid.core.transitions.protection_lock import (
     is_protection_locked_initial,
 )
 from hypergrid.core.transitions.reason_codes import ReasonCode
+from hypergrid.core.transitions.sizing import (
+    assign_level_notionals,
+    compute_max_cycle_notional,
+    compute_max_generation_notional,
+    compute_max_level_notional,
+    compute_max_level_notional_dominant,
+    convert_notional_to_size,
+    count_active_cycles,
+    count_active_generations,
+    enforce_level_caps,
+)
 
 __all__ = [
     "CycleState",
@@ -64,6 +75,15 @@ __all__ = [
     "apply_locks",
     "apply_protection_unlock",
     "apply_same_generation_precedence",
+    "assign_level_notionals",
     "compute_ladder_geometry",
+    "compute_max_cycle_notional",
+    "compute_max_generation_notional",
+    "compute_max_level_notional",
+    "compute_max_level_notional_dominant",
+    "convert_notional_to_size",
+    "count_active_cycles",
+    "count_active_generations",
+    "enforce_level_caps",
     "is_protection_locked_initial",
 ]
