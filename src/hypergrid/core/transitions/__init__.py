@@ -6,6 +6,29 @@ centralized reason codes. Pure, stdlib-only, no domain logic beyond §4.7
 ordering; no envelope-content interpretation.
 """
 
+from hypergrid.core.transitions.arm import (
+    ARM_TIMEOUT_S,
+    DISTANCE_BAND,
+    EDGE_FLOOR_BPS,
+    MARGIN_BUFFER_MULT,
+    MIN_DEPTH_MULTIPLE,
+    OPEN_ORDER_CAP,
+    ArmEvaluation,
+    GateResult,
+    evaluate_arm_gates,
+    evaluate_wait,
+)
+from hypergrid.core.transitions.arm_state import (
+    ArmBlockCode,
+    ArmOutcome,
+    ArmPolicy,
+    ArmRequestState,
+    OperationalState,
+    OperatorDecision,
+    expire_on_restart,
+    is_legal_arm_transition,
+    supersede_request,
+)
 from hypergrid.core.transitions.cycle import apply_cycle
 from hypergrid.core.transitions.cycle_state import (
     CycleState,
@@ -78,6 +101,14 @@ from hypergrid.core.transitions.observation_state import (
     P0ObservationMarkers,
     PerLevelObservation,
 )
+from hypergrid.core.transitions.order_state import (
+    OrderIntent,
+    OrderState,
+    OrderType,
+    classify_intent,
+    construct_order_intent,
+    is_legal_order_transition,
+)
 from hypergrid.core.transitions.precedence import (
     apply_across_generation_precedence,
     apply_same_generation_precedence,
@@ -100,8 +131,19 @@ from hypergrid.core.transitions.sizing import (
 )
 
 __all__ = [
+    "ARM_TIMEOUT_S",
+    "DISTANCE_BAND",
+    "EDGE_FLOOR_BPS",
     "EPSILON_H",
+    "MARGIN_BUFFER_MULT",
+    "MIN_DEPTH_MULTIPLE",
+    "OPEN_ORDER_CAP",
     "ActualExposureState",
+    "ArmBlockCode",
+    "ArmEvaluation",
+    "ArmOutcome",
+    "ArmPolicy",
+    "ArmRequestState",
     "CycleState",
     "CycleTerminalMarkers",
     "DominanceFlag",
@@ -109,6 +151,7 @@ __all__ = [
     "ExpectedExposureState",
     "ExposureClass",
     "ExposureDeltaState",
+    "GateResult",
     "GenerationState",
     "HedgeExecution",
     "HedgeIntent",
@@ -117,6 +160,11 @@ __all__ = [
     "LevelState",
     "MarketObservationState",
     "NonOverlapData",
+    "OperationalState",
+    "OperatorDecision",
+    "OrderIntent",
+    "OrderState",
+    "OrderType",
     "P0ObservationMarkers",
     "P1ExposureMarkers",
     "P2Attempts",
@@ -142,6 +190,7 @@ __all__ = [
     "build_exposure_singletons",
     "build_hedge_intent",
     "classify_exposure",
+    "classify_intent",
     "classify_remainder_hedge_status",
     "compute_actual_exposure",
     "compute_expected_exposure",
@@ -154,16 +203,23 @@ __all__ = [
     "compute_q_min",
     "compute_t_enter",
     "compute_t_exit",
+    "construct_order_intent",
     "convert_notional_to_size",
     "count_active_cycles",
     "count_active_generations",
     "enforce_level_caps",
+    "evaluate_arm_gates",
+    "evaluate_wait",
+    "expire_on_restart",
     "extend_level_states",
     "hedge_execution_for",
     "is_acute",
+    "is_legal_arm_transition",
+    "is_legal_order_transition",
     "is_protection_locked_initial",
     "mirror_eligible",
     "progression_permitted",
     "project_p1_markers",
     "round_to_zero",
+    "supersede_request",
 ]

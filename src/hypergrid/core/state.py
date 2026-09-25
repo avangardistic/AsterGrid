@@ -48,6 +48,7 @@ from hypergrid.core.events import (
     StateTransitionEvent,
     TimerEvent,
 )
+from hypergrid.core.transitions.arm_state import ArmRequestState
 from hypergrid.core.transitions.cycle_state import (
     CycleState,
     CycleTerminalMarkers,
@@ -75,6 +76,7 @@ from hypergrid.core.transitions.markers import (
 )
 from hypergrid.core.transitions.market_observation_state import MarketObservationState
 from hypergrid.core.transitions.observation_state import P0ObservationMarkers
+from hypergrid.core.transitions.order_state import OrderState
 
 # The ten R-JSON-7 kind tags, sorted ascending — derived from the event classes
 # (no duplicated hardcoded list).
@@ -113,21 +115,25 @@ class State:
     per_kind_count: tuple[tuple[str, int], ...]  # sorted (kind, count) for all ten
 
     # --- domain fields, one per ST-* (STATE_OWNERSHIP.md) ---
-    # Phase 7e types ST-02/14/15/16 (the generation lifecycle family, below).
-    # ST-01/ST-03..ST-13/ST-17..ST-23 remain placeholders (object | None) and are
-    # typed when their rule is implemented (Phase 7f+).
+    # Typed so far: ST-02/03/04/07/08/09/10/14/15/16/19 (7e-7h-1), ST-05/12 (7h-2).
+    # ST-01/06/11/13/17/18/20/21/22 remain placeholders (object | None) and ST-23 is
+    # partial; each is typed/completed when its rule lands (later phases).
     st01_basket_lifecycle_state: object | None = None  # ST-01
     st02_generation_states: tuple[GenerationState, ...] | None = None  # ST-02 (7e)
     st03_cycle_states: tuple[CycleState, ...] | None = None  # ST-03 (7f)
     st04_level_pipeline_states: tuple[LevelState, ...] | None = None  # ST-04 (7g-1)
-    st05_order_intents_and_outcomes: object | None = None  # ST-05
+    st05_order_intents_and_outcomes: tuple[OrderState, ...] | None = (
+        None  # ST-05 (7h-2)
+    )
     st06_cloid_registry: object | None = None  # ST-06
     st07_expected_exposure: ExpectedExposureState | None = None  # ST-07 (7g-3a)
     st08_actual_exposure: ActualExposureState | None = None  # ST-08 (7g-3a)
     st09_exposure_delta: ExposureDeltaState | None = None  # ST-09 (7g-3a)
     st10_reference_prices: tuple[ReferencePriceRecord, ...] | None = None  # ST-10 (7f)
     st11_calibration_configuration: object | None = None  # ST-11
-    st12_operator_arm_requests: object | None = None  # ST-12
+    st12_operator_arm_requests: tuple[ArmRequestState, ...] | None = (
+        None  # ST-12 (7h-2)
+    )
     st13_event_log_audit_trail: object | None = None  # ST-13
     st14_dominance_flags: tuple[DominanceFlag, ...] | None = None  # ST-14 (7e)
     st15_successor_locks: tuple[SuccessorLock, ...] | None = None  # ST-15 (7e)
@@ -198,6 +204,7 @@ class State:
         self._validate_generation_invariants()
         self._validate_cycle_invariants()
         self._validate_level_invariants()
+        self._validate_order_arm_invariants()
 
     def _validate_generation_invariants(self) -> None:
         """Phase-7e ordering + coherence invariants on ST-02/14/15/16.
@@ -298,6 +305,31 @@ class State:
                 "(gen, cycle, direction, level), no dups"
             )
 
+    def _validate_order_arm_invariants(self) -> None:
+        """Phase-7h-2 ordering + no-dup invariants on ST-05 and ST-12.
+
+        Enforced: ST-05 sorted by ``cloid`` with no duplicate cloids (one live order
+        row per order identity); ST-12 sorted by ``(cloid, request_seq)`` with no
+        duplicate request identities. Per-row ranges/coherence are validated by
+        ``OrderState``/``ArmRequestState``. No cross-field lifecycle↔outcome invariant
+        (7e-deviation doctrine: gating lives in the transition, not the container).
+        """
+        if self.st05_order_intents_and_outcomes is not None:
+            cloids = [row.cloid for row in self.st05_order_intents_and_outcomes]
+            if cloids != sorted(cloids) or len(set(cloids)) != len(cloids):
+                raise ValueError(
+                    "st05_order_intents_and_outcomes must be sorted by cloid, no dups"
+                )
+        if self.st12_operator_arm_requests is not None:
+            keys = [
+                (row.cloid, row.request_seq) for row in self.st12_operator_arm_requests
+            ]
+            if keys != sorted(keys) or len(set(keys)) != len(keys):
+                raise ValueError(
+                    "st12_operator_arm_requests must be sorted by "
+                    "(cloid, request_seq), no dups"
+                )
+
     def to_canonical_obj(self) -> dict[str, object]:
         """Canonical dict for :func:`canonical_dumps` (no None/float in output)."""
         obj: dict[str, object] = {
@@ -331,6 +363,14 @@ class State:
         if self.st04_level_pipeline_states is not None:
             obj["st04_level_pipeline_states"] = [
                 lvl.to_canonical_obj() for lvl in self.st04_level_pipeline_states
+            ]
+        if self.st05_order_intents_and_outcomes is not None:
+            obj["st05_order_intents_and_outcomes"] = [
+                row.to_canonical_obj() for row in self.st05_order_intents_and_outcomes
+            ]
+        if self.st12_operator_arm_requests is not None:
+            obj["st12_operator_arm_requests"] = [
+                row.to_canonical_obj() for row in self.st12_operator_arm_requests
             ]
         if self.st07_expected_exposure is not None:
             obj["st07_expected_exposure"] = (
@@ -424,6 +464,8 @@ _TYPED_ST_FIELD_NAMES = frozenset(
         "st02_generation_states",
         "st03_cycle_states",
         "st04_level_pipeline_states",
+        "st05_order_intents_and_outcomes",
+        "st12_operator_arm_requests",
         "st07_expected_exposure",
         "st08_actual_exposure",
         "st09_exposure_delta",

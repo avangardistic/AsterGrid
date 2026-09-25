@@ -17,7 +17,10 @@ over-strict invariants on fields no code populates yet:
     single-source coherence rule is now enforced here as R10c:
     ``is_protection_locked ⇔ lifecycle == "LOCKED"`` (checked when observed).
   * ``filled_quantity`` (VERIFIED cumulative) — LANDED Phase 7h-1 (this field).
-  * ``order_state`` (IDLE/AWAITING_ARM/ARMED/...) — Phase 7h-2/7h-4.
+  * ``order_state``: SUPERSEDED. Order lifecycle is ST-05 (``order_state.py``
+    ``OrderState``, Phase 7h-2 — the §6.1 pipeline minus LOCKED/IDLE); arm status is
+    ST-12 (``arm_state.py``, Phase 7h-2). No AWAITING_ARM/ARMED lives on ST-04. The
+    ST-04↔ST-05 coupling rule is the P6-writer phase's (7h-4).
   * order linkage (cloid, oid) — Phase 7h.
 
 Frozen, slots, self-validating, canonical-serializable (Decimals kept as Decimals;
