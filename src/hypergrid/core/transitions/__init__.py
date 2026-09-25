@@ -13,6 +13,20 @@ from hypergrid.core.transitions.cycle_state import (
     NonOverlapData,
     ReferencePriceRecord,
 )
+from hypergrid.core.transitions.exposure import (
+    classify_exposure,
+    compute_actual_exposure,
+    compute_expected_exposure,
+    compute_exposure_delta,
+    is_acute,
+)
+from hypergrid.core.transitions.exposure_state import (
+    ActualExposureState,
+    ExpectedExposureState,
+    ExposureClass,
+    ExposureDeltaState,
+    LevelFillState,
+)
 from hypergrid.core.transitions.generation import apply_evolution
 from hypergrid.core.transitions.generation_state import (
     DominanceFlag,
@@ -53,11 +67,16 @@ from hypergrid.core.transitions.sizing import (
 )
 
 __all__ = [
+    "ActualExposureState",
     "CycleState",
     "CycleTerminalMarkers",
     "DominanceFlag",
     "EvolutionCandidateWindow",
+    "ExpectedExposureState",
+    "ExposureClass",
+    "ExposureDeltaState",
     "GenerationState",
+    "LevelFillState",
     "LevelState",
     "NonOverlapData",
     "P2Attempts",
@@ -76,6 +95,10 @@ __all__ = [
     "apply_protection_unlock",
     "apply_same_generation_precedence",
     "assign_level_notionals",
+    "classify_exposure",
+    "compute_actual_exposure",
+    "compute_expected_exposure",
+    "compute_exposure_delta",
     "compute_ladder_geometry",
     "compute_max_cycle_notional",
     "compute_max_generation_notional",
@@ -85,5 +108,6 @@ __all__ = [
     "count_active_cycles",
     "count_active_generations",
     "enforce_level_caps",
+    "is_acute",
     "is_protection_locked_initial",
 ]

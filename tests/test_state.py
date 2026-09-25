@@ -10,10 +10,14 @@ from hypergrid.core.fold import _empty_state
 from hypergrid.core.serialization import canonical_dumps
 from hypergrid.core.state import _EVENT_KINDS, State
 from hypergrid.core.transitions import (
+    ActualExposureState,
     CycleState,
     CycleTerminalMarkers,
     DominanceFlag,
     EvolutionCandidateWindow,
+    ExpectedExposureState,
+    ExposureClass,
+    ExposureDeltaState,
     GenerationState,
     LevelState,
     ReferencePriceRecord,
@@ -338,3 +342,37 @@ def test_fully_populated_7g1_state_serializes() -> None:
             "is_protection_locked": True,
         },
     ]
+
+
+# ------------------------ Phase 7g-3a: typed ST-07/08/09 ------------------------
+
+
+def test_st07_08_09_default_none() -> None:
+    s = _valid_state()
+    assert s.st07_expected_exposure is None
+    assert s.st08_actual_exposure is None
+    assert s.st09_exposure_delta is None
+
+
+def test_fully_populated_exposure_state_serializes() -> None:
+    state = dataclasses.replace(
+        _valid_state(),
+        st07_expected_exposure=ExpectedExposureState(Decimal("-1.5")),  # negative!
+        st08_actual_exposure=ActualExposureState(Decimal("0.5"), "clearinghouseState"),
+        st09_exposure_delta=ExposureDeltaState(
+            expected_value=Decimal("-1.5"),
+            actual_value=Decimal("0.5"),
+            delta=Decimal("-2.0"),
+            classification=ExposureClass.TRANSIENT,
+            is_acute=False,
+        ),
+    )
+    canonical_dumps(state.to_canonical_obj())  # no None/float at any depth
+    obj = state.to_canonical_obj()
+    assert obj["st07_expected_exposure"] == {"value": Decimal("-1.5")}
+    assert obj["st08_actual_exposure"] == {
+        "value": Decimal("0.5"),
+        "source": "clearinghouseState",
+    }
+    assert obj["st09_exposure_delta"]["classification"] == "TRANSIENT"
+    assert obj["st09_exposure_delta"]["is_acute"] is False

@@ -37,8 +37,10 @@ it contains **no trading/domain logic** yet.
   §7.2 protection locking (`protection_lock.py`) as pure functions, plus minimal
   ST-04 typing (`level_state.py`) — no `run_pass` wiring. Phase 7g-2 added §7.3
   position sizing + hard caps + D-14 counting helpers (`sizing.py`) as pure
-  functions, plus `LevelState.size_notional_usd`. The remaining §8 arming and §11
-  exposure/hedge rules are later phases. Guards: `tests/test_core_*`.
+  functions, plus `LevelState.size_notional_usd`. Phase 7g-3a added the §11.1
+  exposure derivatives + acute predicate + classification (`exposure.py`) and typed
+  ST-07/08/09 (`exposure_state.py`). The remaining §8 arming and §11.2+ hedge/
+  mirroring rules are later phases. Guards: `tests/test_core_*`.
 - `adapters/` — side-effect boundary (venue I/O, persistence, signing) — Phase 7b+.
 - `runtime/` — the process shell: logging, wiring, asyncio. `logging_setup.py`
   provides the JSON formatter + context + redaction.

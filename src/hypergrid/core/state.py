@@ -12,13 +12,17 @@ Phase 7e types the generation-lifecycle family ST-02/14/15/16 (in
 ``is_protection_locked``). Each enforces its ordering/range invariants at
 construction.
 
-Forward notes: ST-04's ``size_notional_usd`` arrives WITH the §7.3 sizing function
-in Phase 7g-2; ST-04 lifecycle / filled_quantity / order_state / cloid-oid linkage
-are DEFERRED to Phase 7h (arming + real P0). ST-01 (basket lifecycle) goes with the
-freeze/closure phase. The remaining ST-* (ST-01, ST-05..ST-09, ST-11..ST-13,
-ST-17..ST-23) stay ``object | None`` placeholders until their rule is implemented.
-The State is frozen and validates its own invariants, so no invalid State can be
-serialized.
+Phase 7g-3a types ST-07/08/09 (``transitions/exposure_state.py``) as Basket
+singletons — the §11.1 exposure derivatives produced by the exposure functions.
+
+Forward notes: ST-04's ``size_notional_usd`` was typed in 7g-2; ST-04
+filled_quantity / lifecycle / order_state / cloid-oid linkage are DEFERRED to
+Phase 7h (arming + real P0) — the exposure functions read ``LevelFillState``
+markers in 7g-3a, and a 7h projection maps ST-04 rows to them. ST-19 (minimal) is
+typed in Phase 7g-3b. ST-01 (basket lifecycle) goes with the freeze/closure phase.
+The remaining ST-* (ST-01, ST-05, ST-06, ST-11..ST-13, ST-17, ST-18, ST-20..ST-23)
+stay ``object | None`` placeholders until their rule is implemented. The State is
+frozen and validates its own invariants, so no invalid State can be serialized.
 """
 
 from __future__ import annotations
@@ -41,6 +45,11 @@ from hypergrid.core.transitions.cycle_state import (
     CycleState,
     CycleTerminalMarkers,
     ReferencePriceRecord,
+)
+from hypergrid.core.transitions.exposure_state import (
+    ActualExposureState,
+    ExpectedExposureState,
+    ExposureDeltaState,
 )
 from hypergrid.core.transitions.generation_state import (
     DominanceFlag,
@@ -103,9 +112,9 @@ class State:
     st04_level_pipeline_states: tuple[LevelState, ...] | None = None  # ST-04 (7g-1)
     st05_order_intents_and_outcomes: object | None = None  # ST-05
     st06_cloid_registry: object | None = None  # ST-06
-    st07_expected_exposure: object | None = None  # ST-07
-    st08_actual_exposure: object | None = None  # ST-08
-    st09_exposure_delta: object | None = None  # ST-09
+    st07_expected_exposure: ExpectedExposureState | None = None  # ST-07 (7g-3a)
+    st08_actual_exposure: ActualExposureState | None = None  # ST-08 (7g-3a)
+    st09_exposure_delta: ExposureDeltaState | None = None  # ST-09 (7g-3a)
     st10_reference_prices: tuple[ReferencePriceRecord, ...] | None = None  # ST-10 (7f)
     st11_calibration_configuration: object | None = None  # ST-11
     st12_operator_arm_requests: object | None = None  # ST-12
@@ -301,6 +310,14 @@ class State:
             obj["st04_level_pipeline_states"] = [
                 lvl.to_canonical_obj() for lvl in self.st04_level_pipeline_states
             ]
+        if self.st07_expected_exposure is not None:
+            obj["st07_expected_exposure"] = (
+                self.st07_expected_exposure.to_canonical_obj()
+            )
+        if self.st08_actual_exposure is not None:
+            obj["st08_actual_exposure"] = self.st08_actual_exposure.to_canonical_obj()
+        if self.st09_exposure_delta is not None:
+            obj["st09_exposure_delta"] = self.st09_exposure_delta.to_canonical_obj()
         if self.st16_evolution_candidate_windows is not None:
             obj["st16_evolution_candidate_windows"] = [
                 w.to_canonical_obj() for w in self.st16_evolution_candidate_windows
@@ -369,6 +386,9 @@ _TYPED_ST_FIELD_NAMES = frozenset(
         "st02_generation_states",
         "st03_cycle_states",
         "st04_level_pipeline_states",
+        "st07_expected_exposure",
+        "st08_actual_exposure",
+        "st09_exposure_delta",
         "st10_reference_prices",
         "st14_dominance_flags",
         "st15_successor_locks",
