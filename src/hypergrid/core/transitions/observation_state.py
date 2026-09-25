@@ -36,8 +36,8 @@ from dataclasses import dataclass
 from decimal import Decimal
 
 _GROUPS = frozenset({"BU", "SL"})
-# The 13 §6.1 pipeline lifecycle strings (verbatim from Strategy.md §6.1 L561-567;
-# the C1 cross-test guards this against the exposure_state copy — no drift).
+# The 13 §6.1 + LEVEL_SKIPPED (§9.3, 7h-3) — kept identical to the level_state leaf
+# (the symmetric "both leaves" design; the C1 cross-test guards against drift).
 _LIFECYCLES = frozenset(
     {
         "INTENT_CREATED",
@@ -53,6 +53,7 @@ _LIFECYCLES = frozenset(
         "ERROR",
         "LOCKED",
         "IDLE",
+        "LEVEL_SKIPPED",  # §9.3 (7h-3): first-class per-level terminal
     }
 )
 

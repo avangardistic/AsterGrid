@@ -36,6 +36,18 @@ from hypergrid.core.transitions.cycle_state import (
     NonOverlapData,
     ReferencePriceRecord,
 )
+from hypergrid.core.transitions.emergency import (
+    EMERGENCY_BOUNDED_WAIT_S,
+    EmergencyEvaluation,
+    EmergencyVerdict,
+    compute_emergency_tolerance_bps,
+    evaluate_emergency,
+)
+from hypergrid.core.transitions.execution_cancel import (
+    CancelCandidate,
+    CancelReasonCode,
+    select_exhausted_candidates,
+)
 from hypergrid.core.transitions.exposure import (
     classify_exposure,
     compute_actual_exposure,
@@ -79,7 +91,7 @@ from hypergrid.core.transitions.hedge_state import (
     P1ExposureMarkers,
     RemainderHedgeStatus,
 )
-from hypergrid.core.transitions.level_state import LevelState
+from hypergrid.core.transitions.level_state import LevelState, can_level_skip
 from hypergrid.core.transitions.locks import apply_locks
 from hypergrid.core.transitions.markers import (
     P2Attempts,
@@ -118,6 +130,7 @@ from hypergrid.core.transitions.protection_lock import (
     is_protection_locked_initial,
 )
 from hypergrid.core.transitions.reason_codes import ReasonCode
+from hypergrid.core.transitions.remainder import RemainderState, track_remainder
 from hypergrid.core.transitions.sizing import (
     assign_level_notionals,
     compute_max_cycle_notional,
@@ -129,11 +142,13 @@ from hypergrid.core.transitions.sizing import (
     count_active_generations,
     enforce_level_caps,
 )
+from hypergrid.core.transitions.submission import SubmissionResult, submit_order
 
 __all__ = [
     "ARM_TIMEOUT_S",
     "DISTANCE_BAND",
     "EDGE_FLOOR_BPS",
+    "EMERGENCY_BOUNDED_WAIT_S",
     "EPSILON_H",
     "MARGIN_BUFFER_MULT",
     "MIN_DEPTH_MULTIPLE",
@@ -144,9 +159,13 @@ __all__ = [
     "ArmOutcome",
     "ArmPolicy",
     "ArmRequestState",
+    "CancelCandidate",
+    "CancelReasonCode",
     "CycleState",
     "CycleTerminalMarkers",
     "DominanceFlag",
+    "EmergencyEvaluation",
+    "EmergencyVerdict",
     "EvolutionCandidateWindow",
     "ExpectedExposureState",
     "ExposureClass",
@@ -176,7 +195,9 @@ __all__ = [
     "ReasonCode",
     "ReferencePriceRecord",
     "RemainderHedgeStatus",
+    "RemainderState",
     "StageReport",
+    "SubmissionResult",
     "SuccessorLock",
     "apply_across_generation_precedence",
     "apply_cycle",
@@ -189,10 +210,12 @@ __all__ = [
     "assign_level_notionals",
     "build_exposure_singletons",
     "build_hedge_intent",
+    "can_level_skip",
     "classify_exposure",
     "classify_intent",
     "classify_remainder_hedge_status",
     "compute_actual_exposure",
+    "compute_emergency_tolerance_bps",
     "compute_expected_exposure",
     "compute_exposure_delta",
     "compute_ladder_geometry",
@@ -209,6 +232,7 @@ __all__ = [
     "count_active_generations",
     "enforce_level_caps",
     "evaluate_arm_gates",
+    "evaluate_emergency",
     "evaluate_wait",
     "expire_on_restart",
     "extend_level_states",
@@ -221,5 +245,8 @@ __all__ = [
     "progression_permitted",
     "project_p1_markers",
     "round_to_zero",
+    "select_exhausted_candidates",
+    "submit_order",
     "supersede_request",
+    "track_remainder",
 ]

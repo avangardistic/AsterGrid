@@ -33,8 +33,8 @@ from dataclasses import dataclass
 from decimal import Decimal
 
 _GROUPS = frozenset({"BU", "SL"})  # §7.1 traversal groups
-# The 13 §6.1 pipeline lifecycle strings (verbatim from Strategy.md §6.1 L561-567).
-# ST-04's observed lifecycle (Phase 7h-1) is validated against this set.
+# The 13 §6.1 + LEVEL_SKIPPED (§9.3 STR-0190/0191: first-class per-level terminal;
+# zero exposure/PnL; never resurrected). ST-04's observed lifecycle is validated here.
 _LIFECYCLES = frozenset(
     {
         "INTENT_CREATED",
@@ -50,8 +50,11 @@ _LIFECYCLES = frozenset(
         "ERROR",
         "LOCKED",
         "IDLE",
+        "LEVEL_SKIPPED",  # §9.3 (7h-3): first-class per-level terminal
     }
 )
+# §9.3 skip gate (B3): working states with a live order/remainder may skip.
+_SKIPPABLE = frozenset({"ORDER_ACTIVE", "EMERGENCY", "PARTIALLY_FILLED"})
 
 
 @dataclass(frozen=True, slots=True)
@@ -126,3 +129,17 @@ class LevelState:
         if self.lifecycle is not None:  # R-JSON-6
             obj["lifecycle"] = self.lifecycle
         return obj
+
+
+def can_level_skip(from_lifecycle: str) -> bool:
+    """§9.3 skip gate (B3): may a level in ``from_lifecycle`` be skipped?
+
+    ``True`` only for the working states with a live order/remainder
+    ({ORDER_ACTIVE, EMERGENCY, PARTIALLY_FILLED} — §9.1 trigger + §11.4 remainder-
+    timeout cases); ``False`` for the other 11 (incl. LEVEL_SKIPPED itself, terminal
+    and "never resurrected" §9.3). Unknown lifecycle → ``ValueError`` (fail-closed).
+    A minimal skip gate by design — NOT a general ST-04 transition table.
+    """
+    if from_lifecycle not in _LIFECYCLES:
+        raise ValueError(f"unknown level lifecycle: {from_lifecycle!r}")
+    return from_lifecycle in _SKIPPABLE

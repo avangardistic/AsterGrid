@@ -16,8 +16,9 @@ from hypergrid.core.pass_engine import run_pass
 from hypergrid.core.transitions import LevelState, PerLevelObservation
 from hypergrid.core.transitions.observation_state import P0ObservationMarkers
 
-# The 13 §6.1 strings (Strategy.md §6.1 L561-567), stated in the test (behavioral).
-_THIRTEEN = (
+# The 13 §6.1 + LEVEL_SKIPPED (§9.3), stated in the test (behavioral). 7h-3 added the
+# 14th member to both leaves; this list tracks it (pre-authorized existing-test edit).
+_ALL_LIFECYCLES = (
     "INTENT_CREATED",
     "ORDER_SUBMITTED",
     "ORDER_ACKNOWLEDGED",
@@ -31,6 +32,7 @@ _THIRTEEN = (
     "ERROR",
     "LOCKED",
     "IDLE",
+    "LEVEL_SKIPPED",
 )
 
 
@@ -62,18 +64,18 @@ def _level(**over: object) -> LevelState:
     return LevelState(**fields)  # type: ignore[arg-type]
 
 
-# --------------------------- 13-set acceptance (both leaves) ---------------------
+# --------------------------- 14-set acceptance (both leaves) ---------------------
 
 
 def test_all_thirteen_accepted_on_observation() -> None:
-    for lc in _THIRTEEN:
+    for lc in _ALL_LIFECYCLES:
         # FILLED needs the conjunction; the rest don't.
         obs = _obs(lifecycle=lc, order_filled=True, position_delta_verified=True)
         assert obs.lifecycle == lc
 
 
 def test_all_thirteen_accepted_on_level_state() -> None:
-    for lc in _THIRTEEN:
+    for lc in _ALL_LIFECYCLES:
         lvl = _level(lifecycle=lc, is_protection_locked=(lc == "LOCKED"))
         assert lvl.lifecycle == lc
 
@@ -86,8 +88,8 @@ def test_bogus_lifecycle_rejected_both_leaves() -> None:
 
 
 def test_thirteen_set_drift_guard() -> None:
-    # Both leaves accept exactly the same 13 and reject the same bogus token.
-    for lc in _THIRTEEN:
+    # Both leaves accept exactly the same 14 and reject the same bogus token.
+    for lc in _ALL_LIFECYCLES:
         assert (
             _obs(
                 lifecycle=lc, order_filled=True, position_delta_verified=True
