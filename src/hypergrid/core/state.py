@@ -26,8 +26,9 @@ test-set — closing the 7g-3b seam while P1 stays untouched (write-only preserv
 
 Forward notes: ST-23 mirror side joins THIS row with the B2b formula (no second
 field); ST-05 → 7h-2/7h-4; ST-11 → later; ST-12 → 7h-2; ST-13 →
-later; ST-17 → 7h (venue reads / MaxBasketNotional; 7g-3b reads no CapitalBase);
-ST-18 → 7h; ST-01, ST-06, ST-20..ST-22 stay ``object | None`` placeholders until
+later; ST-17/20/21/22 → 7h-4a (risk_state.py rows; venue reads still runtime-fed,
+MaxBasketNotional formula post-7h);
+ST-18 → 7h; ST-01, ST-06 stay ``object | None`` placeholders until
 their rule lands. The State is frozen and validates its own invariants, so no
 invalid State can be serialized.
 """
@@ -77,6 +78,12 @@ from hypergrid.core.transitions.markers import (
 from hypergrid.core.transitions.market_observation_state import MarketObservationState
 from hypergrid.core.transitions.observation_state import P0ObservationMarkers
 from hypergrid.core.transitions.order_state import OrderState
+from hypergrid.core.transitions.risk_state import (
+    AccountEquityState,
+    BasketNetPnLState,
+    FreezeErrorRecoveryOverlayState,
+    RiskBoundTrackerState,
+)
 
 # The ten R-JSON-7 kind tags, sorted ascending — derived from the event classes
 # (no duplicated hardcoded list).
@@ -115,9 +122,9 @@ class State:
     per_kind_count: tuple[tuple[str, int], ...]  # sorted (kind, count) for all ten
 
     # --- domain fields, one per ST-* (STATE_OWNERSHIP.md) ---
-    # Typed so far: ST-02/03/04/07/08/09/10/14/15/16/19 (7e-7h-1), ST-05/12 (7h-2).
-    # ST-01/06/11/13/17/18/20/21/22 remain placeholders (object | None) and ST-23 is
-    # partial; each is typed/completed when its rule lands (later phases).
+    # Typed so far: ST-02/03/04/07/08/09/10/14/15/16/19 (7e-7h-1), ST-05/12 (7h-2),
+    # ST-17/20/21/22 (7h-4a). ST-01/06/11/13/18 remain placeholders (object | None)
+    # and ST-23 is partial; each is typed/completed when its rule lands (later phases).
     st01_basket_lifecycle_state: object | None = None  # ST-01
     st02_generation_states: tuple[GenerationState, ...] | None = None  # ST-02 (7e)
     st03_cycle_states: tuple[CycleState, ...] | None = None  # ST-03 (7f)
@@ -140,12 +147,14 @@ class State:
     st16_evolution_candidate_windows: tuple[EvolutionCandidateWindow, ...] | None = (
         None  # ST-16 (7e)
     )
-    st17_account_equity_capital_base: object | None = None  # ST-17
+    st17_account_equity_capital_base: AccountEquityState | None = None  # ST-17 (7h-4a)
     st18_open_order_registry: object | None = None  # ST-18
     st19_market_observation_cache: MarketObservationState | None = None  # ST-19
-    st20_risk_bound_trackers: object | None = None  # ST-20
-    st21_basket_pnl_accounting_net: object | None = None  # ST-21
-    st22_freeze_error_recovery_overlay: object | None = None  # ST-22
+    st20_risk_bound_trackers: RiskBoundTrackerState | None = None  # ST-20 (7h-4a)
+    st21_basket_pnl_accounting_net: BasketNetPnLState | None = None  # ST-21 (7h-4a)
+    st22_freeze_error_recovery_overlay: FreezeErrorRecoveryOverlayState | None = (
+        None  # ST-22 (7h-4a)
+    )
     st23_mirror_targets_hedge_intents: HedgeIntent | None = None  # ST-23 (partial)
 
     # --- Phase-7d §4.7 arbitration markers (typed here; 7d-owned only) ---
@@ -392,6 +401,22 @@ class State:
             obj["st16_evolution_candidate_windows"] = [
                 w.to_canonical_obj() for w in self.st16_evolution_candidate_windows
             ]
+        if self.st17_account_equity_capital_base is not None:
+            obj["st17_account_equity_capital_base"] = (
+                self.st17_account_equity_capital_base.to_canonical_obj()
+            )
+        if self.st20_risk_bound_trackers is not None:
+            obj["st20_risk_bound_trackers"] = (
+                self.st20_risk_bound_trackers.to_canonical_obj()
+            )
+        if self.st21_basket_pnl_accounting_net is not None:
+            obj["st21_basket_pnl_accounting_net"] = (
+                self.st21_basket_pnl_accounting_net.to_canonical_obj()
+            )
+        if self.st22_freeze_error_recovery_overlay is not None:
+            obj["st22_freeze_error_recovery_overlay"] = (
+                self.st22_freeze_error_recovery_overlay.to_canonical_obj()
+            )
         if self.effective_generation_limit is not None:
             obj["effective_generation_limit"] = self.effective_generation_limit
         # Phase-7f typed cycle state + markers (omit when None; else recurse).
@@ -475,6 +500,10 @@ _TYPED_ST_FIELD_NAMES = frozenset(
         "st23_mirror_targets_hedge_intents",
         "st15_successor_locks",
         "st16_evolution_candidate_windows",
+        "st17_account_equity_capital_base",
+        "st20_risk_bound_trackers",
+        "st21_basket_pnl_accounting_net",
+        "st22_freeze_error_recovery_overlay",
     }
 )
 _DOMAIN_FIELD_NAMES: tuple[str, ...] = tuple(
