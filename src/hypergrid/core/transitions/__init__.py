@@ -35,6 +35,27 @@ from hypergrid.core.transitions.generation_state import (
     SuccessorLock,
 )
 from hypergrid.core.transitions.geometry import compute_ladder_geometry
+from hypergrid.core.transitions.hedge import (
+    apply_p1,
+    build_exposure_singletons,
+    build_hedge_intent,
+    classify_remainder_hedge_status,
+    compute_q_min,
+    compute_t_enter,
+    compute_t_exit,
+    hedge_execution_for,
+    mirror_eligible,
+    progression_permitted,
+    round_to_zero,
+)
+from hypergrid.core.transitions.hedge_state import (
+    EPSILON_H,
+    HedgeExecution,
+    HedgeIntent,
+    IntentTag,
+    P1ExposureMarkers,
+    RemainderHedgeStatus,
+)
 from hypergrid.core.transitions.level_state import LevelState
 from hypergrid.core.transitions.locks import apply_locks
 from hypergrid.core.transitions.markers import (
@@ -44,6 +65,9 @@ from hypergrid.core.transitions.markers import (
     P4CandidateMarkers,
     P4Decision,
     StageReport,
+)
+from hypergrid.core.transitions.market_observation_state import (
+    MarketObservationState,
 )
 from hypergrid.core.transitions.precedence import (
     apply_across_generation_precedence,
@@ -67,6 +91,7 @@ from hypergrid.core.transitions.sizing import (
 )
 
 __all__ = [
+    "EPSILON_H",
     "ActualExposureState",
     "CycleState",
     "CycleTerminalMarkers",
@@ -76,9 +101,14 @@ __all__ = [
     "ExposureClass",
     "ExposureDeltaState",
     "GenerationState",
+    "HedgeExecution",
+    "HedgeIntent",
+    "IntentTag",
     "LevelFillState",
     "LevelState",
+    "MarketObservationState",
     "NonOverlapData",
+    "P1ExposureMarkers",
     "P2Attempts",
     "P2LocksState",
     "P3CandidateMarkers",
@@ -86,16 +116,21 @@ __all__ = [
     "P4Decision",
     "ReasonCode",
     "ReferencePriceRecord",
+    "RemainderHedgeStatus",
     "StageReport",
     "SuccessorLock",
     "apply_across_generation_precedence",
     "apply_cycle",
     "apply_evolution",
     "apply_locks",
+    "apply_p1",
     "apply_protection_unlock",
     "apply_same_generation_precedence",
     "assign_level_notionals",
+    "build_exposure_singletons",
+    "build_hedge_intent",
     "classify_exposure",
+    "classify_remainder_hedge_status",
     "compute_actual_exposure",
     "compute_expected_exposure",
     "compute_exposure_delta",
@@ -104,10 +139,17 @@ __all__ = [
     "compute_max_generation_notional",
     "compute_max_level_notional",
     "compute_max_level_notional_dominant",
+    "compute_q_min",
+    "compute_t_enter",
+    "compute_t_exit",
     "convert_notional_to_size",
     "count_active_cycles",
     "count_active_generations",
     "enforce_level_caps",
+    "hedge_execution_for",
     "is_acute",
     "is_protection_locked_initial",
+    "mirror_eligible",
+    "progression_permitted",
+    "round_to_zero",
 ]

@@ -4,7 +4,7 @@
 implements the deterministic ordering substrate only:
 
   P0  POSITION VERIFICATION & RECONCILIATION      — STUB (§11.1, Phase 7e)
-  P1  RISK/EXPOSURE PROTECTION & HEDGE RECOVERY    — STUB (§11.1/§11.2, later)
+  P1  RISK/EXPOSURE PROTECTION & HEDGE RECOVERY    — REAL (§11.1/§11.2, hedge)
   P2  LOCKS                                        — REAL (transitions.locks)
   P3  SAME-GENERATION CONFLICT                     — REAL (transitions.precedence)
   P4  ACROSS-GEN PRECEDENCE + EVOLUTION EXECUTION  — REAL (precedence + generation)
@@ -30,6 +30,7 @@ from typing import TYPE_CHECKING
 
 from hypergrid.core.transitions.cycle import apply_cycle
 from hypergrid.core.transitions.generation import apply_evolution
+from hypergrid.core.transitions.hedge import apply_p1
 from hypergrid.core.transitions.locks import apply_locks
 from hypergrid.core.transitions.markers import StageReport
 from hypergrid.core.transitions.precedence import (
@@ -93,7 +94,10 @@ def run_pass(
 
     stages: list[StageReport] = []
     stages.append(_stub("P0"))
-    stages.append(_stub("P1"))
+    # P1 is real (Phase 7g-3b): §11.1 exposure gate (Fix-1) + §11.2 hedge urgency,
+    # markers-fed, write-only on ST-07/08/09/ST-23. Still exactly stage "P1".
+    state, p1 = apply_p1(state, materialized)
+    stages.append(p1)
 
     state, p2 = apply_locks(state, materialized)
     stages.append(p2)

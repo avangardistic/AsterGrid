@@ -13,16 +13,20 @@ Phase 7e types the generation-lifecycle family ST-02/14/15/16 (in
 construction.
 
 Phase 7g-3a types ST-07/08/09 (``transitions/exposure_state.py``) as Basket
-singletons — the §11.1 exposure derivatives produced by the exposure functions.
+singletons. Phase 7g-3b types ST-19 (``market_observation_state.py``, minimal:
+mark_price, unpopulated), ST-23 (``hedge_state.HedgeIntent`` singleton, partial:
+hedge intent now, mirror-target side with the §11.3 symmetric formula later), and
+adds the ``p1_exposure_markers`` arbitration marker (p2-block precedent) that feeds
+real P1.
 
-Forward notes: ST-04's ``size_notional_usd`` was typed in 7g-2; ST-04
-filled_quantity / lifecycle / order_state / cloid-oid linkage are DEFERRED to
-Phase 7h (arming + real P0) — the exposure functions read ``LevelFillState``
-markers in 7g-3a, and a 7h projection maps ST-04 rows to them. ST-19 (minimal) is
-typed in Phase 7g-3b. ST-01 (basket lifecycle) goes with the freeze/closure phase.
-The remaining ST-* (ST-01, ST-05, ST-06, ST-11..ST-13, ST-17, ST-18, ST-20..ST-23)
-stay ``object | None`` placeholders until their rule is implemented. The State is
-frozen and validates its own invariants, so no invalid State can be serialized.
+Forward notes: ST-19 populated by the 7h P0 writer (7g-3b takes mark_price as a
+marker); ST-23 mirror side joins THIS row with the B2b formula (no second field);
+``p1_exposure_markers`` sourced from ST-04/venue by a 7h projection; ST-04
+filled_quantity/lifecycle → 7h; ST-05 → 7h; ST-11 → later; ST-12 → 7h; ST-13 →
+later; ST-17 → 7h (venue reads / MaxBasketNotional; 7g-3b reads no CapitalBase);
+ST-18 → 7h; ST-01, ST-06, ST-20..ST-22 stay ``object | None`` placeholders until
+their rule lands. The State is frozen and validates its own invariants, so no
+invalid State can be serialized.
 """
 
 from __future__ import annotations
@@ -57,6 +61,7 @@ from hypergrid.core.transitions.generation_state import (
     GenerationState,
     SuccessorLock,
 )
+from hypergrid.core.transitions.hedge_state import HedgeIntent, P1ExposureMarkers
 from hypergrid.core.transitions.level_state import LevelState
 from hypergrid.core.transitions.markers import (
     P2Attempts,
@@ -65,6 +70,7 @@ from hypergrid.core.transitions.markers import (
     P4CandidateMarkers,
     P4Decision,
 )
+from hypergrid.core.transitions.market_observation_state import MarketObservationState
 
 # The ten R-JSON-7 kind tags, sorted ascending — derived from the event classes
 # (no duplicated hardcoded list).
@@ -126,11 +132,11 @@ class State:
     )
     st17_account_equity_capital_base: object | None = None  # ST-17
     st18_open_order_registry: object | None = None  # ST-18
-    st19_market_observation_cache: object | None = None  # ST-19
+    st19_market_observation_cache: MarketObservationState | None = None  # ST-19
     st20_risk_bound_trackers: object | None = None  # ST-20
     st21_basket_pnl_accounting_net: object | None = None  # ST-21
     st22_freeze_error_recovery_overlay: object | None = None  # ST-22
-    st23_mirror_targets_hedge_intents: object | None = None  # ST-23
+    st23_mirror_targets_hedge_intents: HedgeIntent | None = None  # ST-23 (partial)
 
     # --- Phase-7d §4.7 arbitration markers (typed here; 7d-owned only) ---
     # Forward note: these p2_/p3_/p4_ fields are the §4.7 pass-arbitration markers.
@@ -158,6 +164,12 @@ class State:
     current_cycle_id_by_generation: tuple[tuple[int, int], ...] | None = None
     p3_ineligible_cycles: tuple[tuple[int, int], ...] | None = None
     cycle_terminal_markers: tuple[CycleTerminalMarkers, ...] | None = None
+
+    # Phase-7g-3b arbitration marker (NOT an ST-* field; p2_ precedent): the P1
+    # exposure/hedge inputs. Set by tests; a 7h projection sources it from ST-04
+    # (fills/lifecycle, real P0) + venue reads (net_position, min_notional, ST-19
+    # mark_price). Serialized like p2_locks (explicit block), not via the typed-ST loop.
+    p1_exposure_markers: P1ExposureMarkers | None = None
 
     def __post_init__(self) -> None:
         if self.event_count < 0:
@@ -318,6 +330,14 @@ class State:
             obj["st08_actual_exposure"] = self.st08_actual_exposure.to_canonical_obj()
         if self.st09_exposure_delta is not None:
             obj["st09_exposure_delta"] = self.st09_exposure_delta.to_canonical_obj()
+        if self.st19_market_observation_cache is not None:
+            obj["st19_market_observation_cache"] = (
+                self.st19_market_observation_cache.to_canonical_obj()
+            )
+        if self.st23_mirror_targets_hedge_intents is not None:
+            obj["st23_mirror_targets_hedge_intents"] = (
+                self.st23_mirror_targets_hedge_intents.to_canonical_obj()
+            )
         if self.st16_evolution_candidate_windows is not None:
             obj["st16_evolution_candidate_windows"] = [
                 w.to_canonical_obj() for w in self.st16_evolution_candidate_windows
@@ -360,6 +380,8 @@ class State:
             obj["p4_candidates"] = self.p4_candidates.to_canonical_obj()
         if self.p4_decisions is not None:
             obj["p4_decisions"] = [d.to_canonical_obj() for d in self.p4_decisions]
+        if self.p1_exposure_markers is not None:  # p2-block precedent (not typed-ST)
+            obj["p1_exposure_markers"] = self.p1_exposure_markers.to_canonical_obj()
         return obj
 
 
@@ -379,6 +401,7 @@ _ARBITRATION_FIELD_NAMES = frozenset(
         "current_cycle_id_by_generation",
         "p3_ineligible_cycles",
         "cycle_terminal_markers",
+        "p1_exposure_markers",
     }
 )
 _TYPED_ST_FIELD_NAMES = frozenset(
@@ -391,6 +414,8 @@ _TYPED_ST_FIELD_NAMES = frozenset(
         "st09_exposure_delta",
         "st10_reference_prices",
         "st14_dominance_flags",
+        "st19_market_observation_cache",
+        "st23_mirror_targets_hedge_intents",
         "st15_successor_locks",
         "st16_evolution_candidate_windows",
     }

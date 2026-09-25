@@ -19,7 +19,13 @@ from hypergrid.core.transitions import (
     ExposureClass,
     ExposureDeltaState,
     GenerationState,
+    HedgeExecution,
+    HedgeIntent,
+    IntentTag,
+    LevelFillState,
     LevelState,
+    MarketObservationState,
+    P1ExposureMarkers,
     ReferencePriceRecord,
     SuccessorLock,
 )
@@ -376,3 +382,67 @@ def test_fully_populated_exposure_state_serializes() -> None:
     }
     assert obj["st09_exposure_delta"]["classification"] == "TRANSIENT"
     assert obj["st09_exposure_delta"]["is_acute"] is False
+
+
+# ------------------ Phase 7g-3b: ST-19/ST-23 + p1_markers ------------------
+
+
+def test_p1_st19_st23_default_none() -> None:
+    s = _valid_state()
+    assert s.p1_exposure_markers is None
+    assert s.st19_market_observation_cache is None
+    assert s.st23_mirror_targets_hedge_intents is None
+
+
+def _p1_markers() -> P1ExposureMarkers:
+    return P1ExposureMarkers(
+        level_fills=(
+            LevelFillState(0, 0, "BU", 1, Decimal("2.0"), "POSITION_VERIFIED"),
+        ),
+        net_position=Decimal("0.5"),
+        tau_acc=Decimal("0.00005"),
+        min_notional_usd=Decimal("10"),
+        mark_price=Decimal("50000"),
+        max_exposure_imbalance=Decimal("3"),
+        emergency_tolerance=Decimal("5"),
+        margin_distance=Decimal("100"),
+        normal_tolerance=Decimal("1"),
+        transient_tolerance=Decimal("3"),
+    )
+
+
+def test_fully_populated_7g3b_state_serializes() -> None:
+    state = dataclasses.replace(
+        _valid_state(),
+        st19_market_observation_cache=MarketObservationState(Decimal("50000")),
+        st23_mirror_targets_hedge_intents=HedgeIntent(
+            IntentTag.EXPOSURE_CORRECTION_INTENT,
+            Decimal("0"),  # zero-amount intent
+            False,
+            HedgeExecution.PREFER_MAKER,
+        ),
+        p1_exposure_markers=_p1_markers(),
+    )
+    canonical_dumps(state.to_canonical_obj())  # no None/float at any depth
+    obj = state.to_canonical_obj()
+    assert obj["st19_market_observation_cache"] == {"mark_price": Decimal("50000")}
+    assert obj["st23_mirror_targets_hedge_intents"]["execution"] == "PREFER_MAKER"
+    assert obj["st23_mirror_targets_hedge_intents"]["amount"] == Decimal("0")
+    # p1_exposure_markers serialized via its own serializer (p2-block precedent).
+    assert obj["p1_exposure_markers"]["mark_price"] == Decimal("50000")
+
+
+def test_fractional_hedge_amount_serializes() -> None:
+    state = dataclasses.replace(
+        _valid_state(),
+        st23_mirror_targets_hedge_intents=HedgeIntent(
+            IntentTag.EXPOSURE_CORRECTION_INTENT,
+            Decimal("2.0001"),  # fractional Δ̂ (R8: no rounding site)
+            True,
+            HedgeExecution.IOC,
+        ),
+    )
+    obj = state.to_canonical_obj()
+    assert obj["st23_mirror_targets_hedge_intents"]["amount"] == Decimal("2.0001")
+    assert obj["st23_mirror_targets_hedge_intents"]["execution"] == "Ioc"
+    canonical_dumps(obj)

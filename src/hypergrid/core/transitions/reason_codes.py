@@ -25,6 +25,11 @@ Grouping by stage:
         block); CYCLE_LIMIT_REACHED is REUSED for the §5.3 disable transition and
         CYCLE_TRANSITION_IN_FLIGHT_LOCKED for the §4.7 P2 per-Generation single
         admission — no second codes are coined.
+  * P1 (exposure gate + hedge urgency, §11.1/§11.2, Fix-1 — Phase 7g-3b):
+        PROGRESSION_PERMITTED / PROGRESSION_BLOCKED (STR-0345 gate verdict),
+        FIX1_RESIDUAL_ZEROED (STR-0346 audit), HEDGE_IMMEDIATE_IOC (STR-0206) /
+        HEDGE_DEFERRED_TO_SECTION_10 (STR-0207). RECONCILIATION_REQUIRED is REUSED
+        later for STR-0345's 3-failed-attempts rule (needs ST-05, 7h+).
 """
 
 from __future__ import annotations
@@ -57,3 +62,9 @@ class ReasonCode(StrEnum):
     GENERATION_ID_LIMIT = auto()  # §4.6 + DECISION-013 — VERBATIM
     # --- P5 cycle execution (§5.2/§5.4.1/§5.6, Phase 7f) ---
     RECONCILIATION_REQUIRED = auto()  # §5.2 step 4 / §5.4.1 / §5.6 — VERBATIM
+    # --- P1 exposure gate + hedge urgency (§11.1/§11.2, Fix-1, Phase 7g-3b) ---
+    PROGRESSION_PERMITTED = auto()  # STR-0345 gate verdict — COINED
+    PROGRESSION_BLOCKED = auto()  # STR-0345 gate verdict — COINED
+    FIX1_RESIDUAL_ZEROED = auto()  # STR-0346 audit trail — COINED
+    HEDGE_IMMEDIATE_IOC = auto()  # §11.2 STR-0206 acute branch — COINED
+    HEDGE_DEFERRED_TO_SECTION_10 = auto()  # §11.2 STR-0207 ELSE — COINED

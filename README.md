@@ -39,8 +39,11 @@ it contains **no trading/domain logic** yet.
   position sizing + hard caps + D-14 counting helpers (`sizing.py`) as pure
   functions, plus `LevelState.size_notional_usd`. Phase 7g-3a added the §11.1
   exposure derivatives + acute predicate + classification (`exposure.py`) and typed
-  ST-07/08/09 (`exposure_state.py`). The remaining §8 arming and §11.2+ hedge/
-  mirroring rules are later phases. Guards: `tests/test_core_*`.
+  ST-07/08/09 (`exposure_state.py`). Phase 7g-3b made **P1 real** (`hedge.py`): the
+  Fix-1 exposure gate (STR-0345/0346), §11.2 hedge urgency + HedgeIntent, §11.3
+  mirror eligibility (price formula is a documented stop-item), §11.4 remainder
+  tri-state; typed ST-19/ST-23 and wrote the first ST-07/08/09 values. The remaining
+  §8 arming, §9/§10, and real P0/P6 are later phases. Guards: `tests/test_core_*`.
 - `adapters/` — side-effect boundary (venue I/O, persistence, signing) — Phase 7b+.
 - `runtime/` — the process shell: logging, wiring, asyncio. `logging_setup.py`
   provides the JSON formatter + context + redaction.

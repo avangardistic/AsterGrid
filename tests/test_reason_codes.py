@@ -25,6 +25,12 @@ _EXPECTED = {
     "GENERATION_ID_LIMIT",
     # Phase 7f (one)
     "RECONCILIATION_REQUIRED",
+    # Phase 7g-3b (five)
+    "PROGRESSION_PERMITTED",
+    "PROGRESSION_BLOCKED",
+    "FIX1_RESIDUAL_ZEROED",
+    "HEDGE_IMMEDIATE_IOC",
+    "HEDGE_DEFERRED_TO_SECTION_10",
 }
 
 
@@ -42,9 +48,9 @@ def test_members_are_nonempty_str() -> None:
         assert member.value == member.name  # value == name (auto())
 
 
-def test_membership_is_exactly_the_ten_codes() -> None:
+def test_membership_is_exactly_the_fifteen_codes() -> None:
     assert {m.name for m in ReasonCode} == _EXPECTED
-    assert len(_EXPECTED) == 10
+    assert len(_EXPECTED) == 15
 
 
 def test_each_member_has_same_line_provenance() -> None:
