@@ -55,7 +55,9 @@ def test_seven_stages_p1_second() -> None:
     assert names == list(_STAGES)
     assert "P5_EXEC" not in names
     by = {s.stage: s for s in report.stages}
-    assert by["P0"].status == "STUBBED"
+    # P0 is real since Phase 7h-1: with only p1 markers set (no p0 markers) it
+    # reports NO_OP, not STUBBED. P6 is still a stub.
+    assert by["P0"].status == "NO_OP"
     assert by["P6"].status == "STUBBED"
     assert by["P1"].status == "APPLIED"
 

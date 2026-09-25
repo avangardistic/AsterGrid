@@ -69,6 +69,15 @@ from hypergrid.core.transitions.markers import (
 from hypergrid.core.transitions.market_observation_state import (
     MarketObservationState,
 )
+from hypergrid.core.transitions.observation import (
+    apply_p0,
+    extend_level_states,
+    project_p1_markers,
+)
+from hypergrid.core.transitions.observation_state import (
+    P0ObservationMarkers,
+    PerLevelObservation,
+)
 from hypergrid.core.transitions.precedence import (
     apply_across_generation_precedence,
     apply_same_generation_precedence,
@@ -108,12 +117,14 @@ __all__ = [
     "LevelState",
     "MarketObservationState",
     "NonOverlapData",
+    "P0ObservationMarkers",
     "P1ExposureMarkers",
     "P2Attempts",
     "P2LocksState",
     "P3CandidateMarkers",
     "P4CandidateMarkers",
     "P4Decision",
+    "PerLevelObservation",
     "ReasonCode",
     "ReferencePriceRecord",
     "RemainderHedgeStatus",
@@ -123,6 +134,7 @@ __all__ = [
     "apply_cycle",
     "apply_evolution",
     "apply_locks",
+    "apply_p0",
     "apply_p1",
     "apply_protection_unlock",
     "apply_same_generation_precedence",
@@ -146,10 +158,12 @@ __all__ = [
     "count_active_cycles",
     "count_active_generations",
     "enforce_level_caps",
+    "extend_level_states",
     "hedge_execution_for",
     "is_acute",
     "is_protection_locked_initial",
     "mirror_eligible",
     "progression_permitted",
+    "project_p1_markers",
     "round_to_zero",
 ]

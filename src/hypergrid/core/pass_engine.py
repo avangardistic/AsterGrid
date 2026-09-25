@@ -3,7 +3,7 @@
 ``run_pass`` runs the §4.7 stages in strict P0..P6 order over one pass. Phase 7d
 implements the deterministic ordering substrate only:
 
-  P0  POSITION VERIFICATION & RECONCILIATION      — STUB (§11.1, Phase 7e)
+  P0  POSITION VERIFICATION & RECONCILIATION      — REAL (§6.1 + ST-04/ST-19, 7h-1)
   P1  RISK/EXPOSURE PROTECTION & HEDGE RECOVERY    — REAL (§11.1/§11.2, hedge)
   P2  LOCKS                                        — REAL (transitions.locks)
   P3  SAME-GENERATION CONFLICT                     — REAL (transitions.precedence)
@@ -33,6 +33,7 @@ from hypergrid.core.transitions.generation import apply_evolution
 from hypergrid.core.transitions.hedge import apply_p1
 from hypergrid.core.transitions.locks import apply_locks
 from hypergrid.core.transitions.markers import StageReport
+from hypergrid.core.transitions.observation import apply_p0
 from hypergrid.core.transitions.precedence import (
     apply_across_generation_precedence,
     apply_same_generation_precedence,
@@ -93,7 +94,11 @@ def run_pass(
     materialized = list(envelopes)  # total-iteration guarantee: consume once
 
     stages: list[StageReport] = []
-    stages.append(_stub("P0"))
+    # P0 is real (Phase 7h-1): §6.1 observation recording into ST-04 (fill/lifecycle)
+    # + ST-19, and projection of p1_exposure_markers for P1. Markers-fed, envelopes
+    # unread, write-only. Still exactly stage "P0" in first position.
+    state, p0 = apply_p0(state, materialized)
+    stages.append(p0)
     # P1 is real (Phase 7g-3b): §11.1 exposure gate (Fix-1) + §11.2 hedge urgency,
     # markers-fed, write-only on ST-07/08/09/ST-23. Still exactly stage "P1".
     state, p1 = apply_p1(state, materialized)

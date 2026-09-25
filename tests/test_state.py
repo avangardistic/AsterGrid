@@ -26,9 +26,11 @@ from hypergrid.core.transitions import (
     LevelState,
     MarketObservationState,
     P1ExposureMarkers,
+    PerLevelObservation,
     ReferencePriceRecord,
     SuccessorLock,
 )
+from hypergrid.core.transitions.observation_state import P0ObservationMarkers
 
 _FULL_COUNTS = tuple(sorted((kind, 0) for kind in _EVENT_KINDS))
 
@@ -446,3 +448,74 @@ def test_fractional_hedge_amount_serializes() -> None:
     assert obj["st23_mirror_targets_hedge_intents"]["amount"] == Decimal("2.0001")
     assert obj["st23_mirror_targets_hedge_intents"]["execution"] == "Ioc"
     canonical_dumps(obj)
+
+
+# --------------------------- Phase 7h-1: p0 markers + extended ST-04 ------------
+
+
+def test_p0_markers_default_none() -> None:
+    assert _valid_state().p0_observation_markers is None
+
+
+def test_fully_populated_7h1_state_serializes() -> None:
+    # extended ST-04 (incl. a lock-coherent LOCKED row) + populated ST-19 + both
+    # marker sets all pass canonical_dumps; p0 markers use their own serializer.
+    st04 = (
+        LevelState(
+            0,
+            0,
+            "BU",
+            1,
+            Decimal("50000"),
+            False,
+            filled_quantity=Decimal("3.5"),
+            lifecycle="POSITION_VERIFIED",
+        ),
+        LevelState(
+            0,
+            0,
+            "SL",
+            1,
+            Decimal("49000"),
+            True,
+            filled_quantity=Decimal("0"),
+            lifecycle="LOCKED",  # coherent LOCKED row
+        ),
+    )
+    state = dataclasses.replace(
+        _valid_state(),
+        st04_level_pipeline_states=st04,
+        st19_market_observation_cache=MarketObservationState(Decimal("50000")),
+        p1_exposure_markers=_p1_markers(),
+        p0_observation_markers=P0ObservationMarkers(
+            observations=(
+                PerLevelObservation(
+                    0, 0, "BU", 1, "POSITION_VERIFIED", Decimal("3.5"), True, True
+                ),
+            ),
+            net_position=Decimal("1.5"),
+            mark_price=Decimal("50000"),
+            tau_acc=Decimal("0.00005"),
+            min_notional_usd=Decimal("10"),
+            max_exposure_imbalance=Decimal("3"),
+            emergency_tolerance=Decimal("5"),
+            margin_distance=Decimal("100"),
+            normal_tolerance=Decimal("1"),
+            transient_tolerance=Decimal("3"),
+        ),
+    )
+    canonical_dumps(state.to_canonical_obj())  # no None/float at any depth
+    obj = state.to_canonical_obj()
+    assert obj["st04_level_pipeline_states"][0]["lifecycle"] == "POSITION_VERIFIED"
+    assert obj["st04_level_pipeline_states"][0]["filled_quantity"] == Decimal("3.5")
+    assert obj["st04_level_pipeline_states"][1]["lifecycle"] == "LOCKED"
+    # p0 markers serialized via their own serializer (p2-block precedent).
+    assert obj["p0_observation_markers"]["mark_price"] == Decimal("50000")
+    assert obj["p0_observation_markers"]["observations"][0]["order_filled"] is True
+
+
+def test_st04_lock_incoherence_rejected() -> None:
+    with pytest.raises(ValueError):
+        LevelState(
+            0, 0, "BU", 1, Decimal("50000"), True, lifecycle="ORDER_ACTIVE"
+        )  # locked but not LOCKED

@@ -21,8 +21,8 @@ from hypergrid.core.transitions import (
 
 # Strategy.md §4.7 defines seven passes, P0 through P6.
 _STAGES = ("P0", "P1", "P2", "P3", "P4", "P5", "P6")
-_STUBBED = ("P0", "P6")  # P1 became real in Phase 7g-3b; P5 in Phase 7f
-_REAL = ("P1", "P2", "P3", "P4", "P5")
+_STUBBED = ("P6",)  # P0 became real in Phase 7h-1; P1 in 7g-3b; P5 in 7f
+_REAL = ("P0", "P1", "P2", "P3", "P4", "P5")
 
 
 @contextmanager

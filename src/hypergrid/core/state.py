@@ -19,10 +19,13 @@ hedge intent now, mirror-target side with the §11.3 symmetric formula later), a
 adds the ``p1_exposure_markers`` arbitration marker (p2-block precedent) that feeds
 real P1.
 
-Forward notes: ST-19 populated by the 7h P0 writer (7g-3b takes mark_price as a
-marker); ST-23 mirror side joins THIS row with the B2b formula (no second field);
-``p1_exposure_markers`` sourced from ST-04/venue by a 7h projection; ST-04
-filled_quantity/lifecycle → 7h; ST-05 → 7h; ST-11 → later; ST-12 → 7h; ST-13 →
+Phase 7h-1 makes P0 real: ST-04 gains observed ``filled_quantity``/``lifecycle``
+(``level_state.py``), ST-19 is POPULATED by P0, and ``p1_exposure_markers`` is now
+P0-written (projected from ST-04 + the ``p0_observation_markers`` input) instead of
+test-set — closing the 7g-3b seam while P1 stays untouched (write-only preserved).
+
+Forward notes: ST-23 mirror side joins THIS row with the B2b formula (no second
+field); ST-05 → 7h-2/7h-4; ST-11 → later; ST-12 → 7h-2; ST-13 →
 later; ST-17 → 7h (venue reads / MaxBasketNotional; 7g-3b reads no CapitalBase);
 ST-18 → 7h; ST-01, ST-06, ST-20..ST-22 stay ``object | None`` placeholders until
 their rule lands. The State is frozen and validates its own invariants, so no
@@ -71,6 +74,7 @@ from hypergrid.core.transitions.markers import (
     P4Decision,
 )
 from hypergrid.core.transitions.market_observation_state import MarketObservationState
+from hypergrid.core.transitions.observation_state import P0ObservationMarkers
 
 # The ten R-JSON-7 kind tags, sorted ascending — derived from the event classes
 # (no duplicated hardcoded list).
@@ -170,6 +174,12 @@ class State:
     # (fills/lifecycle, real P0) + venue reads (net_position, min_notional, ST-19
     # mark_price). Serialized like p2_locks (explicit block), not via the typed-ST loop.
     p1_exposure_markers: P1ExposureMarkers | None = None
+
+    # Phase-7h-1 arbitration marker (NOT an ST-* field; p2_ precedent): the real-P0
+    # observation input. Set by tests in 7h-1; an adapter/FillEvent/fold + venue path
+    # sources it later. P0 records it into ST-04/ST-19 and projects
+    # ``p1_exposure_markers`` from it. Serialized like p2_locks (explicit block).
+    p0_observation_markers: P0ObservationMarkers | None = None
 
     def __post_init__(self) -> None:
         if self.event_count < 0:
@@ -382,6 +392,10 @@ class State:
             obj["p4_decisions"] = [d.to_canonical_obj() for d in self.p4_decisions]
         if self.p1_exposure_markers is not None:  # p2-block precedent (not typed-ST)
             obj["p1_exposure_markers"] = self.p1_exposure_markers.to_canonical_obj()
+        if self.p0_observation_markers is not None:  # p2-block precedent (not typed-ST)
+            obj["p0_observation_markers"] = (
+                self.p0_observation_markers.to_canonical_obj()
+            )
         return obj
 
 
@@ -402,6 +416,7 @@ _ARBITRATION_FIELD_NAMES = frozenset(
         "p3_ineligible_cycles",
         "cycle_terminal_markers",
         "p1_exposure_markers",
+        "p0_observation_markers",
     }
 )
 _TYPED_ST_FIELD_NAMES = frozenset(

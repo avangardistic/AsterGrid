@@ -42,8 +42,13 @@ it contains **no trading/domain logic** yet.
   ST-07/08/09 (`exposure_state.py`). Phase 7g-3b made **P1 real** (`hedge.py`): the
   Fix-1 exposure gate (STR-0345/0346), §11.2 hedge urgency + HedgeIntent, §11.3
   mirror eligibility (price formula is a documented stop-item), §11.4 remainder
-  tri-state; typed ST-19/ST-23 and wrote the first ST-07/08/09 values. The remaining
-  §8 arming, §9/§10, and real P0/P6 are later phases. Guards: `tests/test_core_*`.
+  tri-state; typed ST-19/ST-23 and wrote the first ST-07/08/09 values. Phase 7h-1
+  made **P0 real** (`observation.py`): it records observed §6.1 lifecycle + VERIFIED
+  `filled_quantity` into ST-04, populates ST-19, and projects `p1_exposure_markers`
+  for the untouched P1 — closing the 7g-3b seam (markers-fed, envelopes unread,
+  write-only); the §6.1 hard rule and the §7.2/§6.1 lock coherence are enforced at
+  construction. The remaining §8 arming, §9/§10, and real P6 are later phases.
+  Guards: `tests/test_core_*`.
 - `adapters/` — side-effect boundary (venue I/O, persistence, signing) — Phase 7b+.
 - `runtime/` — the process shell: logging, wiring, asyncio. `logging_setup.py`
   provides the JSON formatter + context + redaction.
