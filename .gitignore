@@ -30,3 +30,10 @@ htmlcov/
 secrets/
 *.key
 *.pem
+7h-*-prompt-final.md
+
+# Temporary phase prompt files (kept on disk, not committed)
+7h-3-prompt-final.md
+7h-4a-prompt-final.md
+7h-4b-1-prompt-final.md
+7h-4b-2-prompt-final.md
