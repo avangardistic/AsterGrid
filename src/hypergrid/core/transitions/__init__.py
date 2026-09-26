@@ -36,6 +36,13 @@ from hypergrid.core.transitions.cycle_state import (
     NonOverlapData,
     ReferencePriceRecord,
 )
+from hypergrid.core.transitions.economics import (
+    PathEconomicsVerdict,
+    check_arming_validity,
+    classify_path_economics,
+    compute_gross_grid_edge,
+    compute_net_expected_edge,
+)
 from hypergrid.core.transitions.emergency import (
     EMERGENCY_BOUNDED_WAIT_S,
     EmergencyEvaluation,
@@ -91,6 +98,7 @@ from hypergrid.core.transitions.hedge_state import (
     P1ExposureMarkers,
     RemainderHedgeStatus,
 )
+from hypergrid.core.transitions.ladder_issuance import issue_fresh_ladder
 from hypergrid.core.transitions.level_state import LevelState, can_level_skip
 from hypergrid.core.transitions.locks import apply_locks
 from hypergrid.core.transitions.markers import (
@@ -213,6 +221,7 @@ __all__ = [
     "P3CandidateMarkers",
     "P4CandidateMarkers",
     "P4Decision",
+    "PathEconomicsVerdict",
     "PerLevelObservation",
     "ReasonCode",
     "ReferencePriceRecord",
@@ -236,13 +245,16 @@ __all__ = [
     "build_exposure_singletons",
     "build_hedge_intent",
     "can_level_skip",
+    "check_arming_validity",
     "classify_exposure",
     "classify_intent",
+    "classify_path_economics",
     "classify_remainder_hedge_status",
     "compute_actual_exposure",
     "compute_emergency_tolerance_bps",
     "compute_expected_exposure",
     "compute_exposure_delta",
+    "compute_gross_grid_edge",
     "compute_ladder_geometry",
     "compute_max_cycle_notional",
     "compute_max_execution_cost_pnl_regime",
@@ -253,6 +265,7 @@ __all__ = [
     "compute_max_level_notional",
     "compute_max_level_notional_dominant",
     "compute_max_range_induced_dd_pct",
+    "compute_net_expected_edge",
     "compute_q_min",
     "compute_t_enter",
     "compute_t_exit",
@@ -271,6 +284,7 @@ __all__ = [
     "is_legal_arm_transition",
     "is_legal_order_transition",
     "is_protection_locked_initial",
+    "issue_fresh_ladder",
     "mirror_eligible",
     "progression_permitted",
     "project_p1_markers",
