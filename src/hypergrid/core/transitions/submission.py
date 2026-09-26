@@ -64,6 +64,40 @@ class SubmissionResult:
         }
 
 
+def emit_submission_command(
+    *,
+    order: OrderState,
+    tif: str,
+    expires_after: int,
+    intent_log_seq: int,
+) -> CommandEvent:
+    """Build the submission ``CommandEvent`` (pure; Phase 7h-4b-2 B2.1).
+
+    Holds the four submit_order validations (messages VERBATIM-identical — 7h-3 tests
+    match on them) + the ``CommandEvent`` construction. No append, no advance. P6 uses
+    this to emit without a log port; ``submit_order`` calls it then appends.
+    Fail-closed (``ValueError``): non-``INTENT_CREATED`` row, ``tif ∉ {Gtc,Ioc,Alo}``,
+    ``expires_after <= 0`` (DECISION-008), ``intent_log_seq < 0``. Cite: STR-0298; §6.2.
+    """
+    if order.lifecycle != "INTENT_CREATED":
+        raise ValueError(
+            "submit_order requires an INTENT_CREATED row (double-submit guard)"
+        )
+    if tif not in _TIF:
+        raise ValueError(f"tif must be one of {sorted(_TIF)}: {tif!r}")
+    if type(expires_after) is not int or expires_after <= 0:
+        raise ValueError("expires_after must be a positive int (DECISION-008)")
+    if type(intent_log_seq) is not int or intent_log_seq < 0:
+        raise ValueError("intent_log_seq must be an int >= 0")
+    return CommandEvent(
+        cloid=order.intent.cloid,
+        action=_ACTION_BY_ORDER_TYPE[order.intent.order_type],
+        tif=tif,
+        expires_after=expires_after,
+        causal_predecessors=(intent_log_seq,),
+    )
+
+
 def submit_order(
     *,
     order: OrderState,
@@ -79,23 +113,11 @@ def submit_order(
     ``tif ∉ {Gtc,Ioc,Alo}``, ``expires_after <= 0`` (DECISION-008; units opaque),
     ``intent_log_seq < 0``. Appends EXACTLY once. Returns (receipt, advanced row).
     """
-    if order.lifecycle != "INTENT_CREATED":
-        raise ValueError(
-            "submit_order requires an INTENT_CREATED row (double-submit guard)"
-        )
-    if tif not in _TIF:
-        raise ValueError(f"tif must be one of {sorted(_TIF)}: {tif!r}")
-    if type(expires_after) is not int or expires_after <= 0:
-        raise ValueError("expires_after must be a positive int (DECISION-008)")
-    if type(intent_log_seq) is not int or intent_log_seq < 0:
-        raise ValueError("intent_log_seq must be an int >= 0")
-
-    cmd = CommandEvent(
-        cloid=order.intent.cloid,
-        action=_ACTION_BY_ORDER_TYPE[order.intent.order_type],
+    cmd = emit_submission_command(
+        order=order,
         tif=tif,
         expires_after=expires_after,
-        causal_predecessors=(intent_log_seq,),
+        intent_log_seq=intent_log_seq,
     )
     env = port.append(cmd, observed)
     receipt = SubmissionResult(
@@ -111,4 +133,4 @@ def submit_order(
     return receipt, advanced
 
 
-__all__ = ["SubmissionResult", "submit_order"]
+__all__ = ["SubmissionResult", "emit_submission_command", "submit_order"]

@@ -39,7 +39,7 @@ def test_persistent_ineligibility_same_cycle_binds_evolution() -> None:
         ),
         current_cycle_id_by_generation=((0, 7),),
     )
-    s1, _ = run_pass(pass1, [])
+    s1, _, _ = run_pass(pass1, [])
     assert s1.p3_ineligible_cycles == ((0, 7),)
     assert s1.p3_decisions == (0,)
 
@@ -51,7 +51,7 @@ def test_persistent_ineligibility_same_cycle_binds_evolution() -> None:
         ),
         st16_evolution_candidate_windows=(_complete_window(0),),
     )
-    s2, _ = run_pass(pass2, [])
+    s2, _, _ = run_pass(pass2, [])
     assert s2.p3_decisions == ()  # per-pass reset
     assert _glife(s2, 1) is None  # Evolution stayed bound (silent) — no G1
     assert _glife(s2, 0) == "ACTIVE"
@@ -68,7 +68,7 @@ def test_later_cycle_recandidates() -> None:
         ),
         st16_evolution_candidate_windows=(_complete_window(0),),
     )
-    s, _ = run_pass(base, [])
+    s, _, _ = run_pass(base, [])
     assert _glife(s, 1) == "CREATED"  # (0,8) not ineligible -> Evolution admitted
     assert _glife(s, 0) == "SUCCESSOR_CREATED"
 
@@ -85,7 +85,7 @@ def test_multi_generation_union_sorted() -> None:
         ),
         current_cycle_id_by_generation=((0, 3), (1, 5)),
     )
-    s, _ = run_pass(pass1, [])
+    s, _, _ = run_pass(pass1, [])
     assert s.p3_ineligible_cycles == ((0, 3), (1, 5))  # sorted, no dups
 
 
@@ -98,6 +98,6 @@ def test_unknown_current_cycle_leaves_set_none() -> None:
         ),
         # no current_cycle_id_by_generation
     )
-    s, _ = run_pass(pass1, [])
+    s, _, _ = run_pass(pass1, [])
     assert s.p3_decisions == (0,)  # 7d per-pass decision still recorded
     assert s.p3_ineligible_cycles is None  # nothing persisted (unknown Cycle)

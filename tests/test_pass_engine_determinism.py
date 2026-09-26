@@ -37,21 +37,21 @@ def _rich_state() -> State:
 
 def test_run_pass_byte_identical() -> None:
     state = _rich_state()
-    a, _ = run_pass(state, [])
-    b, _ = run_pass(state, [])
+    a, _, _ = run_pass(state, [])
+    b, _, _ = run_pass(state, [])
     assert canonical_dumps(a.to_canonical_obj()) == canonical_dumps(
         b.to_canonical_obj()
     )
 
 
 def test_returned_state_is_frozen() -> None:
-    state, _ = run_pass(_rich_state(), [])
+    state, _, _ = run_pass(_rich_state(), [])
     with pytest.raises(dataclasses.FrozenInstanceError):
         state.event_count = 9  # type: ignore[misc]
 
 
 def test_reports_are_frozen() -> None:
-    _, report = run_pass(_rich_state(), [])
+    _, report, _ = run_pass(_rich_state(), [])
     with pytest.raises(dataclasses.FrozenInstanceError):
         report.stages = ()  # type: ignore[misc]
     for stage in report.stages:

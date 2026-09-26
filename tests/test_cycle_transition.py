@@ -138,7 +138,7 @@ def test_scenario_10_composition_evolution_and_cycle() -> None:
         st16=(window,),
         markers=(_mk(0, 0, non_overlap_data=_PASS_DATA),),
     )
-    new, _ = run_pass(state, [])
+    new, _, _ = run_pass(state, [])
     # P4 admitted the Evolution; P5 completed the parent Cycle — two events.
     assert _glife(new, 0) == "SUCCESSOR_CREATED"
     assert _glife(new, 1) == "CREATED"

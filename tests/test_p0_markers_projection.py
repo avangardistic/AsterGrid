@@ -120,7 +120,7 @@ def test_end_to_end_p0_then_p1_pipeline() -> None:
         st04_level_pipeline_states=geometry,
         p0_observation_markers=p0_markers,
     )
-    new_state, report = run_pass(state, [])
+    new_state, report, _ = run_pass(state, [])
     by = {s.stage: s for s in report.stages}
     assert by["P0"].status == "APPLIED"
     assert by["P1"].status == "APPLIED"

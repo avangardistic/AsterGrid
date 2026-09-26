@@ -87,19 +87,19 @@ def test_seven_stages_p0_first_applied_with_markers() -> None:
         st04_level_pipeline_states=rows,
         p0_observation_markers=_markers(observations=(_obs("BU", 1),)),
     )
-    _, report = run_pass(state, [])
+    _, report, _ = run_pass(state, [])
     names = [s.stage for s in report.stages]
     assert names == list(_STAGES)
     assert "P5_EXEC" not in names
     by = {s.stage: s for s in report.stages}
     assert by["P0"].status == "APPLIED"
-    assert by["P6"].status == "STUBBED"
+    assert by["P6"].status == "NO_OP"  # P6 real (7h-4b-2); no sub-decisions here
 
 
 def test_p0_no_op_without_markers() -> None:
     state = _empty_state()
     before = canonical_dumps(state.to_canonical_obj())
-    new_state, report = run_pass(state, [])
+    new_state, report, _ = run_pass(state, [])
     p0 = {s.stage: s for s in report.stages}["P0"]
     assert p0.status == "NO_OP"
     assert p0.reason_codes == ()
@@ -138,7 +138,7 @@ def test_upsert_preserves_order_and_touches_only_target() -> None:
             )
         ),
     )
-    new_state, _ = run_pass(state, [])
+    new_state, _, _ = run_pass(state, [])
     out = new_state.st04_level_pipeline_states or ()
     keys = [(r.direction, r.level_id) for r in out]
     assert keys == [("BU", 1), ("BU", 2), ("SL", 1)]  # order preserved
@@ -206,8 +206,8 @@ def test_envelope_independence() -> None:
     for i in range(3):
         log.append(CommandEvent(cloid=f"c{i}", action="submit", tif="Alo"), meta)
     envelopes = list(log.read_all())
-    s_empty, r_empty = run_pass(state, [])
-    s_full, r_full = run_pass(state, envelopes)
+    s_empty, r_empty, _ = run_pass(state, [])
+    s_full, r_full, _ = run_pass(state, envelopes)
     by_empty = {s.stage: s for s in r_empty.stages}["P0"]
     by_full = {s.stage: s for s in r_full.stages}["P0"]
     assert by_empty.to_canonical_obj() == by_full.to_canonical_obj()

@@ -9,18 +9,19 @@ implements the deterministic ordering substrate only:
   P3  SAME-GENERATION CONFLICT                     — REAL (transitions.precedence)
   P4  ACROSS-GEN PRECEDENCE + EVOLUTION EXECUTION  — REAL (precedence + generation)
   P5  CYCLE TRANSITIONS                            — REAL (transitions.cycle)
-  P6  LEVEL ARMING / ORDER PLACEMENT               — STUB (later)
+  P6  LEVEL ARMING / ORDER PLACEMENT               — REAL (transitions.p6_stage)
 
 Strategy.md §4.7 defines seven passes, P0 through P6; ``run_pass`` therefore
-returns exactly seven StageReports (one per pass), in order. Stubs pass the state
-through unchanged and report ``status="STUBBED"``; they read no event content
-beyond the envelope count. The real stages read ONLY the state's marker fields
-(never envelope/event content — Phase-7d DESIGN RULE).
+returns exactly seven StageReports (one per pass), in order. All seven stages are
+real; the real stages read ONLY the state's marker fields (never envelope/event
+content — Phase-7d DESIGN RULE).
 
 ``run_pass`` is pure, total, clock-free and deterministic: the same
-``(state, envelopes)`` yields the same ``(state', report)``, and the canonical
-JSON of the returned State is byte-identical across runs. The input iterable is
-materialized once (``list(...)``) so it is never consumed twice.
+``(state, envelopes)`` yields the same ``(state', report, emitted)``, and the
+canonical JSON of the returned State is byte-identical across runs. The input
+iterable is materialized once (``list(...)``) so it is never consumed twice. The
+third element is P6's emitted CommandEvents (sorted by (sub_kind_order, cloid);
+CANCEL_SELECT=0, SUBMISSION_EMIT=1) — no log-port import lives here (D11).
 """
 
 from __future__ import annotations
@@ -34,6 +35,8 @@ from hypergrid.core.transitions.hedge import apply_p1
 from hypergrid.core.transitions.locks import apply_locks
 from hypergrid.core.transitions.markers import StageReport
 from hypergrid.core.transitions.observation import apply_p0
+from hypergrid.core.transitions.p6_stage import apply_p6
+from hypergrid.core.transitions.pass_report_ext import SubDecisionRecord
 from hypergrid.core.transitions.precedence import (
     apply_across_generation_precedence,
     apply_same_generation_precedence,
@@ -42,28 +45,22 @@ from hypergrid.core.transitions.precedence import (
 if TYPE_CHECKING:
     from collections.abc import Iterable
 
-    from hypergrid.core.events import EventEnvelope
+    from hypergrid.core.events import CommandEvent, EventEnvelope
     from hypergrid.core.state import State
 
 
 @dataclass(frozen=True, slots=True)
 class PassReport:
-    """The result of one pass: exactly seven StageReports in P0..P6 order."""
+    """One pass: seven StageReports (P0..P6) + P6's traced sub-decisions."""
 
     stages: tuple[StageReport, ...]
+    sub_decisions: tuple[SubDecisionRecord, ...] = ()
 
     def to_canonical_obj(self) -> dict[str, object]:
-        return {"stages": [stage.to_canonical_obj() for stage in self.stages]}
-
-
-def _stub(stage: str) -> StageReport:
-    """A pass-through stub stage: state unchanged, no event-content read."""
-    return StageReport(
-        stage=stage,
-        status="STUBBED",
-        reason_codes=(),
-        notes=f"{stage} stub: no-op in Phase 7d",
-    )
+        return {
+            "stages": [stage.to_canonical_obj() for stage in self.stages],
+            "sub_decisions": [r.to_canonical_obj() for r in self.sub_decisions],
+        }
 
 
 def _combine_p4(arbitration: StageReport, execution: StageReport) -> StageReport:
@@ -89,8 +86,8 @@ def _combine_p4(arbitration: StageReport, execution: StageReport) -> StageReport
 def run_pass(
     state: State,
     envelopes: Iterable[EventEnvelope],
-) -> tuple[State, PassReport]:
-    """Run P0..P6 over one pass; return (new state, pass report)."""
+) -> tuple[State, PassReport, tuple[CommandEvent, ...]]:
+    """Run P0..P6 over one pass; return (new state, pass report, emitted commands)."""
     materialized = list(envelopes)  # total-iteration guarantee: consume once
 
     stages: list[StageReport] = []
@@ -119,6 +116,11 @@ def run_pass(
     # P4-before-P5 holds by construction. Still exactly stage "P5" (no P5_EXEC).
     state, p5 = apply_cycle(state, materialized)
     stages.append(p5)
-    stages.append(_stub("P6"))
 
-    return state, PassReport(stages=tuple(stages))
+    # P6 is real (Phase 7h-4b-2): §5.2 arming/placement — cancel-select, arm eval +
+    # submission emit, ladder issuance, ST-04<->ST-05 coupling. Markers-fed; it emits
+    # CommandEvents (returned, never appended here — D11) and writes ST-04 only.
+    state, p6, sub_decisions, emitted = apply_p6(state)
+    stages.append(p6)
+
+    return state, PassReport(stages=tuple(stages), sub_decisions=sub_decisions), emitted

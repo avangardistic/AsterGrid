@@ -24,7 +24,10 @@ from __future__ import annotations
 from dataclasses import dataclass
 from enum import StrEnum, auto
 
+from hypergrid.core.events import CommandEvent
 from hypergrid.core.transitions.order_state import OrderState
+
+_TIF = frozenset({"Gtc", "Ioc", "Alo"})  # §6.2 TIF set
 
 # The RESTING set: order lifecycles that still hold live venue quantity (§5.2 L362-363
 # resting-set reading). A cancel is meaningful only for these.
@@ -95,8 +98,43 @@ def select_exhausted_candidates(
     )
 
 
+def emit_cancel_command(
+    *,
+    cloid: str,
+    tif: str = "Gtc",
+    expires_after: int,
+    intent_log_seq: int,
+) -> CommandEvent:
+    """Build a cancel ``CommandEvent`` (pure; Phase 7h-4b-2 B2.2).
+
+    ``action="cancel"`` is a frozen-vocab literal (kinds.py L51). ``tif="Gtc"`` default
+    is COINED (Item 3: schema requires a non-optional str; no Strategy sentence ties a
+    cancel to a TIF). ``expires_after`` is REQUIRED and ``> 0`` — a cancel IS an action
+    (DECISION-008 "use expiresAfter on actions"); the schema's None default is
+    permissiveness, not permission. Fail-closed (``ValueError``): empty cloid,
+    ``tif ∉ {Gtc,Ioc,Alo}``, ``expires_after <= 0``, ``intent_log_seq < 0``.
+    Cite: §6.2 (TIF set); STR-0075 (step 2); DECISION-008.
+    """
+    if not isinstance(cloid, str) or not cloid:
+        raise ValueError("cloid must be a non-empty str")
+    if tif not in _TIF:
+        raise ValueError(f"tif must be one of {sorted(_TIF)}: {tif!r}")
+    if type(expires_after) is not int or expires_after <= 0:
+        raise ValueError("expires_after must be a positive int (DECISION-008)")
+    if type(intent_log_seq) is not int or intent_log_seq < 0:
+        raise ValueError("intent_log_seq must be an int >= 0")
+    return CommandEvent(
+        cloid=cloid,
+        action="cancel",  # frozen vocab literal (kinds.py L51)
+        tif=tif,
+        expires_after=expires_after,
+        causal_predecessors=(intent_log_seq,),
+    )
+
+
 __all__ = [
     "CancelCandidate",
     "CancelReasonCode",
+    "emit_cancel_command",
     "select_exhausted_candidates",
 ]

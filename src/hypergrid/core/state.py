@@ -78,6 +78,11 @@ from hypergrid.core.transitions.markers import (
 from hypergrid.core.transitions.market_observation_state import MarketObservationState
 from hypergrid.core.transitions.observation_state import P0ObservationMarkers
 from hypergrid.core.transitions.order_state import OrderState
+from hypergrid.core.transitions.p6_state import (
+    P6ArmInput,
+    P6CancelInput,
+    P6IssuanceInput,
+)
 from hypergrid.core.transitions.risk_state import (
     AccountEquityState,
     BasketNetPnLState,
@@ -196,6 +201,14 @@ class State:
     # ``p1_exposure_markers`` from it. Serialized like p2_locks (explicit block).
     p0_observation_markers: P0ObservationMarkers | None = None
 
+    # Phase-7h-4b-2 arbitration markers (NOT ST-* fields; p2_ precedent): the P6 stage
+    # inputs (arm/cancel/issuance operator intents). Set by tests; an adapter sources
+    # them later. arm/cancel sorted by cloid no-dups; issuance sorted by (gen, cycle)
+    # no-dups. Serialized like p2_locks (explicit blocks), omitted when None.
+    p6_arm_inputs: tuple[P6ArmInput, ...] | None = None
+    p6_cancel_inputs: tuple[P6CancelInput, ...] | None = None
+    p6_issuance_inputs: tuple[P6IssuanceInput, ...] | None = None
+
     def __post_init__(self) -> None:
         if self.event_count < 0:
             raise ValueError("event_count must be >= 0")
@@ -214,6 +227,7 @@ class State:
         self._validate_cycle_invariants()
         self._validate_level_invariants()
         self._validate_order_arm_invariants()
+        self._validate_p6_input_invariants()
 
     def _validate_generation_invariants(self) -> None:
         """Phase-7e ordering + coherence invariants on ST-02/14/15/16.
@@ -339,6 +353,29 @@ class State:
                     "(cloid, request_seq), no dups"
                 )
 
+    def _validate_p6_input_invariants(self) -> None:
+        """Phase-7h-4b-2 ordering + no-dup invariants on the P6 input marker slots.
+
+        Enforced: ``p6_arm_inputs`` and ``p6_cancel_inputs`` sorted by ``cloid`` with no
+        duplicate cloids; ``p6_issuance_inputs`` sorted by ``(generation_id, cycle_id)``
+        with no duplicate pairs. Per-row validation is in the p6_state dataclasses.
+        """
+        for name, rows in (
+            ("p6_arm_inputs", self.p6_arm_inputs),
+            ("p6_cancel_inputs", self.p6_cancel_inputs),
+        ):
+            if rows is None:
+                continue
+            cloids = [row.cloid for row in rows]
+            if cloids != sorted(cloids) or len(set(cloids)) != len(cloids):
+                raise ValueError(f"{name} must be sorted by cloid, no dups")
+        if self.p6_issuance_inputs is not None:
+            keys = [(r.generation_id, r.cycle_id) for r in self.p6_issuance_inputs]
+            if keys != sorted(keys) or len(set(keys)) != len(keys):
+                raise ValueError(
+                    "p6_issuance_inputs must be sorted by (gen, cycle), no dups"
+                )
+
     def to_canonical_obj(self) -> dict[str, object]:
         """Canonical dict for :func:`canonical_dumps` (no None/float in output)."""
         obj: dict[str, object] = {
@@ -461,6 +498,16 @@ class State:
             obj["p0_observation_markers"] = (
                 self.p0_observation_markers.to_canonical_obj()
             )
+        if self.p6_arm_inputs is not None:
+            obj["p6_arm_inputs"] = [r.to_canonical_obj() for r in self.p6_arm_inputs]
+        if self.p6_cancel_inputs is not None:
+            obj["p6_cancel_inputs"] = [
+                r.to_canonical_obj() for r in self.p6_cancel_inputs
+            ]
+        if self.p6_issuance_inputs is not None:
+            obj["p6_issuance_inputs"] = [
+                r.to_canonical_obj() for r in self.p6_issuance_inputs
+            ]
         return obj
 
 
@@ -482,6 +529,9 @@ _ARBITRATION_FIELD_NAMES = frozenset(
         "cycle_terminal_markers",
         "p1_exposure_markers",
         "p0_observation_markers",
+        "p6_arm_inputs",
+        "p6_cancel_inputs",
+        "p6_issuance_inputs",
     }
 )
 _TYPED_ST_FIELD_NAMES = frozenset(

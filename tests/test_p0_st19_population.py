@@ -31,7 +31,7 @@ def _markers(**over: object) -> P0ObservationMarkers:
 def test_st19_absent_before_present_after() -> None:
     state = _empty_state()
     assert state.st19_market_observation_cache is None
-    new_state, _ = run_pass(
+    new_state, _, _ = run_pass(
         dataclasses.replace(state, p0_observation_markers=_markers()), []
     )
     st19 = new_state.st19_market_observation_cache
@@ -40,7 +40,7 @@ def test_st19_absent_before_present_after() -> None:
 
 def test_mark_price_carried_exactly() -> None:
     m = _markers(mark_price=Decimal("63125.5"))
-    new_state, _ = run_pass(
+    new_state, _, _ = run_pass(
         dataclasses.replace(_empty_state(), p0_observation_markers=m), []
     )
     st19 = new_state.st19_market_observation_cache
@@ -59,7 +59,7 @@ def test_mark_price_nonpositive_or_nondecimal_rejected() -> None:
 
 def test_st19_unwritten_when_p0_markers_absent() -> None:
     # 7d-compat pin: no p0 markers -> NO_OP -> ST-19 stays None.
-    new_state, report = run_pass(_empty_state(), [])
+    new_state, report, _ = run_pass(_empty_state(), [])
     p0 = {s.stage: s for s in report.stages}["P0"]
     assert p0.status == "NO_OP"
     assert new_state.st19_market_observation_cache is None

@@ -199,7 +199,7 @@ def test_p0_records_marker_value_exactly_no_accumulation() -> None:
             transient_tolerance=Decimal("3"),
         ),
     )
-    new_state, _ = run_pass(state, [])
+    new_state, _, _ = run_pass(state, [])
     rows = new_state.st04_level_pipeline_states or ()
     assert len(rows) == 1
     # EXACTLY the marker value (5.0), not 2.0 + 5.0.

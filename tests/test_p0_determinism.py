@@ -43,8 +43,8 @@ def _state() -> State:
 
 
 def test_identical_inputs_byte_identical_outputs() -> None:
-    s1, r1 = run_pass(_state(), [])
-    s2, r2 = run_pass(_state(), [])
+    s1, r1, _ = run_pass(_state(), [])
+    s2, r2, _ = run_pass(_state(), [])
     assert canonical_dumps(s1.to_canonical_obj()) == canonical_dumps(
         s2.to_canonical_obj()
     )

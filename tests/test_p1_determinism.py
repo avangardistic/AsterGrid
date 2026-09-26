@@ -28,8 +28,8 @@ def _markers() -> P1ExposureMarkers:
 
 def test_byte_identical_state_and_report() -> None:
     state = dataclasses.replace(_empty_state(), p1_exposure_markers=_markers())
-    s1, r1 = run_pass(state, [])
-    s2, r2 = run_pass(state, [])
+    s1, r1, _ = run_pass(state, [])
+    s2, r2, _ = run_pass(state, [])
     assert canonical_dumps(s1.to_canonical_obj()) == canonical_dumps(
         s2.to_canonical_obj()
     )

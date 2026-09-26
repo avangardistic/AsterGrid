@@ -53,6 +53,7 @@ from hypergrid.core.transitions.emergency import (
 from hypergrid.core.transitions.execution_cancel import (
     CancelCandidate,
     CancelReasonCode,
+    emit_cancel_command,
     select_exhausted_candidates,
 )
 from hypergrid.core.transitions.exposure import (
@@ -129,6 +130,14 @@ from hypergrid.core.transitions.order_state import (
     construct_order_intent,
     is_legal_order_transition,
 )
+from hypergrid.core.transitions.p6_stage import apply_p6
+from hypergrid.core.transitions.p6_state import (
+    P6ArmInput,
+    P6CancelInput,
+    P6IssuanceInput,
+)
+from hypergrid.core.transitions.pass_report_ext import SubDecisionRecord
+from hypergrid.core.transitions.pipeline_coupling import apply_pipeline_coupling
 from hypergrid.core.transitions.precedence import (
     apply_across_generation_precedence,
     apply_same_generation_precedence,
@@ -167,7 +176,11 @@ from hypergrid.core.transitions.sizing import (
     count_active_generations,
     enforce_level_caps,
 )
-from hypergrid.core.transitions.submission import SubmissionResult, submit_order
+from hypergrid.core.transitions.submission import (
+    SubmissionResult,
+    emit_submission_command,
+    submit_order,
+)
 
 __all__ = [
     "ARM_TIMEOUT_S",
@@ -221,6 +234,9 @@ __all__ = [
     "P3CandidateMarkers",
     "P4CandidateMarkers",
     "P4Decision",
+    "P6ArmInput",
+    "P6CancelInput",
+    "P6IssuanceInput",
     "PathEconomicsVerdict",
     "PerLevelObservation",
     "ReasonCode",
@@ -230,6 +246,7 @@ __all__ = [
     "RiskBoundTrackerState",
     "RiskReasonCode",
     "StageReport",
+    "SubDecisionRecord",
     "SubmissionResult",
     "SuccessorLock",
     "apply_across_generation_precedence",
@@ -239,6 +256,8 @@ __all__ = [
     "apply_locks",
     "apply_p0",
     "apply_p1",
+    "apply_p6",
+    "apply_pipeline_coupling",
     "apply_protection_unlock",
     "apply_same_generation_precedence",
     "assign_level_notionals",
@@ -273,6 +292,8 @@ __all__ = [
     "convert_notional_to_size",
     "count_active_cycles",
     "count_active_generations",
+    "emit_cancel_command",
+    "emit_submission_command",
     "enforce_level_caps",
     "evaluate_arm_gates",
     "evaluate_emergency",

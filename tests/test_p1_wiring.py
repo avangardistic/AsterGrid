@@ -50,22 +50,22 @@ def _p1(report_stages: tuple) -> object:
 
 
 def test_seven_stages_p1_second() -> None:
-    _, report = run_pass(_with(_markers()), [])
+    _, report, _ = run_pass(_with(_markers()), [])
     names = [s.stage for s in report.stages]
     assert names == list(_STAGES)
     assert "P5_EXEC" not in names
     by = {s.stage: s for s in report.stages}
     # P0 is real since Phase 7h-1: with only p1 markers set (no p0 markers) it
-    # reports NO_OP, not STUBBED. P6 is still a stub.
+    # reports NO_OP, not STUBBED. P6 is real since 7h-4b-2: NO_OP with no inputs.
     assert by["P0"].status == "NO_OP"
-    assert by["P6"].status == "STUBBED"
+    assert by["P6"].status == "NO_OP"
     assert by["P1"].status == "APPLIED"
 
 
 def test_markers_absent_no_op_unchanged() -> None:
     state = _empty_state()
     before = canonical_dumps(state.to_canonical_obj())
-    new_state, report = run_pass(state, [])
+    new_state, report, _ = run_pass(state, [])
     p1 = _p1(report.stages)
     assert p1.status == "NO_OP"
     assert p1.reason_codes == ()
@@ -75,7 +75,7 @@ def test_markers_absent_no_op_unchanged() -> None:
 
 def test_markers_present_writes_and_coheres() -> None:
     markers = _markers()
-    new_state, report = run_pass(_with(markers), [])
+    new_state, report, _ = run_pass(_with(markers), [])
     p1 = _p1(report.stages)
     # exposure singletons match a DIRECT writer call on the same inputs.
     exp, act, delta = build_exposure_singletons(
@@ -107,7 +107,7 @@ def test_markers_present_writes_and_coheres() -> None:
 def test_acute_and_zeroed_paths() -> None:
     # acute path: margin_distance < 2·d_emergency -> IMMEDIATE_IOC.
     acute_markers = _markers(margin_distance=Decimal("0"))
-    new_state, report = run_pass(_with(acute_markers), [])
+    new_state, report, _ = run_pass(_with(acute_markers), [])
     intent = new_state.st23_mirror_targets_hedge_intents
     assert intent is not None
     assert intent.execution == HedgeExecution.IOC
@@ -117,7 +117,7 @@ def test_acute_and_zeroed_paths() -> None:
         level_fills=(LevelFillState(0, 0, "BU", 1, Decimal("0.0001"), "FILLED"),),
         net_position=Decimal("0"),
     )
-    z_state, z_report = run_pass(_with(zero_markers), [])
+    z_state, z_report, _ = run_pass(_with(zero_markers), [])
     z_intent = z_state.st23_mirror_targets_hedge_intents
     assert z_intent is not None
     assert z_intent.amount == Decimal("0")  # zeroed
@@ -127,7 +127,7 @@ def test_acute_and_zeroed_paths() -> None:
 
 def test_only_target_fields_change() -> None:
     markers = _markers()
-    new_state, _ = run_pass(_with(markers), [])
+    new_state, _, _ = run_pass(_with(markers), [])
     # every field except the four P1 writes (+ the markers input) is unchanged.
     written = {
         "st07_expected_exposure",
@@ -149,8 +149,8 @@ def test_envelopes_unread() -> None:
     for i in range(3):
         log.append(CommandEvent(cloid=f"c{i}", action="submit", tif="Alo"), meta)
     envelopes = list(log.read_all())
-    _, empty_report = run_pass(_with(markers), [])
-    _, full_report = run_pass(_with(markers), envelopes)
+    _, empty_report, _ = run_pass(_with(markers), [])
+    _, full_report, _ = run_pass(_with(markers), envelopes)
     p1_empty = _p1(empty_report.stages)
     p1_full = _p1(full_report.stages)
     assert p1_empty.to_canonical_obj() == p1_full.to_canonical_obj()
