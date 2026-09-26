@@ -72,9 +72,7 @@ def test_p4_exhaustive_bounded() -> None:
     cycle_pool = ((0, 0), (0, 1), (1, 0), (1, 1))
     for evo in _subsets(gens):
         for cyc in _subsets(cycle_pool):
-            markers = P4CandidateMarkers(
-                evolution_candidates=evo, cycle_candidates=cyc
-            )
+            markers = P4CandidateMarkers(evolution_candidates=evo, cycle_candidates=cyc)
             state = dataclasses.replace(_empty_state(), p4_candidates=markers)
             new_state, report = apply_across_generation_precedence(state, [])
             assert report.status == "APPLIED"

@@ -32,9 +32,7 @@ from decimal import Decimal
 DECIMAL_TAG = "__decimal__"
 
 # R-JSON-5: ISO-8601 UTC, 'Z' suffix, exactly six fractional digits.
-_ISO_UTC_MICROS = re.compile(
-    r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{6}Z$"
-)
+_ISO_UTC_MICROS = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{6}Z$")
 
 
 def is_iso_utc_micros(value: str) -> bool:

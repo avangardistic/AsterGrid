@@ -139,8 +139,7 @@ def apply_cycle(
 
     st03 = {(r.generation_id, r.cycle_id): r for r in state.st03_cycle_states}
     st10 = {
-        (r.generation_id, r.cycle_id): r
-        for r in (state.st10_reference_prices or ())
+        (r.generation_id, r.cycle_id): r for r in (state.st10_reference_prices or ())
     }
     st02 = {g.generation_id: g for g in (state.st02_generation_states or ())}
     markers = {(m.generation_id, m.cycle_id): m for m in markers_field}

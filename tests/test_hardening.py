@@ -91,9 +91,7 @@ def test_append_does_not_advance_head_on_bad_meta_nonempty(tmp_path: object) -> 
         before = log.head_sequence()
         with pytest.raises(ValueError):
             log.append(
-                CommandEvent(
-                    cloid="c2", action="submit", tif="Alo"
-                ),
+                CommandEvent(cloid="c2", action="submit", tif="Alo"),
                 ObservedMeta(
                     venue_sequence=None, server_ts=None, local_receive_ts=_BAD
                 ),

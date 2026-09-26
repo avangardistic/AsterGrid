@@ -143,12 +143,8 @@ def envelope_to_obj(envelope: EventEnvelope) -> dict[str, object]:
 
 def scenario_dumps(envelopes: Iterable[EventEnvelope]) -> str:
     """Serialize a scenario file: R-JSON-4 envelope + R-JSON-8 payload shape."""
-    ordered: Sequence[EventEnvelope] = sorted(
-        envelopes, key=lambda e: e.log_sequence
-    )
-    payload: dict[str, object] = {
-        "events": [envelope_to_obj(env) for env in ordered]
-    }
+    ordered: Sequence[EventEnvelope] = sorted(envelopes, key=lambda e: e.log_sequence)
+    payload: dict[str, object] = {"events": [envelope_to_obj(env) for env in ordered]}
     return canonical_dumps(
         {"schema_version": SCENARIO_SCHEMA_VERSION, "payload": payload}
     )

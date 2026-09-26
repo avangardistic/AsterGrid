@@ -69,8 +69,10 @@ def _data(
 
 def test_pass_bu() -> None:
     data = _data(
-        old_ref="99900", old_term="100000",
-        new_levels=("100100", "100200"), direction="BU",
+        old_ref="99900",
+        old_term="100000",
+        new_levels=("100100", "100200"),
+        direction="BU",
     )
     _, report = _run(data)
     assert _RECON not in report.reason_codes
@@ -78,8 +80,10 @@ def test_pass_bu() -> None:
 
 def test_pass_sl() -> None:
     data = _data(
-        old_ref="100100", old_term="100000",
-        new_levels=("99900", "99800"), direction="SL",
+        old_ref="100100",
+        old_term="100000",
+        new_levels=("99900", "99800"),
+        direction="SL",
     )
     _, report = _run(data)
     assert _RECON not in report.reason_codes
@@ -87,8 +91,10 @@ def test_pass_sl() -> None:
 
 def test_fail_n1_non_monotonic() -> None:
     data = _data(
-        old_ref="99900", old_term="100000",
-        new_levels=("100200", "100100"), direction="BU",
+        old_ref="99900",
+        old_term="100000",
+        new_levels=("100200", "100100"),
+        direction="BU",
     )
     _, report = _run(data)
     assert _RECON in report.reason_codes
@@ -97,8 +103,10 @@ def test_fail_n1_non_monotonic() -> None:
 
 def test_fail_n1_equal_adjacent() -> None:
     data = _data(
-        old_ref="99900", old_term="100000",
-        new_levels=("100100", "100100"), direction="BU",
+        old_ref="99900",
+        old_term="100000",
+        new_levels=("100100", "100100"),
+        direction="BU",
     )
     _, report = _run(data)
     assert _RECON in report.reason_codes
@@ -108,8 +116,10 @@ def test_fail_n1_equal_adjacent() -> None:
 def test_fail_n2_side() -> None:
     # BU L1 exactly at old terminal -> not strictly beyond.
     data = _data(
-        old_ref="99900", old_term="100000",
-        new_levels=("100000", "100100"), direction="BU",
+        old_ref="99900",
+        old_term="100000",
+        new_levels=("100000", "100100"),
+        direction="BU",
     )
     _, report = _run(data)
     assert _RECON in report.reason_codes
@@ -119,8 +129,10 @@ def test_fail_n2_side() -> None:
 def test_fail_n2_interval_endpoint() -> None:
     # A new price exactly ON the [lo, hi] endpoint fails (inclusive interval).
     data = _data(
-        old_ref="100050", old_term="100000",
-        new_levels=("100050", "100100"), direction="BU",
+        old_ref="100050",
+        old_term="100000",
+        new_levels=("100050", "100100"),
+        direction="BU",
     )
     _, report = _run(data)
     assert _RECON in report.reason_codes
@@ -131,9 +143,13 @@ def test_fail_n3_separation() -> None:
     # tick=0.1, step=20, p_new=100100 -> eps = max(0.1, 0.1*20*100100/10000) ~ 20.02
     # live 100090 is only 10 away -> below eps -> N3 block.
     data = _data(
-        old_ref="99900", old_term="100000",
-        new_levels=("100100", "100200"), direction="BU",
-        live=("100090",), step="20", tick="0.1",
+        old_ref="99900",
+        old_term="100000",
+        new_levels=("100100", "100200"),
+        direction="BU",
+        live=("100090",),
+        step="20",
+        tick="0.1",
     )
     _, report = _run(data)
     assert _RECON in report.reason_codes
@@ -143,9 +159,13 @@ def test_fail_n3_separation() -> None:
 def test_pass_n3_boundary_inclusive() -> None:
     # tick=50 dominates eps; nearest live is exactly 50 away -> passes (>=).
     data = _data(
-        old_ref="99900", old_term="100000",
-        new_levels=("100100", "100200"), direction="BU",
-        live=("100050",), step="1", tick="50",
+        old_ref="99900",
+        old_term="100000",
+        new_levels=("100100", "100200"),
+        direction="BU",
+        live=("100050",),
+        step="1",
+        tick="50",
     )
     _, report = _run(data)
     assert _RECON not in report.reason_codes
@@ -153,8 +173,11 @@ def test_pass_n3_boundary_inclusive() -> None:
 
 def test_pass_n3_empty_live_vacuous() -> None:
     data = _data(
-        old_ref="99900", old_term="100000",
-        new_levels=("100100", "100200"), direction="BU", live=(),
+        old_ref="99900",
+        old_term="100000",
+        new_levels=("100100", "100200"),
+        direction="BU",
+        live=(),
     )
     _, report = _run(data)
     assert _RECON not in report.reason_codes
@@ -174,6 +197,4 @@ def test_malformed_non_overlap_data_raises() -> None:
     with pytest.raises(ValueError):  # empty new levels
         _data(old_ref="1", old_term="1", new_levels=(), direction="BU")
     with pytest.raises(ValueError):  # non-positive tick
-        _data(
-            old_ref="1", old_term="1", new_levels=("2",), direction="BU", tick="0"
-        )
+        _data(old_ref="1", old_term="1", new_levels=("2",), direction="BU", tick="0")

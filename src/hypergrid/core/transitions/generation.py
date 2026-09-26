@@ -91,9 +91,7 @@ def apply_evolution(
 
     lifecycle_by_id = {g.generation_id: g.lifecycle for g in st02}
     locked_ids = {s.generation_id for s in st15 if s.locked}
-    pending_ids = {
-        g.generation_id for g in st02 if g.lifecycle == "EVOLUTION_PENDING"
-    }
+    pending_ids = {g.generation_id for g in st02 if g.lifecycle == "EVOLUTION_PENDING"}
 
     codes: list[str] = []
     admitted = 0
@@ -168,9 +166,7 @@ def apply_evolution(
     if admitted > 0:
         new_state = dataclasses.replace(
             state,
-            st02_generation_states=tuple(
-                sorted(st02, key=lambda gs: gs.generation_id)
-            ),
+            st02_generation_states=tuple(sorted(st02, key=lambda gs: gs.generation_id)),
             st14_dominance_flags=tuple(sorted(st14, key=lambda d: d.generation_id)),
             st15_successor_locks=tuple(sorted(st15, key=lambda s: s.generation_id)),
         )

@@ -311,7 +311,8 @@ def test_resume_after_s7_block_writes_reference_once() -> None:
         st03=(CycleState(0, 0, "ACTIVE"),),
         markers=(
             _mk(
-                0, 0,
+                0,
+                0,
                 non_overlap_data=_PASS_DATA,
                 captured_reference_price=Decimal("100040"),
             ),

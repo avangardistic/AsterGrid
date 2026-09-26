@@ -83,9 +83,7 @@ def _req_ts(payload: dict[str, object], key: str) -> str:
     """Require an ISO-8601-Z microsecond timestamp string (R-JSON-5)."""
     value = _req_str(payload, key)
     if not is_iso_utc_micros(value):
-        raise ValueError(
-            f"field {key!r} must be an ISO-8601-Z microsecond timestamp"
-        )
+        raise ValueError(f"field {key!r} must be an ISO-8601-Z microsecond timestamp")
     return value
 
 
