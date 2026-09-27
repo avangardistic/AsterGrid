@@ -44,3 +44,12 @@ without asking; open an Owner Gate only for the boundaries above.
 ## Research state
 
 See **`research/README.md`** for phase status, artifact layout, and blockers.
+## Merge-gate protocol (standing)
+
+- Roles: DeepSeek drafts prompts; the Reviewer (advisor) pre-flights drafts and
+  independently reviews execution; Claude Code executes.
+- No merge to `main` without the Reviewer's explicit ACCEPT verdict on the
+  phase's full report text. Second-eye reads never substitute for the gate.
+- Fast-forward merges MUST land the exact reviewed commit SHA. Any rebase,
+  amend, or history rewrite of a reviewed branch re-opens the gate (re-review
+  the new SHA before merge).
