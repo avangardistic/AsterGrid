@@ -1,0 +1,61 @@
+[build-system]
+# Hatchling chosen over setuptools: first-class src-layout support, minimal
+# config, no legacy setup.py. No heavy tooling pulled in.
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "hypergrid"
+version = "0.0.0"
+description = "Deterministic, AI-independent Hyperliquid perpetual hedge-grid runtime (CAND-B, event-sourced). Phase 7a scaffolding."
+requires-python = ">=3.11"
+readme = "README.md"
+# Runtime dependencies intentionally EMPTY at Phase 7a: hypergrid.core is
+# stdlib-only (enforced by tests/test_core_no_logging.py). Runtime adapters
+# (httpx, websockets, eth-account, fastapi) and config (pydantic) are added
+# in later phases behind ports. See research/decisions/DECISION_REGISTER.md
+# DECISION-022 / DECISION-023.
+dependencies = []
+
+[project.optional-dependencies]
+# Dev-only; NONE of these is imported by hypergrid.core.
+dev = [
+  "pytest>=8",
+  "mypy>=1.8",
+  "ruff>=0.5",
+  "pydantic>=2",
+  "tomli-w>=1.0",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/hypergrid"]
+
+[tool.ruff]
+line-length = 88
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+# E,F,W (pycodestyle/pyflakes), I (isort), N (pep8-naming), UP (pyupgrade),
+# B (bugbear), SIM (simplify), RUF (ruff), T20 (flake8-print — forbid print).
+select = ["E", "F", "W", "I", "N", "UP", "B", "SIM", "RUF", "T20"]
+
+[tool.mypy]
+strict = true
+disallow_any_explicit = true
+warn_unreachable = true
+no_implicit_reexport = true
+plugins = ["pydantic.mypy"]
+
+# DECISION-022 condition 2 permits `Any` ONLY at explicit fenced boundary zones,
+# declared in this single place. `disallow_any_explicit` is fundamentally
+# incompatible with pydantic (its BaseModel stubs carry `Any`, attributed to
+# each model subclass), so the config *deserialization boundary* is the one
+# fenced zone: it turns external TOML/JSON into typed models. `core/` and every
+# other package stay fully strict (disallow_any_explicit = true).
+[[tool.mypy.overrides]]
+module = "hypergrid.config.schema"
+disallow_any_explicit = false
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
