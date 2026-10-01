@@ -1,8 +1,12 @@
-# hypergrid
+# AsterGrid (formerly hypergrid)
 
-Deterministic, AI-independent runtime for a Hyperliquid perpetual asymmetric
-hedge-grid strategy. This is the **Phase 7a scaffolding** — an empty skeleton;
-it contains **no trading/domain logic** yet.
+Deterministic, AI-independent runtime for an Aster perpetual asymmetric
+hedge-grid strategy. The codebase was imported **verbatim** from the hypergrid
+project on 2026-10-01 (Phase M — full history preserved; see
+`research/migration/MIGRATION.md`). The Aster venue delta (hedge-mode startup
+gate, two-sided exposure, V3 API surface) is specified in
+`docs/contract/CONTRACT_DELTA_ASTER.md` and lands in phases P2/P3
+(`docs/ROADMAP.md`).
 
 ## Authority & design (do not duplicate here)
 
@@ -17,7 +21,7 @@ it contains **no trading/domain logic** yet.
 - **Event model / interfaces:** `research/implementation/EVENT_MODEL.md`,
   `INTERFACE_MAP.md`, `CAP0024_DESIGN.md`.
 
-## Package layout (`src/hypergrid/`)
+## Package layout (`src/astergrid/`)
 
 - `core/` — **pure domain** (stdlib-only; never imports `logging`; single-threaded;
   no `float` in the decision/money path). Phase 7b landed the deterministic
@@ -67,6 +71,6 @@ reference model = OCaml (DECISION-021, separate offline codebase — no shared c
 ```bash
 pip install -e ".[dev]"
 pytest -q
-mypy --strict src/hypergrid
+mypy --strict src/astergrid
 ruff check src tests
 ```

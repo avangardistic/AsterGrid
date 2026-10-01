@@ -1,5 +1,9 @@
 # OPEN_MIGRATION_QUESTIONS — Phase M
 
+> Post-merge note (2026-10-01): PR #1 was merged with a merge commit and all
+> branches were unified at `3c37f8a`; Q1 and Q3 were resolved by the
+> Owner-ordered polish pass the same day. Q2 remains open for the Owner.
+
 > Claim hygiene per `docs/prompts/PROMPT_MIGRATION_FREEBUFF.md` Part 0.10.
 > Generated: 2026-10-01T12:20:34Z (UTC).
 > Anything uncertain about the migration is listed here. Nothing here blocks
@@ -13,6 +17,9 @@
   instruction).
 - **Question:** does the Owner want the marker resolved in a later phase, or
   kept as historical record?
+- **Resolution (2026-10-01, Owner-ordered polish pass):** kept as historical
+  record — the marker is part of the verbatim import (blob OID
+  `598ffc2a…` preserved) and stays untouched.
 - Source class OBSERVATION; status VERIFIED (marker present, untouched).
 
 ## Q2 — OWNER_GATE files that mention Hyperliquid (none moved)
@@ -49,8 +56,16 @@
   (7b check). Both were left per "Rewrite only classes (A), (B), (C)".
 - **Question:** should the docstring be modernized to say `astergrid` in a
   later docs pass? (Cosmetic only.)
+- **Resolution (2026-10-01, same day, Owner-ordered polish pass):** yes —
+  `src/astergrid/__init__.py:1` rewritten to the `astergrid` identity and the
+  `test_core_no_logging.py:33` assert message updated. Post-polish residue:
+  **0 functional** `hypergrid` strings; exactly **2 intentional provenance
+  mentions** remain in prose (`src/astergrid/__init__.py:3` "imported verbatim
+  from the hypergrid project" and `pyproject.toml:10` description) — both
+  self-describing history notes, not code; the 157 docs/research prose hits
+  are intentionally preserved.
 - Source class OBSERVATION; status VERIFIED (7e re-grep output quoted in
-  `RENAME_INVENTORY.md` §4).
+  `RENAME_INVENTORY.md` §4; post-polish re-grep quoted in report111.md).
 
 ## Q4 — Script extensions beyond the prompt's exact patterns
 

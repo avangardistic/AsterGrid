@@ -7,7 +7,7 @@ build-backend = "hatchling.build"
 [project]
 name = "astergrid"
 version = "0.0.0"
-description = "Deterministic, AI-independent Hyperliquid perpetual hedge-grid runtime (CAND-B, event-sourced). Phase 7a scaffolding."
+description = "Deterministic, AI-independent Aster perpetual hedge-grid runtime (CAND-B, event-sourced). Imported verbatim from hypergrid at Phase 7h-4b-2."
 requires-python = ">=3.11"
 readme = "README.md"
 # Runtime dependencies intentionally EMPTY at Phase 7a: astergrid.core is

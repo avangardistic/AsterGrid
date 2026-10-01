@@ -1,4 +1,8 @@
-# CLAUDE.md — Project Invariants (hypergrid)
+# CLAUDE.md — Project Invariants (AsterGrid, ex-hypergrid)
+
+> Imported verbatim from hypergrid on 2026-10-01 (Phase M). Venue facts that
+> were Hyperliquid-specific now defer to `docs/contract/CONTRACT_DELTA_ASTER.md`
+> and `docs/ROADMAP.md`; `Strategy.md` itself is untouched.
 
 `prompt.md` (Master Control Prompt v3.0) governs this program's entire workflow:
 phases, gating, source governance, artifact discipline. Read it before acting.
@@ -8,7 +12,8 @@ phases, gating, source governance, artifact discipline. Read it before acting.
 1. System / platform safety constraints
 2. Explicit Owner decisions in the repository
 3. `Strategy.md` — for strategy semantics
-4. Current authoritative external venue evidence (Hyperliquid docs/API)
+4. Current authoritative external venue evidence (Aster V3 docs/API for
+   AsterGrid; `research/aster/SOURCE_MANIFEST.md` is the anchor set)
 5. Accepted architecture decisions
 6. Accepted implementation requirements
 7. Tool / framework conventions

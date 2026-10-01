@@ -30,7 +30,7 @@ def _tops(node: ast.Import | ast.ImportFrom) -> list[str]:
 
 def test_core_has_no_logging_and_is_stdlib_only() -> None:
     files = _core_files()
-    assert files, "expected at least hypergrid/core/__init__.py"
+    assert files, "expected at least astergrid/core/__init__.py"
     stdlib = sys.stdlib_module_names
     for path in files:
         tree = ast.parse(path.read_text(encoding="utf-8"))
