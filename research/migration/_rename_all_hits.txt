@@ -1,0 +1,560 @@
+7h-3-prompt-final.md:259:- **New modules (exact names):** `src/hypergrid/core/transitions/submission.py` (B1),
+7h-3-prompt-final.md:379:1. `src/hypergrid/core/transitions/submission.py`, `remainder.py`, `emergency.py`,
+7h-4a-prompt-final.md:225:  `from hypergrid.core.transitions.risk_state import (AccountEquityState, BasketNetPnLState,
+7h-4a-prompt-final.md:246:- `src/hypergrid/core/transitions/risk_bounds.py` (B1 + B2 + `BreachLayer` + `RiskReasonCode`).
+7h-4a-prompt-final.md:247:- `src/hypergrid/core/transitions/risk_state.py` (B3: 5 dataclasses).
+7h-4a-prompt-final.md:248:- `src/hypergrid/core/state.py` (B4 — the ONLY existing source file edited).
+7h-4a-prompt-final.md:249:- `src/hypergrid/core/transitions/__init__.py` (re-exports + `__all__`, ruff-isort order):
+7h-4a-prompt-final.md:361:  `hypergrid.core.state` — private-import-in-tests precedent).
+7h-4a-prompt-final.md:388:1. `src/hypergrid/core/transitions/risk_bounds.py`, `src/hypergrid/core/transitions/risk_state.py`.
+7h-4a-prompt-final.md:389:2. Additive edits: `src/hypergrid/core/state.py` (Part B4), `transitions/__init__.py`,
+7h-4b-1-prompt-final.md:154:- `src/hypergrid/core/transitions/economics.py` (B1 + `PathEconomicsVerdict`).
+7h-4b-1-prompt-final.md:155:- `src/hypergrid/core/transitions/ladder_issuance.py` (B2).
+7h-4b-1-prompt-final.md:156:- `src/hypergrid/core/transitions/__init__.py` — re-exports + `__all__` ONLY (ruff-isort
+7h-4b-1-prompt-final.md:279:1. `src/hypergrid/core/transitions/economics.py`,
+7h-4b-1-prompt-final.md:280:   `src/hypergrid/core/transitions/ladder_issuance.py`.
+7h-4b-2-prompt-final.md:9:Read the repo. Key files: src/hypergrid/core/pass_engine.py, src/hypergrid/core/state.py, src/hypergrid/core/transitions/submission.py, src/hypergrid/core/transitions/execution_cancel.py, src/hypergrid/core/transitions/order_state.py, src/hypergrid/core/transitions/level_state.py, src/hypergrid/core/transitions/arm.py, src/hypergrid/core/transitions/arm_state.py, src/hypergrid/core/transitions/ladder_issuance.py, src/hypergrid/core/transitions/cycle.py, src/hypergrid/core/transitions/cycle_state.py, src/hypergrid/core/transitions/observation.py, src/hypergrid/core/events/kinds.py, research/strategy/STRATEGY_CONTRACT.md.
+ASTERGRID_HANDOFF.md:10:### 1.1 The Hyperliquid source repo (`hypergrid`)
+ASTERGRID_HANDOFF.md:12:- **Repo:** `github.com/avangardistic/hypergrid` (private)
+ASTERGRID_HANDOFF.md:13:- **Local path (Windows):** `C:\Users\Avangard\Desktop\hypergrid`
+ASTERGRID_HANDOFF.md:255:git clone https://github.com/avangardistic/hypergrid.git AsterGrid
+ASTERGRID_HANDOFF.md:280:> **New session. Repo migrated from `hypergrid` to `AsterGrid`. The canonical strategy is `Strategy.md` (unchanged). The canonical protocol is `prompt.md`. The Hyperliquid venue is abandoned — one-way only, incompatible with hedge mode. We are migrating to ASTER DEX.**
+ASTERGRID_HANDOFF.md:303:**End of handoff.** Save this as `ASTERGRID_HANDOFF.md` at the root of the new repo before starting the new session. The full Hyperliquid `hypergrid` repo remains as the reference for all venue-agnostic logic.
+ASTERGRID_HANDOFF.md:309:The previous draft I sent (titled `7h-5a-ASTER`) assumed the repo was still `hypergrid`. With the repo renamed to `AsterGrid` and cloned fresh, all path references in that draft remain valid **relative to the new repo root** — nothing about the file paths changes. But you should treat that draft as a **reference** for the shape of the ASTER adapter, not as a prompt to be sent verbatim to Claude Code, because:
+CLAUDE.md:1:# CLAUDE.md — Project Invariants (hypergrid)
+README.md:1:# hypergrid
+README.md:20:## Package layout (`src/hypergrid/`)
+README.md:70:mypy --strict src/hypergrid
+docs/ROADMAP.md:46:**هدف:** کد 7h-4b-2 از `hypergrid` وارد `AsterGrid` شود، package → `astergrid`، بدون بازنویسی history.
+docs/ROADMAP.md:50:**خطر اصلی:** replace کورکورانه‌ی `hypergrid`→`astergrid` می‌تواند ثابت‌های hash/serialization و golden fileها را عوض کند → در پرامپت STOP دارد.
+docs/archive/OWNER_INPUT_2026-10-01_VERBATIM.md:7:> hypergrid→astergrid blind text replace; assumption that AsterGrid is empty; 7h-5a before the engine delta).
+docs/archive/OWNER_INPUT_2026-10-01_VERBATIM.md:29:## A. Migration Prompt: hypergrid → AsterGrid (fresh repo + 7h-5a-ASTER) — SUPERSEDED
+docs/archive/OWNER_INPUT_2026-10-01_VERBATIM.md:31:**Purpose of this prompt:** one-shot instruction to a CLI AI agent. It will (1) migrate the codebase from `avangardistic/hypergrid` to the fresh empty repo `avangardistic/AsterGrid`, (2) strip Hyperliquid-specific artifacts, (3) execute the corrected **7h-5a-ASTER** phase (venue adapter only — no engine change; the ST-08 semantic stays out of this phase per the pre-flight verdict).
+docs/archive/OWNER_INPUT_2026-10-01_VERBATIM.md:37:### Part 0 — Non-negotiable rules carried from the hypergrid program
+docs/archive/OWNER_INPUT_2026-10-01_VERBATIM.md:39:These are the operating rules the hypergrid program ran under. They are binding for AsterGrid.
+docs/archive/OWNER_INPUT_2026-10-01_VERBATIM.md:56:**Source repo:** `github.com/avangardistic/hypergrid` (private).
+docs/archive/OWNER_INPUT_2026-10-01_VERBATIM.md:76:git clone https://github.com/avangardistic/hypergrid.git AsterGrid
+docs/archive/OWNER_INPUT_2026-10-01_VERBATIM.md:122:Everything in `src/hypergrid/core/` **except** the venues-specific adapter subpackage (see 3.2). This includes:
+docs/archive/OWNER_INPUT_2026-10-01_VERBATIM.md:157:- `src/hypergrid/adapters/` — was empty (`__all__ = []`) in the source; leave empty in the new repo unless 7h-5a-ASTER repopulates it.
+docs/archive/OWNER_INPUT_2026-10-01_VERBATIM.md:158:- `src/hypergrid/operator/` — if it references Hyperliquid concepts, empty it; the operator surface is post-7h.
+docs/archive/OWNER_INPUT_2026-10-01_VERBATIM.md:165:The package is `hypergrid`. Rename it to `astergrid`.
+docs/archive/OWNER_INPUT_2026-10-01_VERBATIM.md:169:Rename-Item -Path src\hypergrid -NewName astergrid
+docs/archive/OWNER_INPUT_2026-10-01_VERBATIM.md:175:# Update every "from hypergrid." and "import hypergrid" in src/ and tests/
+docs/archive/OWNER_INPUT_2026-10-01_VERBATIM.md:178:    (Get-Content $_.FullName) -replace 'hypergrid', 'astergrid' |
+docs/archive/OWNER_INPUT_2026-10-01_VERBATIM.md:186:- Package discovery path if it references `hypergrid`
+docs/archive/OWNER_INPUT_2026-10-01_VERBATIM.md:187:- Any other reference to `hypergrid`
+docs/archive/OWNER_INPUT_2026-10-01_VERBATIM.md:199:- Source: `github.com/avangardistic/hypergrid` at commit `<quote>`.
+docs/archive/OWNER_INPUT_2026-10-01_VERBATIM.md:203:- Rename: package `hypergrid` → `astergrid`; repo `hypergrid` → `AsterGrid`.
+docs/archive/OWNER_INPUT_2026-10-01_VERBATIM.md:369:- [ ] Package renamed (`hypergrid` → `astergrid`); `pytest` count unchanged.
+docs/contract/CONTRACT_DELTA_ASTER.md:13:| **HANDOFF** | Carried from `ASTERGRID_HANDOFF.md` / the owner's session summary; **not re-verified here** because `Strategy.md`, `prompt.md`, `src/` and the hypergrid history are **not in this repo**. |
+docs/contract/CONTRACT_DELTA_ASTER.md:102:The hypergrid check hard-rejects any `source != "clearinghouseState"` (HANDOFF). The replacement is a **closed allow-list of exact strings**, one per authoritative endpoint, e.g. `asterdex:v3:positionRisk`, `asterdex:v3:account`. Rules:
+docs/contract/CONTRACT_DELTA_ASTER.md:196:A fill on ASTER is meaningless to two-sided accounting without its leg (`GET userTrades` rows include `positionSide`; S2 l.3316, S2 endpoint l.3324). The hypergrid `FillEvent` has no `position_side` (HANDOFF). Ruling: adding `position_side` to `FillEvent` is an **engine change (Phase 2)**, not an adapter change. Until then the adapter **must not** fabricate position-aware `FillEvent`s; it exposes venue records only. This is why §10 orders Phase 2 before the adapter's mapping layer.
+docs/prompts/PROMPT_MIGRATION_FREEBUFF.md:1:# Prompt for CLI agent (freebuff): Phase M — import hypergrid into AsterGrid
+docs/prompts/PROMPT_MIGRATION_FREEBUFF.md:42:- **Target repo** `github.com/avangardistic/AsterGrid` is **NOT empty**. It already contains `ASTERGRID_HANDOFF.md`, `docs/`, and `research/aster/`. Therefore **do not** "clone hypergrid and retarget the remote" (the Owner's older plan) — that would push unrelated history into a non-empty repo.
+docs/prompts/PROMPT_MIGRATION_FREEBUFF.md:43:- **Source repo** `github.com/avangardistic/hypergrid` (private), branch `main`, expected HEAD `46b42b0` (docs-only over `6a854c5`; code identical). The Owner's machine has access. Record the actual hash; a different hash is not a STOP, but must be recorded.
+docs/prompts/PROMPT_MIGRATION_FREEBUFF.md:46:- In the source repo the package is `src/hypergrid/`. `adapters/` contains only `__init__.py`.
+docs/prompts/PROMPT_MIGRATION_FREEBUFF.md:55:git clone https://github.com/avangardistic/hypergrid.git hypergrid-src
+docs/prompts/PROMPT_MIGRATION_FREEBUFF.md:60:**Exit:** both folders exist. `hypergrid-src` is on `main`.
+docs/prompts/PROMPT_MIGRATION_FREEBUFF.md:77:cd C:\Users\Avangard\Desktop\hypergrid-src
+docs/prompts/PROMPT_MIGRATION_FREEBUFF.md:96:git checkout -b migration/hypergrid-import BASE      # BASE from Step 2, e.g. origin/aster-migration
+docs/prompts/PROMPT_MIGRATION_FREEBUFF.md:97:git remote add hg ..\hypergrid-src
+docs/prompts/PROMPT_MIGRATION_FREEBUFF.md:99:git merge --allow-unrelated-histories --no-ff hg/main -m "import: hypergrid main (verbatim, history preserved)"
+docs/prompts/PROMPT_MIGRATION_FREEBUFF.md:107:## Step 5 — Re-run the baseline on the imported tree (still package `hypergrid`)
+docs/prompts/PROMPT_MIGRATION_FREEBUFF.md:120:3. `src/hypergrid/adapters/` stays as-is (only `__init__.py`). `src/hypergrid/operator/` and `runtime/`: do **not** edit; just record (with `Get-ChildItem -Recurse`) whether they contain anything Hyperliquid-specific.
+docs/prompts/PROMPT_MIGRATION_FREEBUFF.md:125:## Step 7 — Rename the Python package `hypergrid` → `astergrid` (HIGH-RISK STEP, read carefully)
+docs/prompts/PROMPT_MIGRATION_FREEBUFF.md:127:A naive global text replace is **forbidden**: the string `hypergrid` may occur inside serialized constants, hash-chain domain separators, event-type names, golden/fixture files, or the repo URL. Changing those would silently alter hashes or break replay.
+docs/prompts/PROMPT_MIGRATION_FREEBUFF.md:131:git grep -n -i "hypergrid" -- . ":(exclude)Strategy.md" | Out-File research/migration/_rename_all_hits.txt -Encoding utf8
+docs/prompts/PROMPT_MIGRATION_FREEBUFF.md:133:Classify every hit into: (A) `import`/`from hypergrid...` statements; (B) `pyproject.toml` package/discovery/entry-point; (C) module-path strings in tests (e.g. `"hypergrid.core..."` used in mock patches/`importlib`); (D) **anything else** (constants, docstrings, URLs, fixtures, docs/research prose).
+docs/prompts/PROMPT_MIGRATION_FREEBUFF.md:138:7c. Rename the directory with git: `git mv src\hypergrid src\astergrid`.
+docs/prompts/PROMPT_MIGRATION_FREEBUFF.md:147:# only: "import hypergrid", "from hypergrid", dotted module paths "hypergrid.", and pyproject package refs
+docs/prompts/PROMPT_MIGRATION_FREEBUFF.md:148:pat_import = re.compile(r"(?m)^(\s*)(from|import)\s+hypergrid\b")
+docs/prompts/PROMPT_MIGRATION_FREEBUFF.md:149:pat_dotted = re.compile(r"\bhypergrid(\.[A-Za-z_])")
+docs/prompts/PROMPT_MIGRATION_FREEBUFF.md:157:        new = re.sub(r'(?m)^(name\s*=\s*")hypergrid(")', r"\1astergrid\2", new)
+docs/prompts/PROMPT_MIGRATION_FREEBUFF.md:158:        new = re.sub(r"\bsrc/hypergrid\b", "src/astergrid", new)
+docs/prompts/PROMPT_MIGRATION_FREEBUFF.md:164:7e. Re-grep: `git grep -n -i "hypergrid" -- src tests pyproject.toml`. Every remaining hit must be an intentional (D) hit already classified in 7a; list them in `RENAME_INVENTORY.md` with a one-line reason each.
+docs/prompts/PROMPT_MIGRATION_FREEBUFF.md:179:2. **`MIGRATION.md`** — source repo+commit; target repo; reason (Hyperliquid is one-way only; strategy needs hedge mode: §2 BU/SL both live, §11.3 mirroring, §11.1 per-side ExposureDelta); decision (ASTER DEX; hedge-native); rename `hypergrid`→`astergrid`; what stays venue-agnostic; what will change later (STR-0200, DECISION-002, §6.2, §6.3, STR-0224, §10, §13.4, new startup assertions) — **pointing to `docs/contract/CONTRACT_DELTA_ASTER.md` and `docs/ROADMAP.md`, not re-deriving them**; the phase-history table below (copy verbatim); explicit non-goals.
+docs/prompts/PROMPT_MIGRATION_FREEBUFF.md:216:git commit -m "migration: rename package hypergrid -> astergrid; relocate legacy HL material"
+docs/prompts/PROMPT_MIGRATION_FREEBUFF.md:234:`Strategy.md` SHA mismatch · no branch contains `CONTRACT_DELTA_ASTER.md` · merge conflict · suite/mypy/ruff regress at Step 5 or 7f · a hashed/serialized `hypergrid` string found (7b) · any need to edit a file not named in this prompt · any step you cannot verify. **Fail-closed. Silence is never a decision.**
+docs/session/DEEPSEEK_SESSION_SUMMARY.md:6:ربات grid دوطرفه (Strategy.md v2.3-final، immutable، SHA-256 `085044e72efa75e7dd7e812588d8247c8e60152eecb233bd6969f6545a825e18`). موتور deterministic در پایتون، ساخته و تست‌شده تا فاز **7h-4b-2** (۵۴۴ تست سبز؛ commit `6a854c5` در repo قدیمی `avangardistic/hypergrid`). Hyperliquid فقط one-way دارد و استراتژی hedge-mode می‌خواهد (BU و SL هم‌زمان؛ mirroring با leg مخالف هم‌زمان؛ exposure per-side) ⇒ مهاجرت به **ASTER DEX** (perp، hedge-native). فارکس ECN = venue دوم، بعداً. Repo جدید: `avangardistic/AsterGrid` (private).
+pyproject.toml:8:name = "hypergrid"
+pyproject.toml:13:# Runtime dependencies intentionally EMPTY at Phase 7a: hypergrid.core is
+pyproject.toml:21:# Dev-only; NONE of these is imported by hypergrid.core.
+pyproject.toml:31:packages = ["src/hypergrid"]
+pyproject.toml:56:module = "hypergrid.config.schema"
+research/README.md:92:On 2026-09-22: **GATE-020 RESOLVED** — production language = **Python** with 3 mandatory conditions (int/`Decimal` in the decision path; `mypy --strict`; core single-threaded/pure) (DECISION-022; Rust/Go/TS rejected; functional family rejected). **GATE-021 RESOLVED** — runtime/UI stack + 3-log system (DECISION-023: pure-Python core, asyncio adapters, SQLite event store, Pydantic+TOML config, FastAPI+HTMX UI; domain event log + operational log + owner audit trail; core never logs). **DECISION-021 ADDENDUM** — REF-D (CAP-0024) language **PINNED to OCaml** (Dune/QCheck/Yojson; JSON scenario exchange; no shared code). Owner UI requirement recorded in `implementation/UI_REQUIREMENT.md`. **Phase 7a scaffolding** built at the repo root (`src/hypergrid/{core,adapters,runtime,operator,config}`, `tests/`): package skeleton + §14 Pydantic config schema (34 fields, strict no-float `Decimal`) + JSON logging skeleton — **no domain logic, no venue code, no secrets**. `pytest` 14/14, `mypy --strict` clean, `ruff` clean. First trading code is Phase 7b+.
+research/README.md:96:On 2026-09-22: implemented the CAND-B log-as-truth substrate under `src/hypergrid/core/` (real code, no domain logic): `events/` (10 frozen event kinds per EVENT_MODEL §A2 with per-field provenance; `ObservedMeta`/`EventEnvelope`; sha256 hash chain binding order+linkage+timing+content; DECISION-007 canonical order; per-stream watermark; event codec), `event_log/` (append-only port + `InMemoryEventLog` + `SqliteEventLog`; the log is the sole allocator of `log_sequence`/`monotonic_counter` from 0 — R-SEQ-1; timestamps enter only via `ObservedMeta`), and `serialization/` (canonical JSON frozen for OCaml interop, R-JSON-1..8; Decimals tagged as strings; floats forbidden). 19 new tests (replay byte-identical across in-memory/SQLite and across runs; core has no `logging`/clock/`float`/forbidden imports; no secret field names). Toolchain green: pytest 33/33, `mypy --strict` clean (20 files), ruff clean. No fold/pass-engine/venue/signing (Phase 7c+).
+research/README.md:100:On 2026-09-22: added `src/hypergrid/core/state.py` (frozen `State`: fold metadata + one placeholder field per ST-01..ST-23, all `None`; validates per-kind-count/head-hash/event-count at construction; `to_canonical_obj()` emits no `None`/`float`) and `src/hypergrid/core/fold.py` (pure, total, clock-free `fold(envelopes) -> State` accumulating metadata ONLY — dispatches on `event_kind` solely to increment a counter; no domain logic). **Hardening (no design change):** G1 — `canonical_dumps` now pre-scans and rejects `float`/`None` at any depth (`__decimal__` reserved-key documented); G2 — ISO-8601-Z microsecond timestamp validation in `codec` (4 event ts fields) and once in `ObservedMeta.__post_init__` (so a bad meta can't append or advance the log head). 27 new tests (fold purity/determinism byte-identical across InMemory/SQLite and runs; State frozen/validated; G1/G2 guards). Toolchain green: pytest 60/60, `mypy --strict` clean (22 files), ruff clean. No §4–§13 rules, no P0–P6 pass engine (Phase 7d+).
+research/README.md:104:On 2026-09-23: first real domain logic — the deterministic ordering substrate of §4.7 only. Added `src/hypergrid/core/pass_engine.py` (`run_pass(state, envelopes) -> (State, PassReport)`; seven StageReports in strict P0..P6 order per §4.7; P0/P1/P5/P6 are labeled STUBs, P2/P3/P4 are real; input materialized once; pure/total/clock-free) and `src/hypergrid/core/transitions/` (`reason_codes.py` — six `ReasonCode` members with same-line VERBATIM/COINED provenance; `markers.py` — leaf dataclasses `P2LocksState`/`P2Attempts`/`P3CandidateMarkers`/`P4CandidateMarkers`/`P4Decision`/`StageReport`; `locks.py` — P2 evolution/cycle in-flight locks; `precedence.py` — P3 DISABLE-beats-Evolution and P4 Evolution-before-Cycle / lower-GenID-first). `State` gained six typed 7d-owned arbitration fields (`p2_locks`/`p2_attempts`/`p3_candidates`/`p3_decisions`/`p4_candidates`/`p4_decisions`, all default `None`, omitted from canonical output when `None`); every other ST-* placeholder unchanged; `fold.py` untouched. **DESIGN RULE:** no stage interprets envelope/event content — stages read only state markers (set directly by tests in 7d; populated from envelopes in 7e/7f). Part-0 hardening: the core float-checker now also rejects `float` in annotations, string-annotations, and typing subscripts (still allows the `isinstance(x, float)` guard). 23 new tests (exhaustive-bounded P2/P3/P4 over ≤2 generations; determinism; reason-code provenance/membership; frozen guarantees; float-checker self-tests). Toolchain green: pytest 83/83, `mypy --strict` clean (28 files), ruff clean. NB: §4.7 has seven passes (P0–P6); the prompt's "six stages" wording is a miscount, resolved in favor of §4.7 + the prompt's own per-stage status list. No real P0/P1/P5/P6 logic; no Evolution/Cycle transitions; no §11/§12; no venue/signing/orders/UI; no new DECISION/GATE/STR.
+research/README.md:116:On 2026-09-24: first §7 rule — pure functions + ST-04 typing only; `pass_engine.py` untouched (seven stages preserved). Added `transitions/geometry.py` (`compute_ladder_geometry(...)`: pure/total/clock-free/Decimal-only ladder prices; config values enter only as arguments — no `hypergrid.config` import in core) implementing the §7.1 distance model under three pinned Owner readings: **R1** chained multiplicative compounding (`p_k = p_{k-1}·(1±step/10000)`; ref 100000/step 10/first 20 → 100200, 100300.2, …, never 100300.0), **R2** successor-rule-wins so `is_successor` is a per-Generation constant (G0 base geometry all cycles, G1+ asymmetric all cycles), **R3** BU/SL labels illustrative so `is_dominant` is direction-agnostic. No rounding (§6.3 normalizes at order-build; no tick source here), no sizing (§7.3/7g-2). Added `transitions/protection_lock.py` (`is_protection_locked_initial` — locked ⟺ successor∧weak∧L1; `apply_protection_unlock` — pure fillability-gated unlock; §8 arming NOT implemented). Added leaf `transitions/level_state.py` (`LevelState`: identity quadruple + `target_price` + `is_protection_locked`, frozen/self-validating/canonical). `State` types ST-04 (`st04_level_pipeline_states`) with a sorted-by-(gen,cycle,direction,level) no-dup invariant. **ST-04 scope (deliberate, C2-7e lesson):** typed only what 7g-1 reads/writes; `size_notional_usd` deferred to 7g-2 (with §7.3 caps), lifecycle/filled_quantity/order_state/cloid-oid to 7h (with a 7h coherence-note owed between the §7.2 lock gate and the §6.1 LOCKED pipeline position). Pinned families (7d/7e/7f) untouched; `fold.py` untouched. 35 new tests (base/successor geometry full-tuple + monotonicity + dominance-ignored + direction-independence; validation incl. non-Decimal rejection; determinism; clock-free; lock truth-table + 4-case unlock; LevelState; ST-04 ordering + full-state serialization). Toolchain green: pytest 210/210, `mypy --strict` clean (35 files), ruff check clean, ruff format clean on all new/edited files. No real P0/P1/P6; no §7.3/§8/§9/§10/§11; no venue/signing/orders/UI; no new DECISION/GATE/STR.
+research/audits/auditb6.md:3:- **Repository:** `hypergrid` @ commit `25ff8cb` ("phase-5: architecture decision — CAND-B event-sourced single process"), branch `arena/01a0c562-hypergrid`
+research/audits/ga_arena.py:346:    with open('/home/user/hypergrid/ga_results.json', 'w') as f:
+research/audits/phases_0_4_technical_inspection.md:3:**Project:** Hypergrid
+research/audits/phases_0_4_technical_inspection.md:337:[1]: https://github.com/avangardistic/hypergrid/blob/main/CLAUDE.md "Hypergrid project invariants"
+research/audits/phases_0_4_technical_inspection.md:338:[2]: https://github.com/avangardistic/hypergrid/blob/main/prompt.md "Hypergrid Master Control Prompt"
+research/audits/phases_0_4_technical_inspection.md:339:[3]: https://github.com/avangardistic/hypergrid/blob/main/research/README.md "Hypergrid research phase status"
+research/audits/phases_0_4_technical_inspection.md:340:[4]: https://github.com/avangardistic/hypergrid/blob/main/research/strategy/STRATEGY_CONTRACT.md "Hypergrid strategy contract"
+research/audits/phases_0_4_technical_inspection.md:341:[5]: https://github.com/avangardistic/hypergrid/blob/main/research/strategy/STRATEGY_COVERAGE.md "Hypergrid strategy coverage"
+research/audits/phases_0_4_technical_inspection.md:342:[6]: https://github.com/avangardistic/hypergrid/blob/main/research/sources/SOURCE_MANIFEST.md "Hypergrid source manifest"
+research/audits/phases_0_4_technical_inspection.md:343:[7]: https://github.com/avangardistic/hypergrid/blob/main/research/sources/hyperliquid/TOPIC_EVIDENCE.md "Hypergrid Hyperliquid topic evidence"
+research/audits/phases_0_4_technical_inspection.md:347:[11]: https://github.com/avangardistic/hypergrid/blob/main/research/architecture/CAPABILITY_MAP.md "Hypergrid capability map"
+research/audits/phases_0_4_technical_inspection.md:348:[12]: https://github.com/avangardistic/hypergrid/blob/main/research/architecture/CAPABILITY_COVERAGE.md "Hypergrid capability coverage"
+research/audits/phases_0_4_technical_inspection.md:349:[13]: https://github.com/avangardistic/hypergrid/blob/main/research/architecture/STATE_OWNERSHIP.md "Hypergrid state ownership"
+research/audits/phases_0_4_technical_inspection.md:350:[14]: https://github.com/avangardistic/hypergrid/blob/main/research/architecture/BOUNDARY_CANDIDATES.md "Hypergrid architecture boundaries"
+research/audits/phases_0_4_technical_inspection.md:351:[15]: https://github.com/avangardistic/hypergrid/blob/main/research/architecture/ARCHITECTURE_CANDIDATES.md "Hypergrid architecture candidates"
+research/audits/phases_0_4_technical_inspection.md:352:[16]: https://github.com/avangardistic/hypergrid/blob/main/research/architecture/FAILURE_BOUNDARIES.md "Hypergrid failure boundaries"
+research/audits/phases_0_4_technical_inspection.md:353:[17]: https://github.com/avangardistic/hypergrid/blob/main/research/decisions/DECISION_REGISTER.md "Hypergrid decision register"
+research/audits/phases_0_4_technical_inspection.md:357:[21]: https://github.com/avangardistic/hypergrid/blob/main/research/sources/hyperliquid/SDK_RECORD.md "Hypergrid Hyperliquid SDK record"
+research/audits/phases_0_4_technical_inspection.md:358:[22]: https://github.com/avangardistic/hypergrid/blob/main/research/findings/CONFLICT-001.md "Hypergrid leverage conflict"
+research/audits/phases_0_4_technical_inspection.md:359:[23]: https://github.com/avangardistic/hypergrid/blob/main/research/findings/CONFLICT-002.md "Hypergrid account-state conflict"
+research/audits/phases_0_4_technical_inspection.md:360:[24]: https://github.com/avangardistic/hypergrid/blob/main/research/findings/CONFLICT-003.md "Hypergrid trigger-basis conflict"
+research/audits/phases_0_4_technical_inspection.md:363:[27]: https://github.com/avangardistic/hypergrid/blob/main/research/strategy/STRATEGY_SOURCE_RECORD.md "Hypergrid canonical strategy source record"
+research/audits/phases_0_4_technical_inspection.md:364:[28]: https://github.com/avangardistic/hypergrid/blob/main/research/strategy/STRATEGY_COVERAGE.md "Hypergrid strategy traceability"
+research/audits/phases_0_4_technical_inspection.md:365:[29]: https://github.com/avangardistic/hypergrid/blob/main/research/architecture/CAPABILITY_COVERAGE.md "Hypergrid capability coverage"
+research/audits/phases_0_4_technical_inspection.md:366:[30]: https://github.com/avangardistic/hypergrid/blob/main/research/architecture/FAILURE_BOUNDARIES.md "Hypergrid failure-boundary analysis"
+research/audits/phases_0_4_technical_inspection.md:367:[31]: https://github.com/avangardistic/hypergrid/blob/main/research/architecture/ARCHITECTURE_CANDIDATES.md "Hypergrid candidate architecture comparison"
+research/audits/phases_0_4_technical_inspection.md:368:[32]: https://github.com/avangardistic/hypergrid/blob/main/research/decisions/OWNER_GATE_001.md "Hypergrid Owner Gate 001"
+research/audits/phases_0_4_technical_inspection.md:369:[33]: https://github.com/avangardistic/hypergrid/blob/main/research/decisions/OWNER_GATE_002.md "Hypergrid Owner Gate 002"
+research/audits/philosophy.md:1:# فلسفه و ممیزی منطقی Hypergrid
+research/audits/philosophy.md:213:ایدهٔ مرکزی Hypergrid درست است: **سرعت کمتر، حقیقت بیشتر**. حقیقت از local bookkeeping، intent یا یک پیام منفرد venue نمی‌آید؛ از observation معتبر، identity matching، authoritative reconciliation، pure decision، event persistence و replay مستقل می‌آید.
+research/audits/philosophy.md:229:[7]: https://github.com/avangardistic/hypergrid/blob/main/Strategy.md "Hypergrid canonical strategy"
+research/audits/philosophy.md:230:[8]: https://github.com/avangardistic/hypergrid/blob/main/research/strategy/STRATEGY_CONTRACT.md "Hypergrid strategy contract"
+research/audits/philosophy.md:231:[9]: https://github.com/avangardistic/hypergrid/blob/main/research/architecture/STATE_OWNERSHIP.md "Hypergrid state ownership"
+research/audits/philosophy.md:232:[10]: https://github.com/avangardistic/hypergrid/blob/main/research/architecture/FAILURE_BOUNDARIES.md "Hypergrid failure boundaries"
+research/audits/philosophy.md:233:[11]: https://github.com/avangardistic/hypergrid/blob/main/research/architecture/ARCHITECTURE_CANDIDATES.md "Hypergrid architecture candidates"
+research/audits/philosophy.md:234:[12]: https://github.com/avangardistic/hypergrid/blob/main/research/decisions/DECISION_REGISTER.md "Hypergrid owner decisions"
+research/audits/philosophy.md:235:[13]: https://github.com/avangardistic/hypergrid/blob/main/research/sources/hyperliquid/TOPIC_EVIDENCE.md "Hypergrid venue evidence"
+research/audits/philosophy.md:238:[16]: https://github.com/avangardistic/hypergrid/blob/main/research/strategy/STRATEGY_COVERAGE.md "Hypergrid strategy coverage"
+research/audits/philosophy.md:239:[17]: https://github.com/avangardistic/hypergrid/blob/main/research/architecture/CAPABILITY_MAP.md "Hypergrid capability map"
+research/audits/philosophy.md:240:[18]: https://github.com/avangardistic/hypergrid/blob/main/research/findings/CONFLICT-001.md "Hypergrid leverage conflict"
+research/audits/philosophy.md:241:[19]: https://github.com/avangardistic/hypergrid/blob/main/research/findings/CONFLICT-002.md "Hypergrid account-state conflict"
+research/audits/philosophy.md:242:[20]: https://github.com/avangardistic/hypergrid/blob/main/research/findings/CONFLICT-003.md "Hypergrid trigger-basis conflict"
+research/audits/philosophy.md:243:[21]: https://github.com/avangardistic/hypergrid/blob/main/CLAUDE.md "Hypergrid project invariants"
+research/audits/philosophy.md:244:[22]: https://github.com/avangardistic/hypergrid/blob/main/research/README.md "Hypergrid research status"
+research/audits/philosophy.md:250:[28]: https://github.com/avangardistic/hypergrid/blob/main/research/sources/SOURCE_MANIFEST.md "Hypergrid source manifest"
+research/audits/philosophy.md:251:[29]: https://github.com/avangardistic/hypergrid/blob/main/research/sources/hyperliquid/SDK_RECORD.md "Hypergrid SDK record"
+research/audits/philosophy.md:252:[30]: https://github.com/avangardistic/hypergrid/blob/main/research/architecture/CAPABILITY_COVERAGE.md "Hypergrid capability coverage"
+research/audits/philosophy.md:253:[31]: https://github.com/avangardistic/hypergrid/blob/main/research/architecture/BOUNDARY_CANDIDATES.md "Hypergrid boundary candidates"
+research/audits/philosophy.md:255:[33]: https://github.com/avangardistic/hypergrid/blob/main/prompt.md "Hypergrid control prompt"
+research/audits/philosophy.md:256:[34]: https://github.com/avangardistic/hypergrid "Hypergrid repository"
+research/audits/strategy_issues.md:951:[1]: https://github.com/avangardistic/hypergrid/blob/main/Strategy.md "Hypergrid canonical strategy specification"
+research/audits/strategy_issues.md:952:[2]: https://github.com/avangardistic/hypergrid/blob/main/prompt.md "Hypergrid control prompt"
+research/audits/strategy_issues.md:953:[3]: https://github.com/avangardistic/hypergrid/blob/main/research/strategy/STRATEGY_CONTRACT.md "Hypergrid derived strategy contract"
+research/audits/strategy_issues.md:954:[4]: https://github.com/avangardistic/hypergrid/blob/main/research/strategy/STRATEGY_COVERAGE.md "Hypergrid strategy coverage"
+research/audits/strategy_issues.md:955:[5]: https://github.com/avangardistic/hypergrid/blob/main/research/architecture/STATE_OWNERSHIP.md "Hypergrid state ownership analysis"
+research/audits/strategy_issues.md:956:[6]: https://github.com/avangardistic/hypergrid/blob/main/research/architecture/FAILURE_BOUNDARIES.md "Hypergrid failure boundary analysis"
+research/audits/strategy_issues.md:957:[7]: https://github.com/avangardistic/hypergrid/blob/main/research/architecture/CAPABILITY_MAP.md "Hypergrid capability map"
+research/audits/strategy_issues.md:958:[8]: https://github.com/avangardistic/hypergrid/blob/main/research/architecture/ARCHITECTURE_CANDIDATES.md "Hypergrid architecture candidates"
+research/audits/strategy_issues.md:959:[9]: https://github.com/avangardistic/hypergrid/blob/main/research/decisions/DECISION_REGISTER.md "Hypergrid decision register"
+research/audits/strategy_issues.md:960:[10]: https://github.com/avangardistic/hypergrid/blob/main/research/sources/hyperliquid/TOPIC_EVIDENCE.md "Hypergrid Hyperliquid topic evidence"
+research/audits/strategy_issues.md:970:[20]: https://github.com/avangardistic/hypergrid/blob/main/research/sources/SOURCE_MANIFEST.md "Hypergrid source manifest"
+research/audits/strategy_issues.md:971:[21]: https://github.com/avangardistic/hypergrid/blob/main/research/findings/CONFLICT-001.md "Hypergrid leverage conflict"
+research/audits/strategy_issues.md:972:[22]: https://github.com/avangardistic/hypergrid/blob/main/research/findings/CONFLICT-002.md "Hypergrid account-state conflict"
+research/audits/strategy_issues.md:973:[23]: https://github.com/avangardistic/hypergrid/blob/main/research/findings/CONFLICT-003.md "Hypergrid trigger-basis conflict"
+research/audits/strategy_issues.md:974:[24]: https://github.com/avangardistic/hypergrid/blob/main/research/README.md "Hypergrid research status"
+research/audits/strategy_issues.md:975:[25]: https://github.com/avangardistic/hypergrid/blob/main/CLAUDE.md "Hypergrid project invariants"
+research/audits/strategy_issues.md:981:[31]: https://github.com/avangardistic/hypergrid/blob/main/research/sources/hyperliquid/SDK_RECORD.md "Hypergrid Hyperliquid SDK record"
+research/audits/strategy_issues.md:982:[32]: https://github.com/avangardistic/hypergrid/blob/main/research/architecture/CAPABILITY_COVERAGE.md "Hypergrid capability coverage"
+research/audits/strategy_issues.md:983:[33]: https://github.com/avangardistic/hypergrid/blob/main/research/architecture/BOUNDARY_CANDIDATES.md "Hypergrid architecture boundary candidates"
+research/audits/strategy_issues.md:984:[34]: https://github.com/avangardistic/hypergrid/blob/main/research/decisions/OWNER_GATE_001.md "Hypergrid owner gate 001"
+research/audits/strategy_issues.md:985:[35]: https://github.com/avangardistic/hypergrid/blob/main/research/decisions/OWNER_GATE_002.md "Hypergrid owner gate 002"
+research/implementation/UI_REQUIREMENT.md:9:- **ورودِ کاملِ §14:** فرمِ ورودی از مدلِ Pydantic §14 تولید می‌شود (`hypergrid.config.schema`).
+research/implementation/UI_REQUIREMENT.md:33:- `hypergrid.config.schema` (منبعِ تولیدِ فرم + JSON schema export).
+research/strategy/STRATEGY_SOURCE_RECORD.md:18:| Path | `C:\Users\Avangard\Desktop\hypergrid\Strategy.md` (repo root) |
+src/hypergrid/__init__.py:1:"""hypergrid — deterministic, AI-independent Hyperliquid hedge-grid runtime.
+src/hypergrid/adapters/__init__.py:1:"""hypergrid.adapters — side-effect boundary (Phase 7b+).
+src/hypergrid/config/__init__.py:1:"""hypergrid.config — configuration models derived from Strategy.md §14.
+src/hypergrid/core/__init__.py:1:"""hypergrid.core — the pure, deterministic domain.
+src/hypergrid/core/event_log/__init__.py:1:"""hypergrid.core.event_log — the append-only log (Phase 7b).
+src/hypergrid/core/event_log/__init__.py:8:from hypergrid.core.event_log.memory import InMemoryEventLog
+src/hypergrid/core/event_log/__init__.py:9:from hypergrid.core.event_log.port import EventLogPort
+src/hypergrid/core/event_log/__init__.py:10:from hypergrid.core.event_log.sqlite import SqliteEventLog
+src/hypergrid/core/event_log/memory.py:7:from hypergrid.core.events import (
+src/hypergrid/core/event_log/memory.py:17:    from hypergrid.core.events import AnyEvent, ObservedMeta
+src/hypergrid/core/event_log/port.py:18:    from hypergrid.core.events import AnyEvent, EventEnvelope, ObservedMeta
+src/hypergrid/core/event_log/sqlite.py:16:from hypergrid.core.events import (
+src/hypergrid/core/event_log/sqlite.py:24:from hypergrid.core.serialization import canonical_dumps, canonical_loads
+src/hypergrid/core/event_log/sqlite.py:29:    from hypergrid.core.events import AnyEvent, ObservedMeta
+src/hypergrid/core/events/__init__.py:1:"""hypergrid.core.events — the event model (Phase 7b).
+src/hypergrid/core/events/__init__.py:8:from hypergrid.core.events.codec import event_from_payload, event_to_payload
+src/hypergrid/core/events/__init__.py:9:from hypergrid.core.events.envelope import (
+src/hypergrid/core/events/__init__.py:19:from hypergrid.core.events.identity import canonical_order_key, compare
+src/hypergrid/core/events/__init__.py:20:from hypergrid.core.events.kinds import (
+src/hypergrid/core/events/__init__.py:33:from hypergrid.core.events.watermark import StreamWatermark, advance
+src/hypergrid/core/events/codec.py:14:from hypergrid.core.events.kinds import (
+src/hypergrid/core/events/codec.py:27:from hypergrid.core.serialization import is_iso_utc_micros
+src/hypergrid/core/events/envelope.py:17:from hypergrid.core.events.codec import event_to_payload
+src/hypergrid/core/events/envelope.py:18:from hypergrid.core.events.kinds import AnyEvent
+src/hypergrid/core/events/envelope.py:19:from hypergrid.core.serialization import canonical_dumps, is_iso_utc_micros
+src/hypergrid/core/events/identity.py:15:from hypergrid.core.events.envelope import EventEnvelope
+src/hypergrid/core/events/watermark.py:12:from hypergrid.core.events.envelope import EventEnvelope
+src/hypergrid/core/fold.py:15:from hypergrid.core.events import GENESIS_PREV_HASH
+src/hypergrid/core/fold.py:16:from hypergrid.core.state import _EVENT_KINDS, State
+src/hypergrid/core/fold.py:21:    from hypergrid.core.events import EventEnvelope
+src/hypergrid/core/pass_engine.py:32:from hypergrid.core.transitions.cycle import apply_cycle
+src/hypergrid/core/pass_engine.py:33:from hypergrid.core.transitions.generation import apply_evolution
+src/hypergrid/core/pass_engine.py:34:from hypergrid.core.transitions.hedge import apply_p1
+src/hypergrid/core/pass_engine.py:35:from hypergrid.core.transitions.locks import apply_locks
+src/hypergrid/core/pass_engine.py:36:from hypergrid.core.transitions.markers import StageReport
+src/hypergrid/core/pass_engine.py:37:from hypergrid.core.transitions.observation import apply_p0
+src/hypergrid/core/pass_engine.py:38:from hypergrid.core.transitions.p6_stage import apply_p6
+src/hypergrid/core/pass_engine.py:39:from hypergrid.core.transitions.pass_report_ext import SubDecisionRecord
+src/hypergrid/core/pass_engine.py:40:from hypergrid.core.transitions.precedence import (
+src/hypergrid/core/pass_engine.py:48:    from hypergrid.core.events import CommandEvent, EventEnvelope
+src/hypergrid/core/pass_engine.py:49:    from hypergrid.core.state import State
+src/hypergrid/core/serialization/__init__.py:1:"""hypergrid.core.serialization — pure, stdlib-only canonical JSON (Phase 7b).
+src/hypergrid/core/serialization/__init__.py:9:from hypergrid.core.serialization.canonical_json import (
+src/hypergrid/core/state.py:40:from hypergrid.core.events import (
+src/hypergrid/core/state.py:52:from hypergrid.core.transitions.arm_state import ArmRequestState
+src/hypergrid/core/state.py:53:from hypergrid.core.transitions.cycle_state import (
+src/hypergrid/core/state.py:58:from hypergrid.core.transitions.exposure_state import (
+src/hypergrid/core/state.py:63:from hypergrid.core.transitions.generation_state import (
+src/hypergrid/core/state.py:69:from hypergrid.core.transitions.hedge_state import HedgeIntent, P1ExposureMarkers
+src/hypergrid/core/state.py:70:from hypergrid.core.transitions.level_state import LevelState
+src/hypergrid/core/state.py:71:from hypergrid.core.transitions.markers import (
+src/hypergrid/core/state.py:78:from hypergrid.core.transitions.market_observation_state import MarketObservationState
+src/hypergrid/core/state.py:79:from hypergrid.core.transitions.observation_state import P0ObservationMarkers
+src/hypergrid/core/state.py:80:from hypergrid.core.transitions.order_state import OrderState
+src/hypergrid/core/state.py:81:from hypergrid.core.transitions.p6_state import (
+src/hypergrid/core/state.py:86:from hypergrid.core.transitions.risk_state import (
+src/hypergrid/core/transitions/__init__.py:1:"""hypergrid.core.transitions — §4.7 deterministic arbitration (Phase 7d).
+src/hypergrid/core/transitions/__init__.py:9:from hypergrid.core.transitions.arm import (
+src/hypergrid/core/transitions/__init__.py:21:from hypergrid.core.transitions.arm_state import (
+src/hypergrid/core/transitions/__init__.py:32:from hypergrid.core.transitions.cycle import apply_cycle
+src/hypergrid/core/transitions/__init__.py:33:from hypergrid.core.transitions.cycle_state import (
+src/hypergrid/core/transitions/__init__.py:39:from hypergrid.core.transitions.economics import (
+src/hypergrid/core/transitions/__init__.py:46:from hypergrid.core.transitions.emergency import (
+src/hypergrid/core/transitions/__init__.py:53:from hypergrid.core.transitions.execution_cancel import (
+src/hypergrid/core/transitions/__init__.py:59:from hypergrid.core.transitions.exposure import (
+src/hypergrid/core/transitions/__init__.py:66:from hypergrid.core.transitions.exposure_state import (
+src/hypergrid/core/transitions/__init__.py:73:from hypergrid.core.transitions.generation import apply_evolution
+src/hypergrid/core/transitions/__init__.py:74:from hypergrid.core.transitions.generation_state import (
+src/hypergrid/core/transitions/__init__.py:80:from hypergrid.core.transitions.geometry import compute_ladder_geometry
+src/hypergrid/core/transitions/__init__.py:81:from hypergrid.core.transitions.hedge import (
+src/hypergrid/core/transitions/__init__.py:94:from hypergrid.core.transitions.hedge_state import (
+src/hypergrid/core/transitions/__init__.py:102:from hypergrid.core.transitions.ladder_issuance import issue_fresh_ladder
+src/hypergrid/core/transitions/__init__.py:103:from hypergrid.core.transitions.level_state import LevelState, can_level_skip
+src/hypergrid/core/transitions/__init__.py:104:from hypergrid.core.transitions.locks import apply_locks
+src/hypergrid/core/transitions/__init__.py:105:from hypergrid.core.transitions.markers import (
+src/hypergrid/core/transitions/__init__.py:113:from hypergrid.core.transitions.market_observation_state import (
+src/hypergrid/core/transitions/__init__.py:116:from hypergrid.core.transitions.observation import (
+src/hypergrid/core/transitions/__init__.py:121:from hypergrid.core.transitions.observation_state import (
+src/hypergrid/core/transitions/__init__.py:125:from hypergrid.core.transitions.order_state import (
+src/hypergrid/core/transitions/__init__.py:133:from hypergrid.core.transitions.p6_stage import apply_p6
+src/hypergrid/core/transitions/__init__.py:134:from hypergrid.core.transitions.p6_state import (
+src/hypergrid/core/transitions/__init__.py:139:from hypergrid.core.transitions.pass_report_ext import SubDecisionRecord
+src/hypergrid/core/transitions/__init__.py:140:from hypergrid.core.transitions.pipeline_coupling import apply_pipeline_coupling
+src/hypergrid/core/transitions/__init__.py:141:from hypergrid.core.transitions.precedence import (
+src/hypergrid/core/transitions/__init__.py:145:from hypergrid.core.transitions.protection_lock import (
+src/hypergrid/core/transitions/__init__.py:149:from hypergrid.core.transitions.reason_codes import ReasonCode
+src/hypergrid/core/transitions/__init__.py:150:from hypergrid.core.transitions.remainder import RemainderState, track_remainder
+src/hypergrid/core/transitions/__init__.py:151:from hypergrid.core.transitions.risk_bounds import (
+src/hypergrid/core/transitions/__init__.py:161:from hypergrid.core.transitions.risk_state import (
+src/hypergrid/core/transitions/__init__.py:168:from hypergrid.core.transitions.sizing import (
+src/hypergrid/core/transitions/__init__.py:179:from hypergrid.core.transitions.submission import (
+src/hypergrid/core/transitions/arm.py:26:from hypergrid.core.transitions.arm_state import (
+src/hypergrid/core/transitions/arm.py:33:from hypergrid.core.transitions.hedge_state import IntentTag
+src/hypergrid/core/transitions/cycle.py:41:from hypergrid.core.transitions.cycle_state import (
+src/hypergrid/core/transitions/cycle.py:46:from hypergrid.core.transitions.generation_state import GenerationState
+src/hypergrid/core/transitions/cycle.py:47:from hypergrid.core.transitions.markers import StageReport
+src/hypergrid/core/transitions/cycle.py:48:from hypergrid.core.transitions.reason_codes import ReasonCode
+src/hypergrid/core/transitions/cycle.py:53:    from hypergrid.core.events import EventEnvelope
+src/hypergrid/core/transitions/cycle.py:54:    from hypergrid.core.state import State
+src/hypergrid/core/transitions/cycle.py:55:    from hypergrid.core.transitions.cycle_state import CycleTerminalMarkers
+src/hypergrid/core/transitions/emergency.py:30:from hypergrid.core.transitions.level_state import can_level_skip
+src/hypergrid/core/transitions/execution_cancel.py:27:from hypergrid.core.events import CommandEvent
+src/hypergrid/core/transitions/execution_cancel.py:28:from hypergrid.core.transitions.order_state import OrderState
+src/hypergrid/core/transitions/exposure.py:44:from hypergrid.core.transitions.exposure_state import (
+src/hypergrid/core/transitions/generation.py:44:from hypergrid.core.transitions.generation_state import (
+src/hypergrid/core/transitions/generation.py:49:from hypergrid.core.transitions.markers import StageReport
+src/hypergrid/core/transitions/generation.py:50:from hypergrid.core.transitions.reason_codes import ReasonCode
+src/hypergrid/core/transitions/generation.py:55:    from hypergrid.core.events import EventEnvelope
+src/hypergrid/core/transitions/generation.py:56:    from hypergrid.core.state import State
+src/hypergrid/core/transitions/hedge.py:48:from hypergrid.core.transitions.exposure import (
+src/hypergrid/core/transitions/hedge.py:55:from hypergrid.core.transitions.exposure_state import (
+src/hypergrid/core/transitions/hedge.py:60:from hypergrid.core.transitions.hedge_state import (
+src/hypergrid/core/transitions/hedge.py:67:from hypergrid.core.transitions.markers import StageReport
+src/hypergrid/core/transitions/hedge.py:68:from hypergrid.core.transitions.reason_codes import ReasonCode
+src/hypergrid/core/transitions/hedge.py:71:    from hypergrid.core.events import EventEnvelope
+src/hypergrid/core/transitions/hedge.py:72:    from hypergrid.core.state import State
+src/hypergrid/core/transitions/hedge.py:73:    from hypergrid.core.transitions.exposure_state import LevelFillState
+src/hypergrid/core/transitions/hedge_state.py:25:    from hypergrid.core.transitions.exposure_state import LevelFillState
+src/hypergrid/core/transitions/ladder_issuance.py:17:from hypergrid.core.transitions.geometry import compute_ladder_geometry
+src/hypergrid/core/transitions/ladder_issuance.py:18:from hypergrid.core.transitions.level_state import LevelState
+src/hypergrid/core/transitions/ladder_issuance.py:19:from hypergrid.core.transitions.protection_lock import is_protection_locked_initial
+src/hypergrid/core/transitions/locks.py:27:from hypergrid.core.transitions.markers import P2LocksState, StageReport
+src/hypergrid/core/transitions/locks.py:28:from hypergrid.core.transitions.reason_codes import ReasonCode
+src/hypergrid/core/transitions/locks.py:33:    from hypergrid.core.events import EventEnvelope
+src/hypergrid/core/transitions/locks.py:34:    from hypergrid.core.state import State
+src/hypergrid/core/transitions/markers.py:3:A LEAF module: it imports ONLY :mod:`hypergrid.core.transitions.reason_codes`
+src/hypergrid/core/transitions/markers.py:24:from hypergrid.core.transitions.reason_codes import ReasonCode
+src/hypergrid/core/transitions/observation.py:44:from hypergrid.core.transitions.exposure_state import LevelFillState
+src/hypergrid/core/transitions/observation.py:45:from hypergrid.core.transitions.hedge_state import P1ExposureMarkers
+src/hypergrid/core/transitions/observation.py:46:from hypergrid.core.transitions.level_state import LevelState
+src/hypergrid/core/transitions/observation.py:47:from hypergrid.core.transitions.markers import StageReport
+src/hypergrid/core/transitions/observation.py:48:from hypergrid.core.transitions.market_observation_state import MarketObservationState
+src/hypergrid/core/transitions/observation.py:53:    from hypergrid.core.events import EventEnvelope
+src/hypergrid/core/transitions/observation.py:54:    from hypergrid.core.state import State
+src/hypergrid/core/transitions/observation.py:55:    from hypergrid.core.transitions.observation_state import PerLevelObservation
+src/hypergrid/core/transitions/order_state.py:30:from hypergrid.core.transitions.hedge_state import IntentTag
+src/hypergrid/core/transitions/p6_stage.py:24:from hypergrid.core.transitions.arm import evaluate_arm_gates
+src/hypergrid/core/transitions/p6_stage.py:25:from hypergrid.core.transitions.arm_state import ArmOutcome
+src/hypergrid/core/transitions/p6_stage.py:26:from hypergrid.core.transitions.execution_cancel import (
+src/hypergrid/core/transitions/p6_stage.py:31:from hypergrid.core.transitions.ladder_issuance import issue_fresh_ladder
+src/hypergrid/core/transitions/p6_stage.py:32:from hypergrid.core.transitions.markers import StageReport
+src/hypergrid/core/transitions/p6_stage.py:33:from hypergrid.core.transitions.pass_report_ext import STAGE_ORDER, SubDecisionRecord
+src/hypergrid/core/transitions/p6_stage.py:34:from hypergrid.core.transitions.pipeline_coupling import apply_pipeline_coupling
+src/hypergrid/core/transitions/p6_stage.py:35:from hypergrid.core.transitions.submission import emit_submission_command
+src/hypergrid/core/transitions/p6_stage.py:38:    from hypergrid.core.events import CommandEvent
+src/hypergrid/core/transitions/p6_stage.py:39:    from hypergrid.core.state import State
+src/hypergrid/core/transitions/p6_stage.py:40:    from hypergrid.core.transitions.level_state import LevelState
+src/hypergrid/core/transitions/p6_state.py:28:from hypergrid.core.transitions.arm import (
+src/hypergrid/core/transitions/p6_state.py:35:from hypergrid.core.transitions.arm_state import (
+src/hypergrid/core/transitions/pipeline_coupling.py:21:    from hypergrid.core.state import State
+src/hypergrid/core/transitions/precedence.py:32:from hypergrid.core.transitions.markers import P4Decision, StageReport
+src/hypergrid/core/transitions/precedence.py:33:from hypergrid.core.transitions.reason_codes import ReasonCode
+src/hypergrid/core/transitions/precedence.py:38:    from hypergrid.core.events import EventEnvelope
+src/hypergrid/core/transitions/precedence.py:39:    from hypergrid.core.state import State
+src/hypergrid/core/transitions/protection_lock.py:25:    from hypergrid.core.transitions.level_state import LevelState
+src/hypergrid/core/transitions/risk_state.py:19:from hypergrid.core.transitions.arm_state import OperationalState
+src/hypergrid/core/transitions/risk_state.py:20:from hypergrid.core.transitions.risk_bounds import BreachLayer
+src/hypergrid/core/transitions/sizing.py:47:    from hypergrid.core.transitions.cycle_state import CycleState
+src/hypergrid/core/transitions/sizing.py:48:    from hypergrid.core.transitions.generation_state import GenerationState
+src/hypergrid/core/transitions/submission.py:22:from hypergrid.core.events import CommandEvent
+src/hypergrid/core/transitions/submission.py:23:from hypergrid.core.transitions.order_state import (
+src/hypergrid/core/transitions/submission.py:30:    from hypergrid.core.event_log import EventLogPort
+src/hypergrid/core/transitions/submission.py:31:    from hypergrid.core.events import ObservedMeta
+src/hypergrid/operator/__init__.py:1:"""hypergrid.operator — gated operator surface (Phase 7b+).
+src/hypergrid/runtime/__init__.py:1:"""hypergrid.runtime — the process shell (Phase 7a: logging only).
+src/hypergrid/runtime/logging_setup.py:5:before anything is logged. The pure ``hypergrid.core`` package never imports
+tests/test_arm_gates.py:10:from hypergrid.core.transitions import (
+tests/test_arm_state.py:10:from hypergrid.core.fold import _empty_state
+tests/test_arm_state.py:11:from hypergrid.core.serialization import canonical_dumps
+tests/test_arm_state.py:12:from hypergrid.core.transitions import (
+tests/test_breach_response.py:7:from hypergrid.core.transitions import (
+tests/test_canonical_json.py:7:from hypergrid.core.event_log import InMemoryEventLog
+tests/test_canonical_json.py:8:from hypergrid.core.events import (
+tests/test_canonical_json.py:14:from hypergrid.core.serialization import (
+tests/test_config_roundtrip.py:8:from hypergrid.config.schema import (
+tests/test_core_determinism_smoke.py:5:from hypergrid.core.events import (
+tests/test_core_determinism_smoke.py:19:from hypergrid.core.serialization import canonical_dumps
+tests/test_core_no_forbidden_imports.py:1:"""Structural guards on hypergrid.core: no forbidden imports, no float, no secrets."""
+tests/test_core_no_forbidden_imports.py:8:from hypergrid.core.events import (
+tests/test_core_no_forbidden_imports.py:20:from hypergrid.runtime.logging_setup import REDACT_KEYS
+tests/test_core_no_forbidden_imports.py:41:    spec = importlib.util.find_spec("hypergrid.core")
+tests/test_core_no_logging.py:1:"""Invariant: hypergrid.core never imports `logging` and is stdlib-only.
+tests/test_core_no_logging.py:4:never logs). Walks the AST of every module under `hypergrid.core`.
+tests/test_core_no_logging.py:14:    spec = importlib.util.find_spec("hypergrid.core")
+tests/test_core_no_logging.py:33:    assert files, "expected at least hypergrid/core/__init__.py"
+tests/test_core_no_logging.py:41:                    assert top in stdlib or top == "hypergrid", (
+tests/test_cycle_clock_free.py:11:from hypergrid.core.fold import _empty_state
+tests/test_cycle_clock_free.py:12:from hypergrid.core.transitions import (
+tests/test_cycle_determinism.py:8:from hypergrid.core.fold import _empty_state
+tests/test_cycle_determinism.py:9:from hypergrid.core.serialization import canonical_dumps
+tests/test_cycle_determinism.py:10:from hypergrid.core.state import State
+tests/test_cycle_determinism.py:11:from hypergrid.core.transitions import (
+tests/test_cycle_non_overlap.py:8:from hypergrid.core.fold import _empty_state
+tests/test_cycle_non_overlap.py:9:from hypergrid.core.state import State
+tests/test_cycle_non_overlap.py:10:from hypergrid.core.transitions import (
+tests/test_cycle_p3_persistence.py:11:from hypergrid.core.fold import _empty_state
+tests/test_cycle_p3_persistence.py:12:from hypergrid.core.pass_engine import run_pass
+tests/test_cycle_p3_persistence.py:13:from hypergrid.core.state import State
+tests/test_cycle_p3_persistence.py:14:from hypergrid.core.transitions import (
+tests/test_cycle_reference_tolerance.py:8:from hypergrid.core.fold import _empty_state
+tests/test_cycle_reference_tolerance.py:9:from hypergrid.core.serialization import canonical_dumps, canonical_loads
+tests/test_cycle_reference_tolerance.py:10:from hypergrid.core.state import State
+tests/test_cycle_reference_tolerance.py:11:from hypergrid.core.transitions import (
+tests/test_cycle_transition.py:9:from hypergrid.core.fold import _empty_state
+tests/test_cycle_transition.py:10:from hypergrid.core.pass_engine import run_pass
+tests/test_cycle_transition.py:11:from hypergrid.core.serialization import canonical_dumps
+tests/test_cycle_transition.py:12:from hypergrid.core.state import State
+tests/test_cycle_transition.py:13:from hypergrid.core.transitions import (
+tests/test_economics.py:7:from hypergrid.core.transitions import (
+tests/test_emergency.py:7:from hypergrid.core.transitions import (
+tests/test_emergency.py:173:    from hypergrid.core.serialization import canonical_dumps
+tests/test_event_log_port_semantics.py:6:from hypergrid.core.event_log import InMemoryEventLog, SqliteEventLog
+tests/test_event_log_port_semantics.py:7:from hypergrid.core.event_log.port import EventLogPort
+tests/test_event_log_port_semantics.py:8:from hypergrid.core.events import (
+tests/test_event_log_replay.py:11:from hypergrid.core.event_log import InMemoryEventLog, SqliteEventLog
+tests/test_event_log_replay.py:12:from hypergrid.core.events import (
+tests/test_events_pure.py:14:from hypergrid.core.events import (
+tests/test_execution_cancel.py:5:from hypergrid.core.transitions import (
+tests/test_execution_cancel.py:89:    from hypergrid.core.serialization import canonical_dumps
+tests/test_exposure_acute.py:7:from hypergrid.core.transitions import is_acute
+tests/test_exposure_classify.py:7:from hypergrid.core.transitions import ExposureClass, classify_exposure
+tests/test_exposure_clock_free.py:10:from hypergrid.core.transitions import (
+tests/test_exposure_derivatives.py:7:from hypergrid.core.transitions import (
+tests/test_exposure_determinism.py:5:from hypergrid.core.serialization import canonical_dumps
+tests/test_exposure_determinism.py:6:from hypergrid.core.transitions import (
+tests/test_exposure_state.py:8:from hypergrid.core.serialization import canonical_dumps
+tests/test_exposure_state.py:9:from hypergrid.core.transitions import (
+tests/test_fix1_gate.py:10:from hypergrid.core.transitions import (
+tests/test_fix1_gate.py:74:    spec = importlib.util.find_spec("hypergrid.core")
+tests/test_fold_determinism.py:6:from hypergrid.core.event_log import InMemoryEventLog, SqliteEventLog
+tests/test_fold_determinism.py:7:from hypergrid.core.event_log.port import EventLogPort
+tests/test_fold_determinism.py:8:from hypergrid.core.events import (
+tests/test_fold_determinism.py:19:from hypergrid.core.fold import fold
+tests/test_fold_determinism.py:20:from hypergrid.core.serialization import canonical_dumps
+tests/test_fold_pure.py:10:from hypergrid.core.event_log import InMemoryEventLog
+tests/test_fold_pure.py:11:from hypergrid.core.events import (
+tests/test_fold_pure.py:18:from hypergrid.core.fold import _empty_state, fold
+tests/test_fold_pure.py:19:from hypergrid.core.serialization import canonical_dumps
+tests/test_generation_evolution.py:9:from hypergrid.core.fold import _empty_state
+tests/test_generation_evolution.py:10:from hypergrid.core.serialization import canonical_dumps
+tests/test_generation_evolution.py:11:from hypergrid.core.state import State
+tests/test_generation_evolution.py:12:from hypergrid.core.transitions import (
+tests/test_generation_evolution_clock_free.py:10:from hypergrid.core.fold import _empty_state
+tests/test_generation_evolution_clock_free.py:11:from hypergrid.core.transitions import (
+tests/test_generation_evolution_closed_skip.py:9:from hypergrid.core.fold import _empty_state
+tests/test_generation_evolution_closed_skip.py:10:from hypergrid.core.transitions import (
+tests/test_generation_evolution_determinism.py:7:from hypergrid.core.fold import _empty_state
+tests/test_generation_evolution_determinism.py:8:from hypergrid.core.serialization import canonical_dumps
+tests/test_generation_evolution_determinism.py:9:from hypergrid.core.state import State
+tests/test_generation_evolution_determinism.py:10:from hypergrid.core.transitions import (
+tests/test_generation_evolution_determinism.py:16:from hypergrid.core.transitions.markers import StageReport
+tests/test_generation_evolution_exhaustive.py:12:from hypergrid.core.fold import _empty_state
+tests/test_generation_evolution_exhaustive.py:13:from hypergrid.core.serialization import canonical_dumps
+tests/test_generation_evolution_exhaustive.py:14:from hypergrid.core.state import State
+tests/test_generation_evolution_exhaustive.py:15:from hypergrid.core.transitions import (
+tests/test_geometry_base.py:5:from hypergrid.core.transitions import compute_ladder_geometry
+tests/test_geometry_clock_free.py:10:from hypergrid.core.transitions import (
+tests/test_geometry_determinism.py:5:from hypergrid.core.serialization import canonical_dumps
+tests/test_geometry_determinism.py:6:from hypergrid.core.transitions import compute_ladder_geometry
+tests/test_geometry_successor.py:5:from hypergrid.core.transitions import compute_ladder_geometry
+tests/test_geometry_validation.py:7:from hypergrid.core.transitions import compute_ladder_geometry
+tests/test_hardening.py:5:from hypergrid.core.event_log import InMemoryEventLog, SqliteEventLog
+tests/test_hardening.py:6:from hypergrid.core.events import CommandEvent, ObservedMeta
+tests/test_hardening.py:7:from hypergrid.core.events.codec import event_from_payload
+tests/test_hedge_mirroring.py:8:from hypergrid.core.transitions import IntentTag, mirror_eligible
+tests/test_hedge_partial_fill.py:7:from hypergrid.core.transitions import (
+tests/test_hedge_response.py:7:from hypergrid.core.transitions import (
+tests/test_hedge_state.py:8:from hypergrid.core.serialization import canonical_dumps
+tests/test_hedge_state.py:9:from hypergrid.core.transitions import (
+tests/test_ladder_issuance.py:7:from hypergrid.core.serialization import canonical_dumps
+tests/test_ladder_issuance.py:8:from hypergrid.core.transitions import compute_ladder_geometry, issue_fresh_ladder
+tests/test_ladder_issuance.py:124:    from hypergrid.core.transitions import (
+tests/test_level_skip.py:7:from hypergrid.core.event_log import InMemoryEventLog
+tests/test_level_skip.py:8:from hypergrid.core.events import CommandEvent, ObservedMeta
+tests/test_level_skip.py:9:from hypergrid.core.serialization import canonical_dumps
+tests/test_level_skip.py:10:from hypergrid.core.transitions import (
+tests/test_level_state.py:8:from hypergrid.core.serialization import canonical_dumps, canonical_loads
+tests/test_level_state.py:9:from hypergrid.core.transitions import LevelState
+tests/test_logging_format.py:6:from hypergrid.runtime.logging_setup import JsonFormatter, redact, set_context
+tests/test_logging_format.py:11:        name="hypergrid.runtime.test",
+tests/test_order_lifecycle.py:12:from hypergrid.core.fold import _empty_state
+tests/test_order_lifecycle.py:13:from hypergrid.core.serialization import canonical_dumps
+tests/test_order_lifecycle.py:14:from hypergrid.core.transitions import (
+tests/test_p0_clock_free.py:11:from hypergrid.core.fold import _empty_state
+tests/test_p0_clock_free.py:12:from hypergrid.core.pass_engine import run_pass
+tests/test_p0_clock_free.py:13:from hypergrid.core.transitions import (
+tests/test_p0_clock_free.py:20:from hypergrid.core.transitions.observation_state import P0ObservationMarkers
+tests/test_p0_determinism.py:6:from hypergrid.core.fold import _empty_state
+tests/test_p0_determinism.py:7:from hypergrid.core.pass_engine import run_pass
+tests/test_p0_determinism.py:8:from hypergrid.core.serialization import canonical_dumps
+tests/test_p0_determinism.py:9:from hypergrid.core.state import State
+tests/test_p0_determinism.py:10:from hypergrid.core.transitions import LevelState, PerLevelObservation
+tests/test_p0_determinism.py:11:from hypergrid.core.transitions.observation_state import P0ObservationMarkers
+tests/test_p0_lifecycle.py:14:from hypergrid.core.fold import _empty_state
+tests/test_p0_lifecycle.py:15:from hypergrid.core.pass_engine import run_pass
+tests/test_p0_lifecycle.py:16:from hypergrid.core.transitions import LevelState, PerLevelObservation
+tests/test_p0_lifecycle.py:17:from hypergrid.core.transitions.observation_state import P0ObservationMarkers
+tests/test_p0_markers_projection.py:6:from hypergrid.core.fold import _empty_state
+tests/test_p0_markers_projection.py:7:from hypergrid.core.pass_engine import run_pass
+tests/test_p0_markers_projection.py:8:from hypergrid.core.transitions import (
+tests/test_p0_markers_projection.py:15:from hypergrid.core.transitions.observation_state import P0ObservationMarkers
+tests/test_p0_st19_population.py:8:from hypergrid.core.fold import _empty_state
+tests/test_p0_st19_population.py:9:from hypergrid.core.pass_engine import run_pass
+tests/test_p0_st19_population.py:10:from hypergrid.core.transitions.market_observation_state import MarketObservationState
+tests/test_p0_st19_population.py:11:from hypergrid.core.transitions.observation_state import P0ObservationMarkers
+tests/test_p0_wiring.py:8:from hypergrid.core.event_log import InMemoryEventLog
+tests/test_p0_wiring.py:9:from hypergrid.core.events import CommandEvent, ObservedMeta
+tests/test_p0_wiring.py:10:from hypergrid.core.fold import _empty_state
+tests/test_p0_wiring.py:11:from hypergrid.core.pass_engine import run_pass
+tests/test_p0_wiring.py:12:from hypergrid.core.serialization import canonical_dumps
+tests/test_p0_wiring.py:13:from hypergrid.core.state import State
+tests/test_p0_wiring.py:14:from hypergrid.core.transitions import (
+tests/test_p0_wiring.py:26:from hypergrid.core.transitions.observation_state import P0ObservationMarkers
+tests/test_p1_clock_free.py:11:from hypergrid.core.fold import _empty_state
+tests/test_p1_clock_free.py:12:from hypergrid.core.transitions import (
+tests/test_p1_determinism.py:6:from hypergrid.core.fold import _empty_state
+tests/test_p1_determinism.py:7:from hypergrid.core.pass_engine import run_pass
+tests/test_p1_determinism.py:8:from hypergrid.core.serialization import canonical_dumps
+tests/test_p1_determinism.py:9:from hypergrid.core.transitions import LevelFillState, P1ExposureMarkers
+tests/test_p1_wiring.py:6:from hypergrid.core.event_log import InMemoryEventLog
+tests/test_p1_wiring.py:7:from hypergrid.core.events import CommandEvent, ObservedMeta
+tests/test_p1_wiring.py:8:from hypergrid.core.fold import _empty_state
+tests/test_p1_wiring.py:9:from hypergrid.core.pass_engine import run_pass
+tests/test_p1_wiring.py:10:from hypergrid.core.serialization import canonical_dumps
+tests/test_p1_wiring.py:11:from hypergrid.core.state import State
+tests/test_p1_wiring.py:12:from hypergrid.core.transitions import (
+tests/test_p6_inputs.py:8:from hypergrid.core.fold import _empty_state
+tests/test_p6_inputs.py:9:from hypergrid.core.serialization import canonical_dumps
+tests/test_p6_inputs.py:10:from hypergrid.core.transitions import (
+tests/test_p6_stage.py:9:from hypergrid.core.fold import _empty_state
+tests/test_p6_stage.py:10:from hypergrid.core.pass_engine import run_pass
+tests/test_p6_stage.py:11:from hypergrid.core.serialization import canonical_dumps
+tests/test_p6_stage.py:12:from hypergrid.core.state import State
+tests/test_p6_stage.py:13:from hypergrid.core.transitions import (
+tests/test_p6_stage.py:43:    from hypergrid.core.transitions import OrderType
+tests/test_p6_stage.py:429:    import hypergrid.core.pass_engine as pe
+tests/test_p6_stage.py:430:    import hypergrid.core.transitions.p6_stage as p6
+tests/test_pass_engine_determinism.py:7:from hypergrid.core.fold import _empty_state
+tests/test_pass_engine_determinism.py:8:from hypergrid.core.pass_engine import run_pass
+tests/test_pass_engine_determinism.py:9:from hypergrid.core.serialization import canonical_dumps
+tests/test_pass_engine_determinism.py:10:from hypergrid.core.state import State
+tests/test_pass_engine_determinism.py:11:from hypergrid.core.transitions import (
+tests/test_pass_engine_locks.py:14:from hypergrid.core.fold import _empty_state
+tests/test_pass_engine_locks.py:15:from hypergrid.core.serialization import canonical_dumps
+tests/test_pass_engine_locks.py:16:from hypergrid.core.state import State
+tests/test_pass_engine_locks.py:17:from hypergrid.core.transitions import (
+tests/test_pass_engine_order.py:10:from hypergrid.core.fold import _empty_state
+tests/test_pass_engine_order.py:11:from hypergrid.core.pass_engine import PassReport, run_pass
+tests/test_pass_engine_order.py:12:from hypergrid.core.serialization import canonical_dumps
+tests/test_pass_engine_order.py:13:from hypergrid.core.transitions import (
+tests/test_pass_engine_precedence.py:10:from hypergrid.core.fold import _empty_state
+tests/test_pass_engine_precedence.py:11:from hypergrid.core.serialization import canonical_dumps
+tests/test_pass_engine_precedence.py:12:from hypergrid.core.transitions import (
+tests/test_pass_report_ext.py:7:from hypergrid.core.pass_engine import PassReport
+tests/test_pass_report_ext.py:8:from hypergrid.core.serialization import canonical_dumps
+tests/test_pass_report_ext.py:9:from hypergrid.core.transitions import StageReport, SubDecisionRecord
+tests/test_pass_report_ext.py:10:from hypergrid.core.transitions.pass_report_ext import STAGE_ORDER
+tests/test_pipeline_coupling.py:8:from hypergrid.core.fold import _empty_state
+tests/test_pipeline_coupling.py:9:from hypergrid.core.serialization import canonical_dumps
+tests/test_pipeline_coupling.py:10:from hypergrid.core.state import State
+tests/test_pipeline_coupling.py:11:from hypergrid.core.transitions import (
+tests/test_protection_lock.py:5:from hypergrid.core.transitions import (
+tests/test_reason_codes.py:6:from hypergrid.core.transitions.reason_codes import ReasonCode
+tests/test_reason_codes.py:38:    spec = importlib.util.find_spec("hypergrid.core.transitions.reason_codes")
+tests/test_remainder.py:7:from hypergrid.core.transitions import track_remainder
+tests/test_remainder.py:67:    from hypergrid.core.serialization import canonical_dumps
+tests/test_risk_bounds.py:7:from hypergrid.core.transitions import (
+tests/test_risk_state.py:8:from hypergrid.core.fold import _empty_state
+tests/test_risk_state.py:9:from hypergrid.core.serialization import canonical_dumps
+tests/test_risk_state.py:10:from hypergrid.core.state import _TYPED_ST_FIELD_NAMES, State
+tests/test_risk_state.py:11:from hypergrid.core.transitions import (
+tests/test_risk_state.py:19:from hypergrid.core.transitions.arm_state import OperationalState
+tests/test_risk_state.py:233:    from hypergrid.core.transitions import (
+tests/test_sizing_assign.py:7:from hypergrid.core.transitions import (
+tests/test_sizing_caps.py:7:from hypergrid.core.transitions import enforce_level_caps
+tests/test_sizing_clock_free.py:10:from hypergrid.core.transitions import (
+tests/test_sizing_compose.py:7:from hypergrid.core.transitions import (
+tests/test_sizing_convert.py:7:from hypergrid.core.transitions import convert_notional_to_size
+tests/test_sizing_counting.py:7:from hypergrid.core.transitions import (
+tests/test_sizing_determinism.py:5:from hypergrid.core.serialization import canonical_dumps
+tests/test_sizing_determinism.py:6:from hypergrid.core.transitions import (
+tests/test_smoke.py:8:        "hypergrid",
+tests/test_smoke.py:9:        "hypergrid.core",
+tests/test_smoke.py:10:        "hypergrid.adapters",
+tests/test_smoke.py:11:        "hypergrid.runtime",
+tests/test_smoke.py:12:        "hypergrid.runtime.logging_setup",
+tests/test_smoke.py:13:        "hypergrid.operator",
+tests/test_smoke.py:14:        "hypergrid.config",
+tests/test_smoke.py:15:        "hypergrid.config.schema",
+tests/test_state.py:8:from hypergrid.core.events import GENESIS_PREV_HASH
+tests/test_state.py:9:from hypergrid.core.fold import _empty_state
+tests/test_state.py:10:from hypergrid.core.serialization import canonical_dumps
+tests/test_state.py:11:from hypergrid.core.state import _EVENT_KINDS, State
+tests/test_state.py:12:from hypergrid.core.transitions import (
+tests/test_state.py:33:from hypergrid.core.transitions.observation_state import P0ObservationMarkers
+tests/test_submission.py:7:from hypergrid.core.event_log import InMemoryEventLog
+tests/test_submission.py:8:from hypergrid.core.events import CommandEvent, ObservedMeta
+tests/test_submission.py:9:from hypergrid.core.transitions import (
