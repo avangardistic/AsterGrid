@@ -11,10 +11,10 @@ from decimal import Decimal
 
 import pytest
 
-from hypergrid.core.fold import _empty_state
-from hypergrid.core.pass_engine import run_pass
-from hypergrid.core.transitions import LevelState, PerLevelObservation
-from hypergrid.core.transitions.observation_state import P0ObservationMarkers
+from astergrid.core.fold import _empty_state
+from astergrid.core.pass_engine import run_pass
+from astergrid.core.transitions import LevelState, PerLevelObservation
+from astergrid.core.transitions.observation_state import P0ObservationMarkers
 
 # The 13 §6.1 + LEVEL_SKIPPED (§9.3), stated in the test (behavioral). 7h-3 added the
 # 14th member to both leaves; this list tracks it (pre-authorized existing-test edit).

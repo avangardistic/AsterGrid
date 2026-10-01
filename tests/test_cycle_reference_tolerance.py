@@ -5,10 +5,10 @@ from decimal import Decimal
 
 import pytest
 
-from hypergrid.core.fold import _empty_state
-from hypergrid.core.serialization import canonical_dumps, canonical_loads
-from hypergrid.core.state import State
-from hypergrid.core.transitions import (
+from astergrid.core.fold import _empty_state
+from astergrid.core.serialization import canonical_dumps, canonical_loads
+from astergrid.core.state import State
+from astergrid.core.transitions import (
     CycleState,
     CycleTerminalMarkers,
     GenerationState,

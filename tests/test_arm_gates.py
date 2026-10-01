@@ -7,7 +7,7 @@ from decimal import Decimal
 
 import pytest
 
-from hypergrid.core.transitions import (
+from astergrid.core.transitions import (
     ArmBlockCode,
     ArmOutcome,
     ArmPolicy,

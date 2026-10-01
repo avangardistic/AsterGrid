@@ -5,8 +5,8 @@ from decimal import Decimal
 
 import pytest
 
-from hypergrid.core.serialization import canonical_dumps, canonical_loads
-from hypergrid.core.transitions import LevelState
+from astergrid.core.serialization import canonical_dumps, canonical_loads
+from astergrid.core.transitions import LevelState
 
 
 def _valid() -> LevelState:

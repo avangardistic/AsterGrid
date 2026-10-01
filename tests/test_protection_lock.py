@@ -2,7 +2,7 @@
 
 from decimal import Decimal
 
-from hypergrid.core.transitions import (
+from astergrid.core.transitions import (
     LevelState,
     apply_protection_unlock,
     is_protection_locked_initial,

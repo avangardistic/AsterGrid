@@ -4,8 +4,8 @@ from decimal import Decimal
 
 import pytest
 
-from hypergrid.core.serialization import canonical_dumps
-from hypergrid.core.transitions import compute_ladder_geometry, issue_fresh_ladder
+from astergrid.core.serialization import canonical_dumps
+from astergrid.core.transitions import compute_ladder_geometry, issue_fresh_ladder
 
 
 def _issue(**over: object):  # type: ignore[no-untyped-def]
@@ -121,7 +121,7 @@ def test_grid_levels_out_of_range_raises() -> None:
 
 
 def test_end_to_end_economics_to_ladder() -> None:
-    from hypergrid.core.transitions import (
+    from astergrid.core.transitions import (
         PathEconomicsVerdict,
         classify_path_economics,
         compute_gross_grid_edge,

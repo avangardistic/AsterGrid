@@ -6,11 +6,11 @@ from decimal import Decimal
 
 import pytest
 
-from hypergrid.core.fold import _empty_state
-from hypergrid.core.pass_engine import run_pass
-from hypergrid.core.serialization import canonical_dumps
-from hypergrid.core.state import State
-from hypergrid.core.transitions import (
+from astergrid.core.fold import _empty_state
+from astergrid.core.pass_engine import run_pass
+from astergrid.core.serialization import canonical_dumps
+from astergrid.core.state import State
+from astergrid.core.transitions import (
     ArmPolicy,
     CycleState,
     CycleTerminalMarkers,
@@ -40,7 +40,7 @@ def _order(
     size: str = "1",
     tag: IntentTag = IntentTag.ENTRY_INTENT,
 ) -> OrderState:
-    from hypergrid.core.transitions import OrderType
+    from astergrid.core.transitions import OrderType
 
     intent = construct_order_intent(
         cloid=cloid,
@@ -426,8 +426,8 @@ def test_sub_decisions_sorted_and_notes_and_union() -> None:
 
 
 def test_d11_no_event_log_import() -> None:
-    import hypergrid.core.pass_engine as pe
-    import hypergrid.core.transitions.p6_stage as p6
+    import astergrid.core.pass_engine as pe
+    import astergrid.core.transitions.p6_stage as p6
 
     for mod in (pe, p6):
         src = inspect.getsource(mod)

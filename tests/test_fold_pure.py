@@ -7,16 +7,16 @@ from collections.abc import Iterator
 from contextlib import contextmanager
 from decimal import Decimal
 
-from hypergrid.core.event_log import InMemoryEventLog
-from hypergrid.core.events import (
+from astergrid.core.event_log import InMemoryEventLog
+from astergrid.core.events import (
     GENESIS_PREV_HASH,
     CommandEvent,
     FillEvent,
     IntentEvent,
     ObservedMeta,
 )
-from hypergrid.core.fold import _empty_state, fold
-from hypergrid.core.serialization import canonical_dumps
+from astergrid.core.fold import _empty_state, fold
+from astergrid.core.serialization import canonical_dumps
 
 _TS = "2026-09-22T00:00:00.000000Z"
 _META = ObservedMeta(venue_sequence=None, server_ts=None, local_receive_ts=_TS)

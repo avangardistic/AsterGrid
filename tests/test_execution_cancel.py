@@ -2,7 +2,7 @@
 
 from decimal import Decimal
 
-from hypergrid.core.transitions import (
+from astergrid.core.transitions import (
     CancelReasonCode,
     IntentTag,
     OrderState,
@@ -86,7 +86,7 @@ def test_empty_input_empty_output() -> None:
 
 
 def test_serialization() -> None:
-    from hypergrid.core.serialization import canonical_dumps
+    from astergrid.core.serialization import canonical_dumps
 
     out = select_exhausted_candidates((_order("a", "ORDER_ACTIVE"),), 0, 0, "BU")
     obj = out[0].to_canonical_obj()

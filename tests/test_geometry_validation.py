@@ -4,7 +4,7 @@ from decimal import Decimal
 
 import pytest
 
-from hypergrid.core.transitions import compute_ladder_geometry
+from astergrid.core.transitions import compute_ladder_geometry
 
 _DEFAULTS: dict[str, object] = {
     "reference_price": Decimal("100000"),

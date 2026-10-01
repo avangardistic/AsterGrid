@@ -2,9 +2,9 @@
 
 import pytest
 
-from hypergrid.core.event_log import InMemoryEventLog, SqliteEventLog
-from hypergrid.core.events import CommandEvent, ObservedMeta
-from hypergrid.core.events.codec import event_from_payload
+from astergrid.core.event_log import InMemoryEventLog, SqliteEventLog
+from astergrid.core.events import CommandEvent, ObservedMeta
+from astergrid.core.events.codec import event_from_payload
 
 _GOOD = "2026-09-22T00:00:00.000000Z"
 _BAD = "2026-09-22T00:00:00Z"  # no microseconds

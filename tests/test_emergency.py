@@ -4,7 +4,7 @@ from decimal import Decimal
 
 import pytest
 
-from hypergrid.core.transitions import (
+from astergrid.core.transitions import (
     EmergencyVerdict,
     compute_emergency_tolerance_bps,
     evaluate_emergency,
@@ -170,7 +170,7 @@ def test_provenance_carried() -> None:
 
 
 def test_serialization_round_trips() -> None:
-    from hypergrid.core.serialization import canonical_dumps
+    from astergrid.core.serialization import canonical_dumps
 
     canonical_dumps(_eval().to_canonical_obj())
     canonical_dumps(_eval(taker_edge_ok=False).to_canonical_obj())  # SKIP legs present

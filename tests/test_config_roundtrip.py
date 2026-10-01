@@ -5,7 +5,7 @@ from decimal import Decimal
 import pytest
 from pydantic import ValidationError
 
-from hypergrid.config.schema import (
+from astergrid.config.schema import (
     ExposureRiskParams,
     GridGeometryParams,
     UserParams,

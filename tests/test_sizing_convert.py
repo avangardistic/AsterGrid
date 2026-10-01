@@ -4,7 +4,7 @@ from decimal import Decimal
 
 import pytest
 
-from hypergrid.core.transitions import convert_notional_to_size
+from astergrid.core.transitions import convert_notional_to_size
 
 
 def test_exact_no_rounding() -> None:

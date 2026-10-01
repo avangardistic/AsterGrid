@@ -4,10 +4,10 @@ import dataclasses
 
 import pytest
 
-from hypergrid.core.pass_engine import PassReport
-from hypergrid.core.serialization import canonical_dumps
-from hypergrid.core.transitions import StageReport, SubDecisionRecord
-from hypergrid.core.transitions.pass_report_ext import STAGE_ORDER
+from astergrid.core.pass_engine import PassReport
+from astergrid.core.serialization import canonical_dumps
+from astergrid.core.transitions import StageReport, SubDecisionRecord
+from astergrid.core.transitions.pass_report_ext import STAGE_ORDER
 
 
 def _rec(**over: object) -> SubDecisionRecord:

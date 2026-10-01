@@ -3,9 +3,9 @@
 from decimal import Decimal
 from pathlib import Path
 
-from hypergrid.core.event_log import InMemoryEventLog, SqliteEventLog
-from hypergrid.core.event_log.port import EventLogPort
-from hypergrid.core.events import (
+from astergrid.core.event_log import InMemoryEventLog, SqliteEventLog
+from astergrid.core.event_log.port import EventLogPort
+from astergrid.core.events import (
     GENESIS_PREV_HASH,
     AcknowledgmentEvent,
     AnyEvent,
@@ -16,8 +16,8 @@ from hypergrid.core.events import (
     ObservedMeta,
     StateTransitionEvent,
 )
-from hypergrid.core.fold import fold
-from hypergrid.core.serialization import canonical_dumps
+from astergrid.core.fold import fold
+from astergrid.core.serialization import canonical_dumps
 
 _TS = "2026-09-22T00:00:00.000000Z"
 _META_A = ObservedMeta(venue_sequence=None, server_ts=None, local_receive_ts=_TS)

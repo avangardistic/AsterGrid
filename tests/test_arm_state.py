@@ -7,9 +7,9 @@ import dataclasses
 
 import pytest
 
-from hypergrid.core.fold import _empty_state
-from hypergrid.core.serialization import canonical_dumps
-from hypergrid.core.transitions import (
+from astergrid.core.fold import _empty_state
+from astergrid.core.serialization import canonical_dumps
+from astergrid.core.transitions import (
     ArmBlockCode,
     ArmRequestState,
     expire_on_restart,

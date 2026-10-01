@@ -4,7 +4,7 @@ from decimal import Decimal
 
 import pytest
 
-from hypergrid.core.transitions import (
+from astergrid.core.transitions import (
     CycleState,
     GenerationState,
     compute_max_cycle_notional,

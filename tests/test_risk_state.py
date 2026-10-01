@@ -5,10 +5,10 @@ from decimal import Decimal
 
 import pytest
 
-from hypergrid.core.fold import _empty_state
-from hypergrid.core.serialization import canonical_dumps
-from hypergrid.core.state import _TYPED_ST_FIELD_NAMES, State
-from hypergrid.core.transitions import (
+from astergrid.core.fold import _empty_state
+from astergrid.core.serialization import canonical_dumps
+from astergrid.core.state import _TYPED_ST_FIELD_NAMES, State
+from astergrid.core.transitions import (
     AccountEquityState,
     BasketNetPnLState,
     BoundLayerState,
@@ -16,7 +16,7 @@ from hypergrid.core.transitions import (
     FreezeErrorRecoveryOverlayState,
     RiskBoundTrackerState,
 )
-from hypergrid.core.transitions.arm_state import OperationalState
+from astergrid.core.transitions.arm_state import OperationalState
 
 _TS = "2026-09-25T00:00:00.000000Z"
 
@@ -230,7 +230,7 @@ def test_fully_populated_state_serializes() -> None:
 
 
 def test_end_to_end_pnl_to_bound_to_ladder() -> None:
-    from hypergrid.core.transitions import (
+    from astergrid.core.transitions import (
         apply_breach_response,
         compute_max_execution_cost_pnl_regime,
     )

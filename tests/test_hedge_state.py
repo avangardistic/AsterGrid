@@ -5,8 +5,8 @@ from decimal import Decimal
 
 import pytest
 
-from hypergrid.core.serialization import canonical_dumps
-from hypergrid.core.transitions import (
+from astergrid.core.serialization import canonical_dumps
+from astergrid.core.transitions import (
     EPSILON_H,
     HedgeExecution,
     HedgeIntent,

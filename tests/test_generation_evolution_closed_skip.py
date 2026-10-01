@@ -6,8 +6,8 @@ is constructible, and the transition skips it silently.
 
 import dataclasses
 
-from hypergrid.core.fold import _empty_state
-from hypergrid.core.transitions import (
+from astergrid.core.fold import _empty_state
+from astergrid.core.transitions import (
     EvolutionCandidateWindow,
     GenerationState,
     apply_evolution,

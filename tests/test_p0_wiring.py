@@ -5,13 +5,13 @@ from decimal import Decimal
 
 import pytest
 
-from hypergrid.core.event_log import InMemoryEventLog
-from hypergrid.core.events import CommandEvent, ObservedMeta
-from hypergrid.core.fold import _empty_state
-from hypergrid.core.pass_engine import run_pass
-from hypergrid.core.serialization import canonical_dumps
-from hypergrid.core.state import State
-from hypergrid.core.transitions import (
+from astergrid.core.event_log import InMemoryEventLog
+from astergrid.core.events import CommandEvent, ObservedMeta
+from astergrid.core.fold import _empty_state
+from astergrid.core.pass_engine import run_pass
+from astergrid.core.serialization import canonical_dumps
+from astergrid.core.state import State
+from astergrid.core.transitions import (
     ActualExposureState,
     ExpectedExposureState,
     ExposureClass,
@@ -23,7 +23,7 @@ from hypergrid.core.transitions import (
     PerLevelObservation,
     apply_p0,
 )
-from hypergrid.core.transitions.observation_state import P0ObservationMarkers
+from astergrid.core.transitions.observation_state import P0ObservationMarkers
 
 _STAGES = ("P0", "P1", "P2", "P3", "P4", "P5", "P6")
 _TS = "2026-09-25T00:00:00.000000Z"

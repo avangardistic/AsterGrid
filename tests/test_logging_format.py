@@ -3,12 +3,12 @@
 import json
 import logging
 
-from hypergrid.runtime.logging_setup import JsonFormatter, redact, set_context
+from astergrid.runtime.logging_setup import JsonFormatter, redact, set_context
 
 
 def _record(msg: str) -> logging.LogRecord:
     return logging.LogRecord(
-        name="hypergrid.runtime.test",
+        name="astergrid.runtime.test",
         level=logging.INFO,
         pathname=__file__,
         lineno=1,

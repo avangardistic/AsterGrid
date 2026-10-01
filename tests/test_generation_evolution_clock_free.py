@@ -7,8 +7,8 @@ import time
 from collections.abc import Iterator
 from contextlib import contextmanager
 
-from hypergrid.core.fold import _empty_state
-from hypergrid.core.transitions import (
+from astergrid.core.fold import _empty_state
+from astergrid.core.transitions import (
     EvolutionCandidateWindow,
     GenerationState,
     SuccessorLock,

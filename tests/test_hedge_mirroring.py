@@ -5,7 +5,7 @@ not a formula, in Strategy — it is the B2b STOP-item and is NOT implemented he
 this file therefore tests only the eligibility predicate.
 """
 
-from hypergrid.core.transitions import IntentTag, mirror_eligible
+from astergrid.core.transitions import IntentTag, mirror_eligible
 
 
 def test_eligible_lifecycles() -> None:

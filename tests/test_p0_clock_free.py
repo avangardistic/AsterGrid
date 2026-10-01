@@ -8,16 +8,16 @@ from collections.abc import Iterator
 from contextlib import contextmanager
 from decimal import Decimal
 
-from hypergrid.core.fold import _empty_state
-from hypergrid.core.pass_engine import run_pass
-from hypergrid.core.transitions import (
+from astergrid.core.fold import _empty_state
+from astergrid.core.pass_engine import run_pass
+from astergrid.core.transitions import (
     LevelState,
     PerLevelObservation,
     apply_p0,
     extend_level_states,
     project_p1_markers,
 )
-from hypergrid.core.transitions.observation_state import P0ObservationMarkers
+from astergrid.core.transitions.observation_state import P0ObservationMarkers
 
 _EXTERNALS: dict[str, object] = {
     "tau_acc": Decimal("0.00005"),

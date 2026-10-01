@@ -4,7 +4,7 @@ from decimal import Decimal
 
 import pytest
 
-from hypergrid.core.transitions import (
+from astergrid.core.transitions import (
     PathEconomicsVerdict,
     check_arming_validity,
     classify_path_economics,

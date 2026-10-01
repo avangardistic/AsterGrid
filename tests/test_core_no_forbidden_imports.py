@@ -1,11 +1,11 @@
-"""Structural guards on hypergrid.core: no forbidden imports, no float, no secrets."""
+"""Structural guards on astergrid.core: no forbidden imports, no float, no secrets."""
 
 import ast
 import importlib.util
 from dataclasses import fields
 from pathlib import Path
 
-from hypergrid.core.events import (
+from astergrid.core.events import (
     AcknowledgmentEvent,
     AdministrativeEvent,
     CommandEvent,
@@ -17,7 +17,7 @@ from hypergrid.core.events import (
     StateTransitionEvent,
     TimerEvent,
 )
-from hypergrid.runtime.logging_setup import REDACT_KEYS
+from astergrid.runtime.logging_setup import REDACT_KEYS
 
 _FORBIDDEN_IMPORT_TOPS = {
     "logging",
@@ -38,7 +38,7 @@ _FORBIDDEN_IMPORT_TOPS = {
 
 
 def _core_root() -> Path:
-    spec = importlib.util.find_spec("hypergrid.core")
+    spec = importlib.util.find_spec("astergrid.core")
     assert spec is not None
     locations = spec.submodule_search_locations
     assert locations is not None

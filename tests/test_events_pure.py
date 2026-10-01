@@ -11,7 +11,7 @@ from unittest import mock
 
 import pytest
 
-from hypergrid.core.events import (
+from astergrid.core.events import (
     AcknowledgmentEvent,
     AdministrativeEvent,
     CommandEvent,

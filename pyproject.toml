@@ -5,12 +5,12 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "hypergrid"
+name = "astergrid"
 version = "0.0.0"
 description = "Deterministic, AI-independent Hyperliquid perpetual hedge-grid runtime (CAND-B, event-sourced). Phase 7a scaffolding."
 requires-python = ">=3.11"
 readme = "README.md"
-# Runtime dependencies intentionally EMPTY at Phase 7a: hypergrid.core is
+# Runtime dependencies intentionally EMPTY at Phase 7a: astergrid.core is
 # stdlib-only (enforced by tests/test_core_no_logging.py). Runtime adapters
 # (httpx, websockets, eth-account, fastapi) and config (pydantic) are added
 # in later phases behind ports. See research/decisions/DECISION_REGISTER.md
@@ -18,7 +18,7 @@ readme = "README.md"
 dependencies = []
 
 [project.optional-dependencies]
-# Dev-only; NONE of these is imported by hypergrid.core.
+# Dev-only; NONE of these is imported by astergrid.core.
 dev = [
   "pytest>=8",
   "mypy>=1.8",
@@ -28,7 +28,7 @@ dev = [
 ]
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/hypergrid"]
+packages = ["src/astergrid"]
 
 [tool.ruff]
 line-length = 88
@@ -53,7 +53,7 @@ plugins = ["pydantic.mypy"]
 # fenced zone: it turns external TOML/JSON into typed models. `core/` and every
 # other package stay fully strict (disallow_any_explicit = true).
 [[tool.mypy.overrides]]
-module = "hypergrid.config.schema"
+module = "astergrid.config.schema"
 disallow_any_explicit = false
 
 [tool.pytest.ini_options]

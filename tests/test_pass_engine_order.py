@@ -7,10 +7,10 @@ import time
 from collections.abc import Iterator
 from contextlib import contextmanager
 
-from hypergrid.core.fold import _empty_state
-from hypergrid.core.pass_engine import PassReport, run_pass
-from hypergrid.core.serialization import canonical_dumps
-from hypergrid.core.transitions import (
+from astergrid.core.fold import _empty_state
+from astergrid.core.pass_engine import PassReport, run_pass
+from astergrid.core.serialization import canonical_dumps
+from astergrid.core.transitions import (
     EvolutionCandidateWindow,
     GenerationState,
     P3CandidateMarkers,

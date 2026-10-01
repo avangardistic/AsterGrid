@@ -4,7 +4,7 @@ from decimal import Decimal
 
 import pytest
 
-from hypergrid.core.transitions import enforce_level_caps
+from astergrid.core.transitions import enforce_level_caps
 
 _CAP = Decimal("5000")
 _CAP_DOM = Decimal("7500")

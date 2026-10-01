@@ -4,7 +4,7 @@ from decimal import Decimal
 
 import pytest
 
-from hypergrid.core.transitions import (
+from astergrid.core.transitions import (
     assign_level_notionals,
     compute_max_level_notional,
     compute_max_level_notional_dominant,

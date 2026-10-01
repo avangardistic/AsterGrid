@@ -9,10 +9,10 @@ blocks. All markers set directly — no envelope interpretation.
 import dataclasses
 import itertools
 
-from hypergrid.core.fold import _empty_state
-from hypergrid.core.serialization import canonical_dumps
-from hypergrid.core.state import State
-from hypergrid.core.transitions import (
+from astergrid.core.fold import _empty_state
+from astergrid.core.serialization import canonical_dumps
+from astergrid.core.state import State
+from astergrid.core.transitions import (
     EvolutionCandidateWindow,
     GenerationState,
     ReasonCode,

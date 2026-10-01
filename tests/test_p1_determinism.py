@@ -3,10 +3,10 @@
 import dataclasses
 from decimal import Decimal
 
-from hypergrid.core.fold import _empty_state
-from hypergrid.core.pass_engine import run_pass
-from hypergrid.core.serialization import canonical_dumps
-from hypergrid.core.transitions import LevelFillState, P1ExposureMarkers
+from astergrid.core.fold import _empty_state
+from astergrid.core.pass_engine import run_pass
+from astergrid.core.serialization import canonical_dumps
+from astergrid.core.transitions import LevelFillState, P1ExposureMarkers
 
 
 def _markers() -> P1ExposureMarkers:

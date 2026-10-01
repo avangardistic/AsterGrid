@@ -8,8 +8,8 @@ from contextlib import contextmanager
 from decimal import Decimal
 from pathlib import Path
 
-from hypergrid.core.event_log import InMemoryEventLog, SqliteEventLog
-from hypergrid.core.events import (
+from astergrid.core.event_log import InMemoryEventLog, SqliteEventLog
+from astergrid.core.events import (
     GENESIS_PREV_HASH,
     AcknowledgmentEvent,
     AnyEvent,

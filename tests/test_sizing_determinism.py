@@ -2,8 +2,8 @@
 
 from decimal import Decimal
 
-from hypergrid.core.serialization import canonical_dumps
-from hypergrid.core.transitions import (
+from astergrid.core.serialization import canonical_dumps
+from astergrid.core.transitions import (
     assign_level_notionals,
     convert_notional_to_size,
 )

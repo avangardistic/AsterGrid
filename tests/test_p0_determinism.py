@@ -3,12 +3,12 @@
 import dataclasses
 from decimal import Decimal
 
-from hypergrid.core.fold import _empty_state
-from hypergrid.core.pass_engine import run_pass
-from hypergrid.core.serialization import canonical_dumps
-from hypergrid.core.state import State
-from hypergrid.core.transitions import LevelState, PerLevelObservation
-from hypergrid.core.transitions.observation_state import P0ObservationMarkers
+from astergrid.core.fold import _empty_state
+from astergrid.core.pass_engine import run_pass
+from astergrid.core.serialization import canonical_dumps
+from astergrid.core.state import State
+from astergrid.core.transitions import LevelState, PerLevelObservation
+from astergrid.core.transitions.observation_state import P0ObservationMarkers
 
 
 def _state() -> State:

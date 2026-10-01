@@ -4,7 +4,7 @@ from decimal import Decimal
 
 import pytest
 
-from hypergrid.core.transitions import (
+from astergrid.core.transitions import (
     LevelFillState,
     compute_actual_exposure,
     compute_expected_exposure,

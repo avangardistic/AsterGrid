@@ -5,11 +5,11 @@ from decimal import Decimal
 
 import pytest
 
-from hypergrid.core.events import GENESIS_PREV_HASH
-from hypergrid.core.fold import _empty_state
-from hypergrid.core.serialization import canonical_dumps
-from hypergrid.core.state import _EVENT_KINDS, State
-from hypergrid.core.transitions import (
+from astergrid.core.events import GENESIS_PREV_HASH
+from astergrid.core.fold import _empty_state
+from astergrid.core.serialization import canonical_dumps
+from astergrid.core.state import _EVENT_KINDS, State
+from astergrid.core.transitions import (
     ActualExposureState,
     CycleState,
     CycleTerminalMarkers,
@@ -30,7 +30,7 @@ from hypergrid.core.transitions import (
     ReferencePriceRecord,
     SuccessorLock,
 )
-from hypergrid.core.transitions.observation_state import P0ObservationMarkers
+from astergrid.core.transitions.observation_state import P0ObservationMarkers
 
 _FULL_COUNTS = tuple(sorted((kind, 0) for kind in _EVENT_KINDS))
 

@@ -5,10 +5,10 @@ from decimal import Decimal
 
 import pytest
 
-from hypergrid.core.fold import _empty_state
-from hypergrid.core.pass_engine import run_pass
-from hypergrid.core.transitions.market_observation_state import MarketObservationState
-from hypergrid.core.transitions.observation_state import P0ObservationMarkers
+from astergrid.core.fold import _empty_state
+from astergrid.core.pass_engine import run_pass
+from astergrid.core.transitions.market_observation_state import MarketObservationState
+from astergrid.core.transitions.observation_state import P0ObservationMarkers
 
 
 def _markers(**over: object) -> P0ObservationMarkers:

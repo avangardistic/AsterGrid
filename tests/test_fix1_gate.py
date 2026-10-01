@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 
-from hypergrid.core.transitions import (
+from astergrid.core.transitions import (
     compute_q_min,
     compute_t_enter,
     compute_t_exit,
@@ -71,7 +71,7 @@ def test_f1star_dead_band_permits_the_unexecutable() -> None:
 def test_pre_fix1_predicate_absent_as_live_gate() -> None:
     # 'ExposureTolerance' never appears as a live identifier in core/ (only tau_acc
     # is used); the broken F-1* |Δ| <= ExposureTolerance gate is not implemented.
-    spec = importlib.util.find_spec("hypergrid.core")
+    spec = importlib.util.find_spec("astergrid.core")
     assert spec is not None and spec.submodule_search_locations is not None
     core_root = Path(next(iter(spec.submodule_search_locations)))
     for path in sorted(core_root.rglob("*.py")):

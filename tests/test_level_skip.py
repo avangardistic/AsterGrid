@@ -4,10 +4,10 @@ from decimal import Decimal
 
 import pytest
 
-from hypergrid.core.event_log import InMemoryEventLog
-from hypergrid.core.events import CommandEvent, ObservedMeta
-from hypergrid.core.serialization import canonical_dumps
-from hypergrid.core.transitions import (
+from astergrid.core.event_log import InMemoryEventLog
+from astergrid.core.events import CommandEvent, ObservedMeta
+from astergrid.core.serialization import canonical_dumps
+from astergrid.core.transitions import (
     IntentTag,
     LevelState,
     OrderState,

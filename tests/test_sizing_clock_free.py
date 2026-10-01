@@ -7,7 +7,7 @@ from collections.abc import Iterator
 from contextlib import contextmanager
 from decimal import Decimal
 
-from hypergrid.core.transitions import (
+from astergrid.core.transitions import (
     CycleState,
     GenerationState,
     assign_level_notionals,

@@ -4,7 +4,7 @@ from decimal import Decimal
 
 import pytest
 
-from hypergrid.core.transitions import (
+from astergrid.core.transitions import (
     compute_max_execution_cost_pnl_regime,
     compute_max_exposure_imbalance_qty,
     compute_max_failed_level_rate,

@@ -2,7 +2,7 @@
 
 from decimal import Decimal
 
-from hypergrid.core.events import (
+from astergrid.core.events import (
     AcknowledgmentEvent,
     AdministrativeEvent,
     AnyEvent,
@@ -16,7 +16,7 @@ from hypergrid.core.events import (
     TimerEvent,
     event_to_payload,
 )
-from hypergrid.core.serialization import canonical_dumps
+from astergrid.core.serialization import canonical_dumps
 
 _TS = "2026-09-22T00:00:00.000000Z"
 

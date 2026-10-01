@@ -4,16 +4,16 @@ import dataclasses
 
 import pytest
 
-from hypergrid.core.fold import _empty_state
-from hypergrid.core.serialization import canonical_dumps
-from hypergrid.core.state import State
-from hypergrid.core.transitions import (
+from astergrid.core.fold import _empty_state
+from astergrid.core.serialization import canonical_dumps
+from astergrid.core.state import State
+from astergrid.core.transitions import (
     EvolutionCandidateWindow,
     GenerationState,
     ReasonCode,
     apply_evolution,
 )
-from hypergrid.core.transitions.markers import StageReport
+from astergrid.core.transitions.markers import StageReport
 
 
 def _rich() -> State:

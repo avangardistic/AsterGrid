@@ -2,8 +2,8 @@
 
 from decimal import Decimal
 
-from hypergrid.core.serialization import canonical_dumps
-from hypergrid.core.transitions import compute_ladder_geometry
+from astergrid.core.serialization import canonical_dumps
+from astergrid.core.transitions import compute_ladder_geometry
 
 _KW: dict[str, object] = {
     "reference_price": Decimal("100000"),

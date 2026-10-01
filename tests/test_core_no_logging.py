@@ -1,7 +1,7 @@
-"""Invariant: hypergrid.core never imports `logging` and is stdlib-only.
+"""Invariant: astergrid.core never imports `logging` and is stdlib-only.
 
 Enforces DECISION-022 (core = no third-party deps) and DECISION-023 (core
-never logs). Walks the AST of every module under `hypergrid.core`.
+never logs). Walks the AST of every module under `astergrid.core`.
 """
 
 import ast
@@ -11,7 +11,7 @@ from pathlib import Path
 
 
 def _core_files() -> list[Path]:
-    spec = importlib.util.find_spec("hypergrid.core")
+    spec = importlib.util.find_spec("astergrid.core")
     assert spec is not None
     locations = spec.submodule_search_locations
     assert locations is not None
@@ -38,6 +38,6 @@ def test_core_has_no_logging_and_is_stdlib_only() -> None:
             if isinstance(node, (ast.Import, ast.ImportFrom)):
                 for top in _tops(node):
                     assert top != "logging", f"{path} imports logging"
-                    assert top in stdlib or top == "hypergrid", (
+                    assert top in stdlib or top == "astergrid", (
                         f"{path} imports non-stdlib module {top!r}"
                     )

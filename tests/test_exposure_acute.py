@@ -4,7 +4,7 @@ from decimal import Decimal
 
 import pytest
 
-from hypergrid.core.transitions import is_acute
+from astergrid.core.transitions import is_acute
 
 
 def _acute(**over: object) -> bool:

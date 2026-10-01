@@ -4,7 +4,7 @@ from decimal import Decimal
 
 import pytest
 
-from hypergrid.core.transitions import ExposureClass, classify_exposure
+from astergrid.core.transitions import ExposureClass, classify_exposure
 
 
 def _c(delta: str, normal: str = "1", transient: str = "3") -> ExposureClass:

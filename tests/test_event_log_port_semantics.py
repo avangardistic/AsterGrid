@@ -3,9 +3,9 @@
 from decimal import Decimal
 from pathlib import Path
 
-from hypergrid.core.event_log import InMemoryEventLog, SqliteEventLog
-from hypergrid.core.event_log.port import EventLogPort
-from hypergrid.core.events import (
+from astergrid.core.event_log import InMemoryEventLog, SqliteEventLog
+from astergrid.core.event_log.port import EventLogPort
+from astergrid.core.events import (
     ENVELOPE_SCHEMA_VERSION,
     CommandEvent,
     FillEvent,

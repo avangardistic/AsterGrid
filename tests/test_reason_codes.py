@@ -3,7 +3,7 @@
 import importlib.util
 from pathlib import Path
 
-from hypergrid.core.transitions.reason_codes import ReasonCode
+from astergrid.core.transitions.reason_codes import ReasonCode
 
 # All DECISION-013 codes are now present (Phase 7e added the last three); there are
 # no further deferred codes for later phases.
@@ -35,7 +35,7 @@ _EXPECTED = {
 
 
 def _source_lines() -> list[str]:
-    spec = importlib.util.find_spec("hypergrid.core.transitions.reason_codes")
+    spec = importlib.util.find_spec("astergrid.core.transitions.reason_codes")
     assert spec is not None
     assert spec.origin is not None
     return Path(spec.origin).read_text(encoding="utf-8").splitlines()

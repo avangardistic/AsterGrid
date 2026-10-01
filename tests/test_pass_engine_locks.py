@@ -11,10 +11,10 @@ import time
 from collections.abc import Iterator
 from contextlib import contextmanager
 
-from hypergrid.core.fold import _empty_state
-from hypergrid.core.serialization import canonical_dumps
-from hypergrid.core.state import State
-from hypergrid.core.transitions import (
+from astergrid.core.fold import _empty_state
+from astergrid.core.serialization import canonical_dumps
+from astergrid.core.state import State
+from astergrid.core.transitions import (
     P2Attempts,
     P2LocksState,
     ReasonCode,

@@ -4,7 +4,7 @@ from decimal import Decimal
 
 import pytest
 
-from hypergrid.core.transitions import track_remainder
+from astergrid.core.transitions import track_remainder
 
 _ID = (0, 0, "BU", 1)
 
@@ -64,7 +64,7 @@ def test_validation_errors() -> None:
 
 
 def test_serialization_round_trips() -> None:
-    from hypergrid.core.serialization import canonical_dumps
+    from astergrid.core.serialization import canonical_dumps
 
     obj = _r("2", "1").to_canonical_obj()
     assert obj["level_identity"] == [0, 0, "BU", 1]
