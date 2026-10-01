@@ -1,0 +1,39 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Virtualenvs
+.venv/
+venv/
+env/
+
+# Tooling caches
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# SQLite event store / WAL / SHM
+*.db
+*.db-*
+*.sqlite
+*.sqlite-*
+
+# Secrets / local env (never commit)
+.env
+.env.*
+secrets/
+*.key
+*.pem
+7h-*-prompt-final.md
+
+# Temporary phase prompt files (kept on disk, not committed)
+7h-3-prompt-final.md
+7h-4a-prompt-final.md
+7h-4b-1-prompt-final.md
+7h-4b-2-prompt-final.md

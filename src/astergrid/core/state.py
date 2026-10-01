@@ -1,0 +1,565 @@
+"""The folded State: fold metadata + ST-* domain fields + §4.7 arbitration markers.
+
+The State carries fold metadata (last log_sequence, head_hash, event_count,
+per-kind counts), one field per ST-01..ST-23 (STATE_OWNERSHIP.md), the Phase-7d
+§4.7 arbitration markers, and the Phase-7e ``effective_generation_limit`` marker.
+
+Phase 7e types the generation-lifecycle family ST-02/14/15/16 (in
+``transitions/generation_state.py``). Phase 7f types the cycle family ST-03/ST-10
+(in ``transitions/cycle_state.py``) and adds the §5 arbitration markers. Phase
+7g-1 types ST-04 (``transitions/level_state.py``) with ONLY what its §7.1 geometry
++ §7.2 protection-lock logic touches (identity, ``target_price``,
+``is_protection_locked``). Each enforces its ordering/range invariants at
+construction.
+
+Phase 7g-3a types ST-07/08/09 (``transitions/exposure_state.py``) as Basket
+singletons. Phase 7g-3b types ST-19 (``market_observation_state.py``, minimal:
+mark_price, unpopulated), ST-23 (``hedge_state.HedgeIntent`` singleton, partial:
+hedge intent now, mirror-target side with the §11.3 symmetric formula later), and
+adds the ``p1_exposure_markers`` arbitration marker (p2-block precedent) that feeds
+real P1.
+
+Phase 7h-1 makes P0 real: ST-04 gains observed ``filled_quantity``/``lifecycle``
+(``level_state.py``), ST-19 is POPULATED by P0, and ``p1_exposure_markers`` is now
+P0-written (projected from ST-04 + the ``p0_observation_markers`` input) instead of
+test-set — closing the 7g-3b seam while P1 stays untouched (write-only preserved).
+
+Forward notes: ST-23 mirror side joins THIS row with the B2b formula (no second
+field); ST-05 → 7h-2/7h-4; ST-11 → later; ST-12 → 7h-2; ST-13 →
+later; ST-17/20/21/22 → 7h-4a (risk_state.py rows; venue reads still runtime-fed,
+MaxBasketNotional formula post-7h);
+ST-18 → 7h; ST-01, ST-06 stay ``object | None`` placeholders until
+their rule lands. The State is frozen and validates its own invariants, so no
+invalid State can be serialized.
+"""
+
+from __future__ import annotations
+
+from dataclasses import dataclass, fields
+
+from astergrid.core.events import (
+    AcknowledgmentEvent,
+    AdministrativeEvent,
+    CommandEvent,
+    ErrorEvent,
+    FillEvent,
+    IntentEvent,
+    ObservationEvent,
+    OperatorEvent,
+    StateTransitionEvent,
+    TimerEvent,
+)
+from astergrid.core.transitions.arm_state import ArmRequestState
+from astergrid.core.transitions.cycle_state import (
+    CycleState,
+    CycleTerminalMarkers,
+    ReferencePriceRecord,
+)
+from astergrid.core.transitions.exposure_state import (
+    ActualExposureState,
+    ExpectedExposureState,
+    ExposureDeltaState,
+)
+from astergrid.core.transitions.generation_state import (
+    DominanceFlag,
+    EvolutionCandidateWindow,
+    GenerationState,
+    SuccessorLock,
+)
+from astergrid.core.transitions.hedge_state import HedgeIntent, P1ExposureMarkers
+from astergrid.core.transitions.level_state import LevelState
+from astergrid.core.transitions.markers import (
+    P2Attempts,
+    P2LocksState,
+    P3CandidateMarkers,
+    P4CandidateMarkers,
+    P4Decision,
+)
+from astergrid.core.transitions.market_observation_state import MarketObservationState
+from astergrid.core.transitions.observation_state import P0ObservationMarkers
+from astergrid.core.transitions.order_state import OrderState
+from astergrid.core.transitions.p6_state import (
+    P6ArmInput,
+    P6CancelInput,
+    P6IssuanceInput,
+)
+from astergrid.core.transitions.risk_state import (
+    AccountEquityState,
+    BasketNetPnLState,
+    FreezeErrorRecoveryOverlayState,
+    RiskBoundTrackerState,
+)
+
+# The ten R-JSON-7 kind tags, sorted ascending — derived from the event classes
+# (no duplicated hardcoded list).
+_EVENT_KINDS: tuple[str, ...] = tuple(
+    sorted(
+        cls.event_kind
+        for cls in (
+            IntentEvent,
+            CommandEvent,
+            AcknowledgmentEvent,
+            FillEvent,
+            ObservationEvent,
+            TimerEvent,
+            ErrorEvent,
+            StateTransitionEvent,
+            OperatorEvent,
+            AdministrativeEvent,
+        )
+    )
+)
+
+_HEX_CHARS = frozenset("0123456789abcdef")
+_METADATA_FIELDS = frozenset(
+    {"log_sequence", "head_hash", "event_count", "per_kind_count"}
+)
+
+
+@dataclass(frozen=True, slots=True)
+class State:
+    """The deterministic folded state (metadata + ST-* + §4.7 markers)."""
+
+    # --- fold metadata (always populated) ---
+    log_sequence: int | None  # last observed log_sequence; None if the log is empty
+    head_hash: str  # last content_hash, or GENESIS_PREV_HASH if empty
+    event_count: int  # number of envelopes folded
+    per_kind_count: tuple[tuple[str, int], ...]  # sorted (kind, count) for all ten
+
+    # --- domain fields, one per ST-* (STATE_OWNERSHIP.md) ---
+    # Typed so far: ST-02/03/04/07/08/09/10/14/15/16/19 (7e-7h-1), ST-05/12 (7h-2),
+    # ST-17/20/21/22 (7h-4a). ST-01/06/11/13/18 remain placeholders (object | None)
+    # and ST-23 is partial; each is typed/completed when its rule lands (later phases).
+    st01_basket_lifecycle_state: object | None = None  # ST-01
+    st02_generation_states: tuple[GenerationState, ...] | None = None  # ST-02 (7e)
+    st03_cycle_states: tuple[CycleState, ...] | None = None  # ST-03 (7f)
+    st04_level_pipeline_states: tuple[LevelState, ...] | None = None  # ST-04 (7g-1)
+    st05_order_intents_and_outcomes: tuple[OrderState, ...] | None = (
+        None  # ST-05 (7h-2)
+    )
+    st06_cloid_registry: object | None = None  # ST-06
+    st07_expected_exposure: ExpectedExposureState | None = None  # ST-07 (7g-3a)
+    st08_actual_exposure: ActualExposureState | None = None  # ST-08 (7g-3a)
+    st09_exposure_delta: ExposureDeltaState | None = None  # ST-09 (7g-3a)
+    st10_reference_prices: tuple[ReferencePriceRecord, ...] | None = None  # ST-10 (7f)
+    st11_calibration_configuration: object | None = None  # ST-11
+    st12_operator_arm_requests: tuple[ArmRequestState, ...] | None = (
+        None  # ST-12 (7h-2)
+    )
+    st13_event_log_audit_trail: object | None = None  # ST-13
+    st14_dominance_flags: tuple[DominanceFlag, ...] | None = None  # ST-14 (7e)
+    st15_successor_locks: tuple[SuccessorLock, ...] | None = None  # ST-15 (7e)
+    st16_evolution_candidate_windows: tuple[EvolutionCandidateWindow, ...] | None = (
+        None  # ST-16 (7e)
+    )
+    st17_account_equity_capital_base: AccountEquityState | None = None  # ST-17 (7h-4a)
+    st18_open_order_registry: object | None = None  # ST-18
+    st19_market_observation_cache: MarketObservationState | None = None  # ST-19
+    st20_risk_bound_trackers: RiskBoundTrackerState | None = None  # ST-20 (7h-4a)
+    st21_basket_pnl_accounting_net: BasketNetPnLState | None = None  # ST-21 (7h-4a)
+    st22_freeze_error_recovery_overlay: FreezeErrorRecoveryOverlayState | None = (
+        None  # ST-22 (7h-4a)
+    )
+    st23_mirror_targets_hedge_intents: HedgeIntent | None = None  # ST-23 (partial)
+
+    # --- Phase-7d §4.7 arbitration markers (typed here; 7d-owned only) ---
+    # Forward note: these p2_/p3_/p4_ fields are the §4.7 pass-arbitration markers.
+    # They will be RECONCILED with (not duplicated by) the ST-* domain fields when
+    # Phase 7e types those (e.g. ST-15 successor lock, ST-16 evolution candidate
+    # window). Until then they stand alone and default to None.
+    p2_locks: P2LocksState | None = None  # §4.7 P2 in-flight locks
+    p2_attempts: P2Attempts | None = None  # §4.7 P2 per-pass attempts
+    p3_candidates: P3CandidateMarkers | None = None  # §4.7 P3 candidates
+    # §4.7 P3 ineligible Evolution GenerationIDs this pass (reason CYCLE_LIMIT_REACHED)
+    p3_decisions: tuple[int, ...] | None = None
+    p4_candidates: P4CandidateMarkers | None = None  # §4.7 P4 candidates
+    p4_decisions: tuple[P4Decision, ...] | None = None  # §4.7 P4 ordered admissions
+
+    # Phase-7e arbitration marker (NOT an ST-* field; like the p2_/p3_/p4_ markers):
+    # the effective Generation limit read by the evolution transition (§4.6).
+    # None ⟹ 99 (the §4.6 hard default applies now; no "unknown" state). Wiring a
+    # lower config override from UserParams.max_generations is a later runtime
+    # concern; the transition only ever reads this marker.
+    effective_generation_limit: int | None = None
+
+    # Phase-7f arbitration markers (NOT ST-* fields; like p2_/p3_/p4_). The Cycle
+    # transition + the multi-pass P3 bridge read these. None ⟹ default/absent.
+    effective_cycle_limit: int | None = None  # §3; None ⟹ 99
+    current_cycle_id_by_generation: tuple[tuple[int, int], ...] | None = None
+    p3_ineligible_cycles: tuple[tuple[int, int], ...] | None = None
+    cycle_terminal_markers: tuple[CycleTerminalMarkers, ...] | None = None
+
+    # Phase-7g-3b arbitration marker (NOT an ST-* field; p2_ precedent): the P1
+    # exposure/hedge inputs. Set by tests; a 7h projection sources it from ST-04
+    # (fills/lifecycle, real P0) + venue reads (net_position, min_notional, ST-19
+    # mark_price). Serialized like p2_locks (explicit block), not via the typed-ST loop.
+    p1_exposure_markers: P1ExposureMarkers | None = None
+
+    # Phase-7h-1 arbitration marker (NOT an ST-* field; p2_ precedent): the real-P0
+    # observation input. Set by tests in 7h-1; an adapter/FillEvent/fold + venue path
+    # sources it later. P0 records it into ST-04/ST-19 and projects
+    # ``p1_exposure_markers`` from it. Serialized like p2_locks (explicit block).
+    p0_observation_markers: P0ObservationMarkers | None = None
+
+    # Phase-7h-4b-2 arbitration markers (NOT ST-* fields; p2_ precedent): the P6 stage
+    # inputs (arm/cancel/issuance operator intents). Set by tests; an adapter sources
+    # them later. arm/cancel sorted by cloid no-dups; issuance sorted by (gen, cycle)
+    # no-dups. Serialized like p2_locks (explicit blocks), omitted when None.
+    p6_arm_inputs: tuple[P6ArmInput, ...] | None = None
+    p6_cancel_inputs: tuple[P6CancelInput, ...] | None = None
+    p6_issuance_inputs: tuple[P6IssuanceInput, ...] | None = None
+
+    def __post_init__(self) -> None:
+        if self.event_count < 0:
+            raise ValueError("event_count must be >= 0")
+        if len(self.head_hash) != 64 or any(
+            ch not in _HEX_CHARS for ch in self.head_hash
+        ):
+            raise ValueError("head_hash must be 64 lowercase hex characters")
+        kinds = tuple(kind for kind, _ in self.per_kind_count)
+        if kinds != _EVENT_KINDS:
+            raise ValueError(
+                "per_kind_count must cover exactly the ten kind tags, sorted"
+            )
+        if any(count < 0 for _, count in self.per_kind_count):
+            raise ValueError("per_kind_count values must be >= 0")
+        self._validate_generation_invariants()
+        self._validate_cycle_invariants()
+        self._validate_level_invariants()
+        self._validate_order_arm_invariants()
+        self._validate_p6_input_invariants()
+
+    def _validate_generation_invariants(self) -> None:
+        """Phase-7e ordering + coherence invariants on ST-02/14/15/16.
+
+        Enforced: each of the four generation tuples is sorted by ``generation_id``
+        ascending with NO duplicate ids; and no ``EVOLUTION_PENDING`` Generation
+        carries a set ST-15 lock (a pending gen is running its window, not locked).
+
+        NOT enforced (deliberate — documented): the "a window ⟹ lifecycle ∈
+        {ACTIVE, EVOLUTION_PENDING, CREATED}" restriction. It contradicts rule (5)
+        (SUCCESSOR_LOCK_ACTIVE needs a window on a SUCCESSOR_CREATED gen), rule (6)
+        (GENERATION_ID_LIMIT needs a window on G99), rule (1a) (the disabled-skip
+        case needs a window on a DISABLED gen) and §5.7 scenarios 11/12/19.
+        Lifecycle gating for terminal states lives in the evolution transition
+        (rules 1/5/6), where §4.3/§5.3 semantics belong.
+        """
+        for name, items in (
+            ("st02_generation_states", self.st02_generation_states),
+            ("st14_dominance_flags", self.st14_dominance_flags),
+            ("st15_successor_locks", self.st15_successor_locks),
+            ("st16_evolution_candidate_windows", self.st16_evolution_candidate_windows),
+        ):
+            if items is None:
+                continue
+            ids = [entry.generation_id for entry in items]
+            if ids != sorted(ids) or len(set(ids)) != len(ids):
+                raise ValueError(f"{name} must be sorted by generation_id, no dups")
+        if self.st02_generation_states is not None and (
+            self.st15_successor_locks is not None
+        ):
+            pending = {
+                g.generation_id
+                for g in self.st02_generation_states
+                if g.lifecycle == "EVOLUTION_PENDING"
+            }
+            locked = {s.generation_id for s in self.st15_successor_locks if s.locked}
+            if pending & locked:
+                raise ValueError("EVOLUTION_PENDING generation must not be locked")
+
+    def _validate_cycle_invariants(self) -> None:
+        """Phase-7f ordering + range invariants on ST-03/10 and the cycle markers.
+
+        Enforced: ST-03/ST-10/cycle_terminal_markers sorted by
+        (generation_id, cycle_id) with no duplicate pairs; the two
+        (generation, cycle) marker maps sorted with no duplicate keys; every id in
+        those fields within 0..99; effective_cycle_limit, when set, a real int in
+        0..99 (bool rejected). No cross-field lifecycle↔marker invariant is added
+        (7e-deviation doctrine: gating lives in the transition).
+        """
+        for name, rows in (
+            ("st03_cycle_states", self.st03_cycle_states),
+            ("st10_reference_prices", self.st10_reference_prices),
+            ("cycle_terminal_markers", self.cycle_terminal_markers),
+        ):
+            if rows is None:
+                continue
+            keys = [(r.generation_id, r.cycle_id) for r in rows]
+            if keys != sorted(keys) or len(set(keys)) != len(keys):
+                raise ValueError(f"{name} must be sorted by (gen, cycle), no dups")
+        if self.current_cycle_id_by_generation is not None:
+            gens = [g for g, _ in self.current_cycle_id_by_generation]
+            if gens != sorted(gens) or len(set(gens)) != len(gens):
+                raise ValueError(
+                    "current_cycle_id_by_generation must be sorted, no dup gens"
+                )
+            for gen, cyc in self.current_cycle_id_by_generation:
+                if not (0 <= gen <= 99 and 0 <= cyc <= 99):
+                    raise ValueError("current_cycle_id_by_generation id out of 0..99")
+        if self.p3_ineligible_cycles is not None:
+            pairs = list(self.p3_ineligible_cycles)
+            if pairs != sorted(pairs) or len(set(pairs)) != len(pairs):
+                raise ValueError("p3_ineligible_cycles must be sorted, no dups")
+            for gen, cyc in pairs:
+                if not (0 <= gen <= 99 and 0 <= cyc <= 99):
+                    raise ValueError("p3_ineligible_cycles id out of 0..99")
+        if self.effective_cycle_limit is not None:
+            # bool is an int subclass — reject it explicitly (isinstance(True, int)).
+            if type(self.effective_cycle_limit) is not int:
+                raise ValueError("effective_cycle_limit must be an int")
+            if not (0 <= self.effective_cycle_limit <= 99):
+                raise ValueError("effective_cycle_limit must be within 0..99")
+
+    def _validate_level_invariants(self) -> None:
+        """Phase-7g-1 ordering + range invariant on ST-04 (LevelState).
+
+        Enforced: ST-04 sorted by (generation_id, cycle_id, direction, level_id)
+        ascending ("BU" < "SL" lexicographically) with no duplicate identity
+        quadruples; ids within range (per-field ranges are validated by LevelState
+        itself). No cross-field lifecycle<->marker invariant (7e-deviation doctrine).
+        """
+        rows = self.st04_level_pipeline_states
+        if rows is None:
+            return
+        keys = [(r.generation_id, r.cycle_id, r.direction, r.level_id) for r in rows]
+        if keys != sorted(keys) or len(set(keys)) != len(keys):
+            raise ValueError(
+                "st04_level_pipeline_states must be sorted by "
+                "(gen, cycle, direction, level), no dups"
+            )
+
+    def _validate_order_arm_invariants(self) -> None:
+        """Phase-7h-2 ordering + no-dup invariants on ST-05 and ST-12.
+
+        Enforced: ST-05 sorted by ``cloid`` with no duplicate cloids (one live order
+        row per order identity); ST-12 sorted by ``(cloid, request_seq)`` with no
+        duplicate request identities. Per-row ranges/coherence are validated by
+        ``OrderState``/``ArmRequestState``. No cross-field lifecycle↔outcome invariant
+        (7e-deviation doctrine: gating lives in the transition, not the container).
+        """
+        if self.st05_order_intents_and_outcomes is not None:
+            cloids = [row.cloid for row in self.st05_order_intents_and_outcomes]
+            if cloids != sorted(cloids) or len(set(cloids)) != len(cloids):
+                raise ValueError(
+                    "st05_order_intents_and_outcomes must be sorted by cloid, no dups"
+                )
+        if self.st12_operator_arm_requests is not None:
+            keys = [
+                (row.cloid, row.request_seq) for row in self.st12_operator_arm_requests
+            ]
+            if keys != sorted(keys) or len(set(keys)) != len(keys):
+                raise ValueError(
+                    "st12_operator_arm_requests must be sorted by "
+                    "(cloid, request_seq), no dups"
+                )
+
+    def _validate_p6_input_invariants(self) -> None:
+        """Phase-7h-4b-2 ordering + no-dup invariants on the P6 input marker slots.
+
+        Enforced: ``p6_arm_inputs`` and ``p6_cancel_inputs`` sorted by ``cloid`` with no
+        duplicate cloids; ``p6_issuance_inputs`` sorted by ``(generation_id, cycle_id)``
+        with no duplicate pairs. Per-row validation is in the p6_state dataclasses.
+        """
+        for name, rows in (
+            ("p6_arm_inputs", self.p6_arm_inputs),
+            ("p6_cancel_inputs", self.p6_cancel_inputs),
+        ):
+            if rows is None:
+                continue
+            cloids = [row.cloid for row in rows]
+            if cloids != sorted(cloids) or len(set(cloids)) != len(cloids):
+                raise ValueError(f"{name} must be sorted by cloid, no dups")
+        if self.p6_issuance_inputs is not None:
+            keys = [(r.generation_id, r.cycle_id) for r in self.p6_issuance_inputs]
+            if keys != sorted(keys) or len(set(keys)) != len(keys):
+                raise ValueError(
+                    "p6_issuance_inputs must be sorted by (gen, cycle), no dups"
+                )
+
+    def to_canonical_obj(self) -> dict[str, object]:
+        """Canonical dict for :func:`canonical_dumps` (no None/float in output)."""
+        obj: dict[str, object] = {
+            "is_empty": self.log_sequence is None,
+            "head_hash": self.head_hash,
+            "event_count": self.event_count,
+            "per_kind_count": [[kind, count] for kind, count in self.per_kind_count],
+        }
+        if self.log_sequence is not None:
+            obj["log_sequence"] = self.log_sequence
+        # Untyped ST-* placeholders are always None (Phase 7f+), so this loop emits
+        # nothing yet; the typed ST-02/14/15/16 are serialized explicitly below.
+        for name in _DOMAIN_FIELD_NAMES:
+            value = getattr(self, name)
+            if value is not None:
+                obj[name] = value
+        # Phase-7e typed generation state: omit when None (R-JSON-6), else recurse
+        # (each already stored sorted by generation_id).
+        if self.st02_generation_states is not None:
+            obj["st02_generation_states"] = [
+                g.to_canonical_obj() for g in self.st02_generation_states
+            ]
+        if self.st14_dominance_flags is not None:
+            obj["st14_dominance_flags"] = [
+                d.to_canonical_obj() for d in self.st14_dominance_flags
+            ]
+        if self.st15_successor_locks is not None:
+            obj["st15_successor_locks"] = [
+                s.to_canonical_obj() for s in self.st15_successor_locks
+            ]
+        if self.st04_level_pipeline_states is not None:
+            obj["st04_level_pipeline_states"] = [
+                lvl.to_canonical_obj() for lvl in self.st04_level_pipeline_states
+            ]
+        if self.st05_order_intents_and_outcomes is not None:
+            obj["st05_order_intents_and_outcomes"] = [
+                row.to_canonical_obj() for row in self.st05_order_intents_and_outcomes
+            ]
+        if self.st12_operator_arm_requests is not None:
+            obj["st12_operator_arm_requests"] = [
+                row.to_canonical_obj() for row in self.st12_operator_arm_requests
+            ]
+        if self.st07_expected_exposure is not None:
+            obj["st07_expected_exposure"] = (
+                self.st07_expected_exposure.to_canonical_obj()
+            )
+        if self.st08_actual_exposure is not None:
+            obj["st08_actual_exposure"] = self.st08_actual_exposure.to_canonical_obj()
+        if self.st09_exposure_delta is not None:
+            obj["st09_exposure_delta"] = self.st09_exposure_delta.to_canonical_obj()
+        if self.st19_market_observation_cache is not None:
+            obj["st19_market_observation_cache"] = (
+                self.st19_market_observation_cache.to_canonical_obj()
+            )
+        if self.st23_mirror_targets_hedge_intents is not None:
+            obj["st23_mirror_targets_hedge_intents"] = (
+                self.st23_mirror_targets_hedge_intents.to_canonical_obj()
+            )
+        if self.st16_evolution_candidate_windows is not None:
+            obj["st16_evolution_candidate_windows"] = [
+                w.to_canonical_obj() for w in self.st16_evolution_candidate_windows
+            ]
+        if self.st17_account_equity_capital_base is not None:
+            obj["st17_account_equity_capital_base"] = (
+                self.st17_account_equity_capital_base.to_canonical_obj()
+            )
+        if self.st20_risk_bound_trackers is not None:
+            obj["st20_risk_bound_trackers"] = (
+                self.st20_risk_bound_trackers.to_canonical_obj()
+            )
+        if self.st21_basket_pnl_accounting_net is not None:
+            obj["st21_basket_pnl_accounting_net"] = (
+                self.st21_basket_pnl_accounting_net.to_canonical_obj()
+            )
+        if self.st22_freeze_error_recovery_overlay is not None:
+            obj["st22_freeze_error_recovery_overlay"] = (
+                self.st22_freeze_error_recovery_overlay.to_canonical_obj()
+            )
+        if self.effective_generation_limit is not None:
+            obj["effective_generation_limit"] = self.effective_generation_limit
+        # Phase-7f typed cycle state + markers (omit when None; else recurse).
+        if self.st03_cycle_states is not None:
+            obj["st03_cycle_states"] = [
+                c.to_canonical_obj() for c in self.st03_cycle_states
+            ]
+        if self.st10_reference_prices is not None:
+            obj["st10_reference_prices"] = [
+                r.to_canonical_obj() for r in self.st10_reference_prices
+            ]
+        if self.effective_cycle_limit is not None:
+            obj["effective_cycle_limit"] = self.effective_cycle_limit
+        if self.current_cycle_id_by_generation is not None:
+            obj["current_cycle_id_by_generation"] = [
+                [gen, cyc] for gen, cyc in self.current_cycle_id_by_generation
+            ]
+        if self.p3_ineligible_cycles is not None:
+            obj["p3_ineligible_cycles"] = [
+                [gen, cyc] for gen, cyc in sorted(self.p3_ineligible_cycles)
+            ]
+        if self.cycle_terminal_markers is not None:
+            obj["cycle_terminal_markers"] = [
+                m.to_canonical_obj() for m in self.cycle_terminal_markers
+            ]
+        # Phase-7d arbitration markers: omit when None (R-JSON-6), else recurse.
+        if self.p2_locks is not None:
+            obj["p2_locks"] = self.p2_locks.to_canonical_obj()
+        if self.p2_attempts is not None:
+            obj["p2_attempts"] = self.p2_attempts.to_canonical_obj()
+        if self.p3_candidates is not None:
+            obj["p3_candidates"] = self.p3_candidates.to_canonical_obj()
+        if self.p3_decisions is not None:
+            obj["p3_decisions"] = sorted(self.p3_decisions)
+        if self.p4_candidates is not None:
+            obj["p4_candidates"] = self.p4_candidates.to_canonical_obj()
+        if self.p4_decisions is not None:
+            obj["p4_decisions"] = [d.to_canonical_obj() for d in self.p4_decisions]
+        if self.p1_exposure_markers is not None:  # p2-block precedent (not typed-ST)
+            obj["p1_exposure_markers"] = self.p1_exposure_markers.to_canonical_obj()
+        if self.p0_observation_markers is not None:  # p2-block precedent (not typed-ST)
+            obj["p0_observation_markers"] = (
+                self.p0_observation_markers.to_canonical_obj()
+            )
+        if self.p6_arm_inputs is not None:
+            obj["p6_arm_inputs"] = [r.to_canonical_obj() for r in self.p6_arm_inputs]
+        if self.p6_cancel_inputs is not None:
+            obj["p6_cancel_inputs"] = [
+                r.to_canonical_obj() for r in self.p6_cancel_inputs
+            ]
+        if self.p6_issuance_inputs is not None:
+            obj["p6_issuance_inputs"] = [
+                r.to_canonical_obj() for r in self.p6_issuance_inputs
+            ]
+        return obj
+
+
+# Fields serialized explicitly (not via the generic always-None ST-* loop): the
+# Phase-7d arbitration markers, the Phase-7e typed ST-* fields, and the
+# effective_generation_limit marker.
+_ARBITRATION_FIELD_NAMES = frozenset(
+    {
+        "p2_locks",
+        "p2_attempts",
+        "p3_candidates",
+        "p3_decisions",
+        "p4_candidates",
+        "p4_decisions",
+        "effective_generation_limit",
+        "effective_cycle_limit",
+        "current_cycle_id_by_generation",
+        "p3_ineligible_cycles",
+        "cycle_terminal_markers",
+        "p1_exposure_markers",
+        "p0_observation_markers",
+        "p6_arm_inputs",
+        "p6_cancel_inputs",
+        "p6_issuance_inputs",
+    }
+)
+_TYPED_ST_FIELD_NAMES = frozenset(
+    {
+        "st02_generation_states",
+        "st03_cycle_states",
+        "st04_level_pipeline_states",
+        "st05_order_intents_and_outcomes",
+        "st12_operator_arm_requests",
+        "st07_expected_exposure",
+        "st08_actual_exposure",
+        "st09_exposure_delta",
+        "st10_reference_prices",
+        "st14_dominance_flags",
+        "st19_market_observation_cache",
+        "st23_mirror_targets_hedge_intents",
+        "st15_successor_locks",
+        "st16_evolution_candidate_windows",
+        "st17_account_equity_capital_base",
+        "st20_risk_bound_trackers",
+        "st21_basket_pnl_accounting_net",
+        "st22_freeze_error_recovery_overlay",
+    }
+)
+_DOMAIN_FIELD_NAMES: tuple[str, ...] = tuple(
+    f.name
+    for f in fields(State)
+    if f.name not in _METADATA_FIELDS
+    and f.name not in _ARBITRATION_FIELD_NAMES
+    and f.name not in _TYPED_ST_FIELD_NAMES
+)
